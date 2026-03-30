@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EA Consult — Briefing Operacional | Juliana Elisei Almada</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f0f0f;
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 32px 16px 64px;
+    }
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 48px 40px;
+      max-width: 680px;
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+    .logo { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 28px; }
+    .logo span { color: #c8a97e; }
+    .badge {
+      display: inline-block;
+      background: rgba(200,169,126,0.12);
+      border: 1px solid rgba(200,169,126,0.3);
+      color: #c8a97e;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 24px; font-weight: 700; color: #f5f5f5; margin-bottom: 8px; line-height: 1.3; }
+    .subtitle { font-size: 14px; color: #777; line-height: 1.6; margin-bottom: 36px; }
+    .section-divider {
+      border: none;
+      border-top: 1px solid #2a2a2a;
+      margin: 32px 0 24px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #c8a97e;
+      margin-bottom: 20px;
+    }
+    .field { margin-bottom: 20px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #ccc; margin-bottom: 7px; }
+    label .required { color: #c8a97e; margin-left: 3px; }
+    label .hint { font-weight: 400; color: #666; font-size: 12px; margin-left: 6px; }
+    input[type="text"], input[type="email"], input[type="number"], textarea, select {
+      width: 100%;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #f0f0f0;
+      font-size: 14px;
+      padding: 11px 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: #c8a97e; }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+    select option { background: #1a1a1a; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-item { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .checkbox-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #c8a97e; cursor: pointer; flex-shrink: 0; }
+    .checkbox-item span { font-size: 13px; color: #ccc; }
+    .upload-note {
+      background: rgba(200,169,126,0.07);
+      border: 1px dashed rgba(200,169,126,0.3);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #999;
+      line-height: 1.5;
+    }
+    .upload-note strong { color: #c8a97e; }
+    .alert-box {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #f87171;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    button[type="submit"] {
+      width: 100%;
+      background: #c8a97e;
+      color: #0f0f0f;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 12px;
+      letter-spacing: 0.02em;
+    }
+    button[type="submit"]:hover { opacity: 0.9; transform: translateY(-1px); }
+    button[type="submit"]:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .success {
+      display: none;
+      text-align: center;
+      padding: 40px 0 20px;
+    }
+    .success .icon { font-size: 48px; margin-bottom: 16px; }
+    .success h2 { font-size: 22px; font-weight: 700; color: #f5f5f5; margin-bottom: 10px; }
+    .success p { font-size: 14px; color: #777; line-height: 1.6; }
+    .error-msg { color: #f87171; font-size: 12px; margin-top: 5px; display: none; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">EA <span>Consult</span></div>
+  <div class="badge">Briefing Operacional — Pós-Fechamento</div>
+  <h1>Vamos construir o seu sistema, Juliana.</h1>
+  <p class="subtitle">Este formulário é a fundação de tudo. Quanto mais detalhado, mais preciso e rápido será o desenvolvimento. Responda com calma — você pode salvar e voltar se precisar.</p>
+
+  <form id="briefingForm">
+
+    <!-- BLOCO 1: DADOS FINANCEIROS -->
+    <div class="section-label">01 — Dados Financeiros & Conciliação</div>
+
+    <div class="field">
+      <label>Quais planilhas você usa para controlar honorários? <span class="required">*</span></label>
+      <textarea name="planilhas_honorarios" placeholder="Ex: Planilha AJ (honorários do processo X), Planilha JG (outro controle). Descreva o que cada uma contém e como estão organizadas." required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Qual é o nome exato das colunas na planilha AJ? <span class="required">*</span><span class="hint">(cole ou descreva)</span></label>
+      <textarea name="colunas_planilha_aj" placeholder="Ex: Nº Processo | Vara | Valor do Honorário | Data de Nomeação | Status | Observações" required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Qual é o nome exato das colunas na planilha JG? <span class="required">*</span><span class="hint">(cole ou descreva)</span></label>
+      <textarea name="colunas_planilha_jg" placeholder="Ex: Processo | Valor Depositado | Data Depósito | Banco | Confirmado?" required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Como chega o pagamento dos honorários hoje? <span class="required">*</span></label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" name="forma_pagamento" value="deposito_judicial"> <span>Depósito judicial (alvará)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="forma_pagamento" value="pix"> <span>PIX direto da parte/advogado</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="forma_pagamento" value="ted"> <span>TED/transferência bancária</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="forma_pagamento" value="outro"> <span>Outro (descreva abaixo)</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Banco principal onde os honorários são recebidos <span class="required">*</span></label>
+      <input type="text" name="banco_principal" placeholder="Ex: Itaú, Bradesco, Nubank..." required />
+    </div>
+
+    <div class="field">
+      <label>O extrato bancário fica disponível em qual formato? <span class="required">*</span></label>
+      <select name="formato_extrato" required>
+        <option value="">Selecione...</option>
+        <option value="ofx">OFX (arquivo de extrato bancário)</option>
+        <option value="pdf">PDF (extrato em PDF)</option>
+        <option value="csv">CSV/Excel exportado do banco</option>
+        <option value="manual">Consulto manualmente no app/site</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Qual o critério que você usa hoje para cruzar um pagamento com um processo? <span class="required">*</span></label>
+      <textarea name="criterio_cruzamento" placeholder="Ex: Olho o valor e a data no extrato e comparo com o que está na planilha. Ou: uso o número do processo como referência no depósito." required></textarea>
+    </div>
+
+    <div class="upload-note">
+      <strong>📎 Arquivos que precisaremos:</strong> Após preencher este formulário, envie por e-mail para <strong>guizoalmada@gmail.com</strong>:<br>
+      • Planilha AJ (últimos 3 meses)<br>
+      • Planilha JG (últimos 3 meses)<br>
+      • Extrato bancário (últimos 3 meses, no formato disponível)
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- BLOCO 2: LAUDOS E AT -->
+    <div class="section-label">02 — Laudos & Fluxo de Assistente Técnica</div>
+
+    <div class="field">
+      <label>Por onde chegam os laudos que você analisa como AT? <span class="required">*</span></label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" name="entrada_laudos" value="email"> <span>E-mail (qual endereço? — descreva abaixo)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="entrada_laudos" value="whatsapp"> <span>WhatsApp</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="entrada_laudos" value="telegram"> <span>Telegram</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="entrada_laudos" value="pessoalmente"> <span>Entregues pessoalmente/Correios</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="entrada_laudos" value="portal"> <span>Portal do tribunal / sistema judicial</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>E-mail(s) que recebem laudos <span class="hint">(se aplicável)</span></label>
+      <input type="text" name="email_laudos" placeholder="Ex: julianaperitos@gmail.com, juliana@escritorio.com.br" />
+    </div>
+
+    <div class="field">
+      <label>Em que formato chegam os laudos geralmente? <span class="required">*</span></label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" name="formato_laudos" value="pdf_texto"> <span>PDF com texto (pesquisável)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="formato_laudos" value="pdf_imagem"> <span>PDF como imagem (escaneado)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="formato_laudos" value="word"> <span>Word (.docx)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="formato_laudos" value="foto_celular"> <span>Foto tirada com celular</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Quais áreas/especialidades você atua como AT? <span class="required">*</span></label>
+      <textarea name="areas_at" placeholder="Ex: Imóveis e avaliações imobiliárias, estrutural/construção civil, engenharia de segurança do trabalho..." required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Quais tribunais você mais atua? <span class="required">*</span></label>
+      <textarea name="tribunais" placeholder="Ex: TJ-SP (Vara Cível), TRF 3ª Região, TRT (trabalhista)..." required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Como é feito o despacho dos quesitos hoje? <span class="required">*</span></label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" name="despacho_quesitos" value="email"> <span>E-mail para o escritório solicitante</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="despacho_quesitos" value="correios"> <span>Correios (carta física)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="despacho_quesitos" value="portal"> <span>Protocolo em portal do tribunal</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="despacho_quesitos" value="presencial"> <span>Entrega presencial</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Quem faz o despacho hoje — você ou a Juliana Gomes (assistente)? <span class="required">*</span></label>
+      <select name="responsavel_despacho" required>
+        <option value="">Selecione...</option>
+        <option value="eu">Eu mesma</option>
+        <option value="assistente">Juliana Gomes (assistente)</option>
+        <option value="ambas">As duas, depende do caso</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Quando você recebe um laudo para AT, qual é o prazo típico para entregar os quesitos? <span class="required">*</span></label>
+      <input type="text" name="prazo_tipico_quesitos" placeholder="Ex: 5 dias úteis, 10 dias corridos, varia por tribunal..." required />
+    </div>
+
+    <div class="upload-note">
+      <strong>📎 Arquivos que precisaremos:</strong> Envie por e-mail para <strong>guizoalmada@gmail.com</strong>:<br>
+      • 5 laudos de exemplo (anonimizados se necessário)<br>
+      • 2 ou 3 modelos de quesitos que você já elaborou (seus melhores exemplos)
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- BLOCO 3: COMUNICAÇÃO E AGENDA -->
+    <div class="section-label">03 — Comunicação, Agenda & Rotina</div>
+
+    <div class="field">
+      <label>Você usa Telegram? <span class="required">*</span></label>
+      <select name="usa_telegram" required>
+        <option value="">Selecione...</option>
+        <option value="sim_uso_frequente">Sim, uso com frequência</option>
+        <option value="sim_pouco">Sim, mas uso pouco</option>
+        <option value="nao">Não uso</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Prefere receber notificações do sistema por qual canal? <span class="required">*</span></label>
+      <select name="canal_notificacoes" required>
+        <option value="">Selecione...</option>
+        <option value="telegram">Telegram (gratuito, recomendado)</option>
+        <option value="whatsapp">WhatsApp (custo adicional de infra)</option>
+        <option value="email">E-mail</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Qual e-mail do Google você usa para a agenda? <span class="required">*</span></label>
+      <input type="email" name="email_google_agenda" placeholder="Ex: juliana@gmail.com" required />
+    </div>
+
+    <div class="field">
+      <label>Como é sua rotina de trabalho hoje? <span class="required">*</span></label>
+      <textarea name="rotina_trabalho" placeholder="Ex: Trabalho de casa das 8h às 18h. Manhãs reservo para laudos, tarde para ATs. Às sextas reviso pendências financeiras. A Juliana Gomes cuida dos Correios." required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Quais são as tarefas que mais consomem seu tempo hoje e que você mais quer eliminar? <span class="required">*</span></label>
+      <textarea name="tarefas_eliminar" placeholder="Ex: Anotar manualmente cada honorário na planilha, procurar no extrato se foi pago, redigir os quesitos do zero para cada AT..." required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Que horário você prefere receber o resumo diário do sistema? <span class="required">*</span></label>
+      <select name="horario_resumo_diario" required>
+        <option value="">Selecione...</option>
+        <option value="07h">07h00</option>
+        <option value="08h">08h00</option>
+        <option value="09h">09h00</option>
+        <option value="18h">18h00 (fim de expediente)</option>
+        <option value="outro">Outro (descreva nas observações)</option>
+      </select>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- BLOCO 4: ACESSOS E CREDENCIAIS -->
+    <div class="section-label">04 — Acessos & Credenciais</div>
+
+    <div class="alert-box">
+      ⚠️ Não preencha senhas aqui. Esta seção serve para mapear quais acessos precisaremos configurar juntos em uma chamada de 30 min.
+    </div>
+
+    <div class="field">
+      <label>Quais dos acessos abaixo você consegue fornecer? <span class="required">*</span></label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" name="acessos_disponiveis" value="gmail_oauth"> <span>Gmail (autorização OAuth — sem senha, você aprova no Google)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="acessos_disponiveis" value="google_calendar"> <span>Google Calendar (mesma autorização)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="acessos_disponiveis" value="extrato_export"> <span>Exportar extrato bancário (OFX/PDF)</span></label>
+        <label class="checkbox-item"><input type="checkbox" name="acessos_disponiveis" value="planilhas_google"> <span>Planilhas no Google Sheets (compartilhar com leitura)</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Alguma restrição de acesso que devemos saber? <span class="hint">(opcional)</span></label>
+      <textarea name="restricoes_acesso" placeholder="Ex: Processo sigiloso X não pode entrar no sistema. Conta bancária Y é pessoal, não usar para conciliação."></textarea>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- BLOCO 5: EXPECTATIVAS -->
+    <div class="section-label">05 — Expectativas & Prioridades</div>
+
+    <div class="field">
+      <label>Na sua visão, qual resultado do Cenário A (Motor Financeiro) será o mais impactante para você? <span class="required">*</span></label>
+      <textarea name="resultado_esperado_a" placeholder="Ex: Saber exatamente quanto tenho a receber e de quem, sem precisar ficar olhando planilha toda semana." required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Qual o seu objetivo de ATs por mês em 6 meses? <span class="required">*</span></label>
+      <div class="row-2">
+        <div>
+          <label style="margin-bottom:5px; font-weight:400; color:#888; font-size:12px;">ATs/mês — meta</label>
+          <input type="number" name="meta_ats_mes" placeholder="Ex: 8" min="1" max="50" required />
+        </div>
+        <div>
+          <label style="margin-bottom:5px; font-weight:400; color:#888; font-size:12px;">Ticket médio esperado (R$)</label>
+          <input type="number" name="meta_ticket_at" placeholder="Ex: 8000" min="1000" required />
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>O que seria um sinal claro de que o sistema está funcionando para você? <span class="required">*</span></label>
+      <textarea name="sinal_sucesso" placeholder="Ex: Acordar e já ter o resumo do dia no celular, sem precisar abrir nenhuma planilha. Saber em tempo real quanto tenho para receber." required></textarea>
+    </div>
+
+    <div class="field">
+      <label>Observações finais, dúvidas ou qualquer detalhe que queira registrar <span class="hint">(opcional)</span></label>
+      <textarea name="observacoes_finais" placeholder="Espaço livre — qualquer coisa que você acha que precisamos saber antes de começar."></textarea>
+    </div>
+
+    <button type="submit" id="submitBtn">Enviar Briefing Operacional →</button>
+  </form>
+
+  <div class="success" id="successMsg">
+    <div class="icon">✅</div>
+    <h2>Briefing recebido!</h2>
+    <p>Obrigado, Juliana. O Guilherme vai revisar tudo e entrará em contato para agendar o kickoff.<br><br>Lembre-se de enviar os arquivos por e-mail: <strong style="color:#c8a97e">guizoalmada@gmail.com</strong></p>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://zvqwjtndvbqryonjplal.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_csV0eBiTNQnUNQuDBlWw0w_NoUYgEtv";
+
+  document.getElementById("briefingForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
+
+    const fd = new FormData(this);
+
+    // Coletar checkboxes como arrays
+    const checkboxFields = ["forma_pagamento", "entrada_laudos", "formato_laudos", "despacho_quesitos", "acessos_disponiveis"];
+    const respostas = {};
+    for (const [key, value] of fd.entries()) {
+      if (checkboxFields.includes(key)) {
+        if (!respostas[key]) respostas[key] = [];
+        respostas[key].push(value);
+      } else {
+        respostas[key] = value;
+      }
+    }
+
+    const payload = {
+      pessoa_id: 6,
+      tipo: "operacional",
+      fase: "pos_fechamento",
+      formato: "formulario",
+      coletado_por: "Formulário HTML — Briefing Operacional Juliana v1",
+      lido_por: "Guilherme Almada",
+      respostas: respostas
+    };
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/briefings?schema=core`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error(await response.text());
+
+      document.getElementById("briefingForm").style.display = "none";
+      document.getElementById("successMsg").style.display = "block";
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = "Enviar Briefing Operacional →";
+      alert("Erro ao enviar. Tente novamente ou entre em contato com Guilherme.\n\n" + err.message);
+    }
+  });
+</script>
+</body>
+</html>
