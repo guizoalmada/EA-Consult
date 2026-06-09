@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Levantamento Estratégico — DreamMaker Hollywood</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1B2E; --ink-2:#16283F; --ink-3:#21364F;
+    --brass:#C2924A; --brass-lo:#A87B38; --brass-hi:#DCB877;
+    --paper:#F5F2EB; --card:#FFFFFF; --slate:#56677C;
+    --line:#E2DCCF; --line-2:#D7D0C0; --ok:#3F7D5A;
+    --shadow:0 1px 2px rgba(14,27,46,.06),0 8px 28px rgba(14,27,46,.08);
+    --maxw:720px;
+  }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* GATE */
+  #gate{min-height:100svh;background:var(--ink);color:var(--paper);display:flex;align-items:center;position:relative;overflow:hidden}
+  #gate::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(194,146,74,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(194,146,74,.06) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 75%)}
+  .gate-inner{position:relative;z-index:2;padding:64px 0;width:100%}
+  .gate-inner .eyebrow{justify-content:flex-start}
+  #gate h1{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(30px,5.4vw,44px);line-height:1.08;margin:0 0 14px}
+  #gate p{color:#C7D0DC;max-width:30em;margin:0 0 30px;font-size:16px}
+  .code-box{display:flex;gap:10px;flex-wrap:wrap;max-width:420px}
+  #codeInput{flex:1;min-width:180px;font-family:'Fraunces',serif;font-size:24px;letter-spacing:.32em;text-align:center;color:var(--paper);background:rgba(255,255,255,.06);border:1px solid var(--ink-3);border-radius:12px;padding:16px 14px}
+  #codeInput:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(194,146,74,.22)}
+  #codeInput::placeholder{color:#5f7governado}
+  #gateErr{color:#E8A38A;font-size:14px;margin-top:14px;min-height:20px}
+  .gate-foot{font-size:12.5px;color:#8A98A9;margin-top:30px}
+
+  /* PROGRESS */
+  #progress{position:sticky;top:0;z-index:40;background:rgba(245,242,235,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:none}
+  #progress .wrap{display:flex;align-items:center;gap:14px;height:60px}
+  .pbrand{font-family:'Fraunces',serif;font-weight:600;font-size:15px;white-space:nowrap}
+  .pbrand span{color:var(--brass)}
+  .ptrack{flex:1;height:4px;background:var(--line-2);border-radius:99px;overflow:hidden}
+  .pfill{height:100%;width:0;background:linear-gradient(90deg,var(--brass-lo),var(--brass));border-radius:99px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .savestate{font-size:12px;color:var(--slate);white-space:nowrap;display:flex;align-items:center;gap:6px;min-width:78px;justify-content:flex-end}
+  .savestate .dot{width:7px;height:7px;border-radius:50%;background:var(--line-2)}
+  .savestate.saving .dot{background:var(--brass);animation:pulse 1s infinite}
+  .savestate.saved .dot{background:var(--ok)}
+  .savestate.err .dot{background:#C2603F}
+  @keyframes pulse{50%{opacity:.3}}
+
+  /* HERO */
+  #hero{min-height:100svh;background:var(--ink);color:var(--paper);position:relative;overflow:hidden;display:none;align-items:center}
+  #hero.show{display:flex}
+  #hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(194,146,74,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(194,146,74,.06) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(120% 90% at 80% 10%,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(120% 90% at 80% 10%,#000 30%,transparent 75%)}
+  #hero::after{content:"";position:absolute;right:-12%;top:-18%;width:60%;height:70%;background:radial-gradient(circle at center,rgba(194,146,74,.18),transparent 60%);filter:blur(10px)}
+  .hero-inner{position:relative;z-index:2;padding:72px 0}
+  .eyebrow{font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--brass-hi);font-weight:600;margin-bottom:26px;display:flex;align-items:center;gap:12px}
+  .eyebrow::before{content:"";width:30px;height:1px;background:var(--brass)}
+  #hero h1{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(34px,6.4vw,58px);line-height:1.04;letter-spacing:-.01em;margin:0 0 22px}
+  #hero h1 em{font-style:italic;color:var(--brass-hi)}
+  .lede{font-size:clamp(16px,2.2vw,18.5px);color:#C7D0DC;max-width:30em;margin:0 0 36px}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px 26px;margin:0 0 30px;font-size:13.5px;color:#9DAABA}
+  .meta-row b{color:var(--paper);font-weight:600}
+  #resumeNote{display:none;background:rgba(194,146,74,.12);border:1px solid rgba(194,146,74,.3);border-radius:10px;padding:12px 14px;color:var(--brass-hi);font-size:14px;margin:0 0 24px;max-width:30em}
+  .start-note{font-size:12.5px;color:#8A98A9;margin-top:22px}
+  .start-note b{color:#C7D0DC;font-weight:600}
+
+  /* BOTÕES */
+  .btn{font-family:'Inter',sans-serif;font-size:15px;font-weight:600;border:none;border-radius:11px;padding:15px 26px;cursor:pointer;transition:transform .15s ease,box-shadow .2s ease,background .2s ease;display:inline-flex;align-items:center;gap:10px}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--brass);color:#1b1305}
+  .btn-primary:hover{background:var(--brass-hi);box-shadow:0 8px 24px rgba(194,146,74,.32)}
+  .btn-ghost{background:transparent;color:var(--slate);border:1px solid var(--line-2)}
+  .btn-ghost:hover{border-color:var(--brass);color:var(--ink)}
+  .btn-ghost-d{background:transparent;color:#9DAABA;border:1px solid var(--ink-3)}
+  .btn-ghost-d:hover{border-color:var(--brass);color:var(--paper)}
+  .btn-dark{background:var(--ink);color:var(--paper)} .btn-dark:hover{background:var(--ink-3)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+  .btn .arr{font-size:18px;line-height:0}
+
+  /* STAGE */
+  #stage{display:none;padding:38px 0 130px}
+  .block-head{margin:6px 0 30px}
+  .b-eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-lo);font-weight:600;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .b-eyebrow .ph{font-variant-numeric:tabular-nums;background:var(--ink);color:var(--brass-hi);border-radius:6px;padding:3px 8px;font-size:11px;letter-spacing:.08em}
+  .block-head h2{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(26px,4.2vw,36px);line-height:1.1;letter-spacing:-.01em;margin:0 0 12px}
+  .block-head p{color:var(--slate);font-size:15.5px;margin:0;max-width:34em}
+  .q{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .q-label{font-size:16px;font-weight:600;color:var(--ink);margin:0 0 4px;line-height:1.4}
+  .q-hint{font-size:13.5px;color:var(--slate);margin:0 0 14px}
+  .q:last-child{margin-bottom:0}
+  input[type=text],textarea{width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);background:#FBFAF6;border:1px solid var(--line-2);border-radius:10px;padding:13px 14px;transition:border-color .15s ease,box-shadow .15s ease;resize:vertical}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(194,146,74,.16)}
+  textarea{min-height:84px;line-height:1.5}
+  ::placeholder{color:#9aa6b3}
+  .scale{display:flex;gap:8px;flex-wrap:wrap}
+  .scale button{flex:1;min-width:48px;font-family:inherit;font-size:16px;font-weight:600;padding:12px 0;border:1px solid var(--line-2);background:#FBFAF6;color:var(--slate);border-radius:10px;cursor:pointer;transition:all .14s ease;font-variant-numeric:tabular-nums}
+  .scale button:hover{border-color:var(--brass);color:var(--ink)}
+  .scale button.sel{background:var(--ink);color:var(--brass-hi);border-color:var(--ink)}
+  .scale-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--slate);margin-top:8px}
+  .opts{display:flex;flex-direction:column;gap:9px}
+  .opt{display:flex;align-items:center;gap:11px;cursor:pointer;border:1px solid var(--line-2);background:#FBFAF6;border-radius:11px;padding:12px 14px;font-size:15px;transition:all .14s ease;color:var(--ink)}
+  .opt:hover{border-color:var(--brass)}
+  .opt .mark{width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);flex:none;display:grid;place-items:center;transition:all .14s ease}
+  .opt.check .mark{border-radius:6px}
+  .opt.sel{border-color:var(--brass);background:#FBF4E6}
+  .opt.sel .mark{border-color:var(--brass);background:var(--brass)}
+  .opt.sel .mark::after{content:"";width:8px;height:8px;border-radius:inherit;background:#fff}
+  .opt.check.sel .mark::after{content:"";width:5px;height:9px;border:2px solid #fff;border-top:0;border-left:0;transform:rotate(45deg) translateY(-1px);border-radius:0;background:none}
+  .insight{background:var(--ink);color:var(--paper);border-radius:16px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden;border:1px solid var(--ink-3)}
+  .insight::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(var(--brass),var(--brass-lo))}
+  .insight .tag{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-hi);font-weight:600;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+  .insight .stat{font-size:15.5px;line-height:1.5;color:#E8EDF2;margin:0 0 14px}
+  .insight .stat b{color:#fff;font-weight:600}
+  .insight .probe{font-family:'Fraunces',serif;font-size:17px;font-style:italic;color:var(--brass-hi);margin:0;line-height:1.4;padding-top:14px;border-top:1px solid rgba(255,255,255,.1)}
+
+  #nav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:none;background:rgba(245,242,235,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  #nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:74px}
+  #navStep{font-size:12.5px;color:var(--slate);font-weight:500}
+
+  #final{display:none;padding:54px 0 90px}
+  .final-badge{width:58px;height:58px;border-radius:50%;background:var(--ink);color:var(--brass-hi);display:grid;place-items:center;margin:0 0 24px;font-size:26px}
+  #final h2{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(28px,4.6vw,40px);line-height:1.08;margin:0 0 16px;letter-spacing:-.01em}
+  #final .lede{color:var(--slate);font-size:16.5px;max-width:34em;margin:0 0 14px}
+  .next-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:26px 0;box-shadow:var(--shadow)}
+  .next-card h3{font-family:'Fraunces',serif;font-weight:600;font-size:18px;margin:0 0 8px}
+  .next-card p{margin:0;color:var(--slate);font-size:14.5px}
+  .export-row{display:flex;gap:11px;flex-wrap:wrap;margin-top:16px}
+  .summary{background:#FBFAF6;border:1px dashed var(--line-2);border-radius:14px;padding:20px;margin-top:26px;font-size:14px;color:var(--ink);max-height:340px;overflow:auto;white-space:pre-wrap;line-height:1.55}
+  .summary h4{margin:18px 0 4px;font-family:'Fraunces',serif;font-size:15px;color:var(--brass-lo)}
+  .summary h4:first-child{margin-top:0}
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:60;font-weight:500}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .fade{animation:fade .4s cubic-bezier(.22,1,.36,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (max-width:560px){.meta-row{gap:8px 18px}#nav .wrap{height:68px}.q{padding:18px 16px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<section id="gate">
+  <div class="wrap gate-inner fade">
+    <div class="eyebrow">Zogui Labs · Acesso restrito</div>
+    <h1>Levantamento DreamMaker Hollywood</h1>
+    <p>Digite o código de acesso que o Guilherme enviou para você. Suas respostas ficam salvas conforme você avança — pode parar e voltar quando quiser.</p>
+    <div class="code-box">
+      <input id="codeInput" inputmode="numeric" maxlength="10" placeholder="••••••" autocomplete="off" />
+      <button class="btn btn-primary" id="codeBtn" onclick="enterCode()">Entrar</button>
+    </div>
+    <div id="gateErr"></div>
+    <p class="gate-foot">Problemas para entrar? Fale com o Guilherme.</p>
+  </div>
+</section>
+
+<!-- PROGRESS -->
+<div id="progress">
+  <div class="wrap">
+    <div class="pbrand">Zogui<span>·</span>Labs</div>
+    <div class="ptrack"><div class="pfill" id="pfill"></div></div>
+    <div class="savestate" id="saveState"><span class="dot"></span><span id="saveLabel">Salvo</span></div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="wrap hero-inner fade">
+    <div class="eyebrow">Diagnóstico · DreamMaker Hollywood</div>
+    <h1>Antes de transformar uma casa, você faz o <em>levantamento</em>.<br>Vamos fazer o do seu negócio.</h1>
+    <p class="lede">Esta não é uma apresentação nossa — é uma escuta. Algumas perguntas sobre como a operação de Hollywood roda hoje: clientes, obras, equipe, papelada, números. No fim, você enxerga o próprio negócio de um ângulo que o dia a dia não deixa ver.</p>
+    <div id="resumeNote"></div>
+    <div class="meta-row">
+      <span>⏱ <b>~15 minutos</b></span>
+      <span>🔒 <b>Sem compromisso</b></span>
+      <span>💾 <b>Salva sozinho</b></span>
+    </div>
+    <button class="btn btn-primary" id="startBtn" onclick="start()">Começar o levantamento <span class="arr">→</span></button>
+    <p class="start-note">Conduzido por <b>Guilherme</b> · Zogui Labs — inteligência aplicada a negócios.</p>
+  </div>
+</section>
+
+<!-- STAGE -->
+<main id="stage"><div class="wrap"><div id="blockArea"></div></div></main>
+
+<!-- NAV -->
+<div id="nav">
+  <div class="wrap">
+    <button class="btn btn-ghost" id="backBtn" onclick="prev()">← Voltar</button>
+    <span id="navStep">Fase 1 de 9</span>
+    <button class="btn btn-primary" id="nextBtn" onclick="next()">Avançar <span class="arr">→</span></button>
+  </div>
+</div>
+
+<!-- FINAL -->
+<section id="final"><div class="wrap fade">
+  <div class="final-badge">✓</div>
+  <h2>Levantamento concluído.</h2>
+  <p class="lede">Obrigado pela transparência, Antonio. É exatamente esse tipo de detalhe que separa um diagnóstico de verdade de um chute.</p>
+  <p class="lede">O próximo passo é a <b>Sessão de Clareza</b>: o Guilherme volta com uma leitura do seu negócio — o que já está bem resolvido, onde tem dinheiro parado em cima da mesa, e onde a tecnologia trabalharia a seu favor sem atrapalhar o que a DreamMaker já entrega.</p>
+  <div class="next-card">
+    <h3>Tudo salvo ✓</h3>
+    <p>Suas respostas já foram registradas com segurança. Se quiser, baixe uma cópia para você — mas não precisa enviar nada: o Guilherme já recebe.</p>
+    <div class="export-row">
+      <button class="btn btn-dark" onclick="downloadTxt()">Baixar cópia (.txt)</button>
+      <button class="btn btn-ghost" onclick="copySummary()">Copiar resumo</button>
+    </div>
+  </div>
+  <div class="summary" id="summaryBox"></div>
+</div></div></section>
+
+<div class="toast" id="toast">Copiado ✓</div>
+
+<script>
+/* ====== CONFIG ====== */
+const CFG = {
+  // URL da Edge Function pública (o Code confirma/ajusta no deploy):
+  FUNCTION_URL: "https://zvqwjtndvbqryonjplal.supabase.co/functions/v1/entrevista-dreammaker",
+  // Deixe vazio. Só preencher com a publishable key SE o gateway exigir apikey
+  // (a função é pública/verify_jwt=false; o ideal é não precisar de chave aqui):
+  APIKEY: ""
+};
+let CODE = ""; // preenchido após o gate
+
+/* ====== CONTEÚDO ====== */
+const blocks = [
+  { phase:"Planta baixa", title:"O retrato do negócio hoje",
+    intro:"Sem números exatos — só a fotografia geral de como Hollywood opera no dia a dia.",
+    fields:[
+      {id:"b1_desc",type:"textarea",label:"Em uma ou duas frases, como você descreveria a operação de Hollywood hoje?",hint:"Como se estivesse explicando pra alguém que nunca ouviu falar."},
+      {id:"b1_obras",type:"choice",label:"Quantas obras vocês tocam ao mesmo tempo, em média?",opts:["1–2","3–5","6–10","Mais de 10"]},
+      {id:"b1_ticket",type:"choice",label:"Ticket médio de uma obra (faixa aproximada, em US$)?",opts:["Até 15k","15k–40k","40k–80k","Acima de 80k"]},
+      {id:"b1_equipe",type:"textarea",label:"Quem é a equipe hoje?",hint:"Vendas/design, produção, administrativo, empreiteiros e subs — quantos de cada, mais ou menos."},
+      {id:"b1_voce",type:"textarea",label:"E você — onde seu tempo vai numa semana cheia?",hint:"O que só você resolve, e o que te suga mais energia."}
+    ]},
+  { phase:"Estrutura", title:"Sua posição como franqueado",
+    intro:"O que a DreamMaker já entrega muito bem — e onde sobra espaço pra gente trabalhar sem pisar no que é deles.",
+    fields:[
+      {id:"b2_resolve",type:"textarea",label:"O que o ecossistema DreamMaker já resolve muito bem pra você?",hint:"Sistema, treinamento, marketing corporativo, fornecedores…"},
+      {id:"b2_gap",type:"textarea",label:"E o que o sistema deles NÃO cobre — coisas que você faz por fora, no improviso, na planilha ou na cabeça?",hint:"Aqui é onde geralmente mora a oportunidade."},
+      {id:"b2_trava",type:"choice",label:"Tem coisa que a franqueadora não deixa você mexer?",opts:["Site e marca são travados","Tenho liberdade local boa","Não sei o limite exato","Depende — preciso checar"]},
+      {id:"b2_lider",type:"textarea",label:"Como líder entre os franqueados: que dor você vê que os OUTROS também sofrem?",hint:"Se resolvermos pra você, faz sentido pros outros 39?"}
+    ]},
+  { phase:"Captação", title:"De onde vêm os clientes",
+    intro:"O topo do funil — e o que a nova parceria de marketing realmente cobre.",
+    fields:[
+      {id:"b3_origem",type:"multichoice",label:"De onde vêm seus MELHORES clientes hoje?",hint:"Marque os principais.",opts:["Indicação / boca a boca","Google (busca/Ads)","Instagram orgânico","Meta Ads (pago)","Site / franqueadora","Clientes antigos"]},
+      {id:"b3_agencia",type:"textarea",label:"A parceria de marketing nova cobre o quê, exatamente?",hint:"Você comentou que ela faz campanha mas não cria visual. O que entra e o que falta?"},
+      {id:"b3_visual",type:"choice",label:"Quem cria o conteúdo visual — fotos de obra, antes/depois, reels?",opts:["Eu mesmo / a equipe","A agência","Ninguém de forma consistente","A franqueadora manda pronto"]}
+    ]},
+  { phase:"Primeiro contato", title:"A resposta ao lead e o follow-up",
+    intro:"Onde mais se ganha ou se perde dinheiro num negócio de obra.",
+    fields:[
+      {id:"b4_tempo",type:"choice",label:"Quando um cliente novo liga ou manda mensagem, em quanto tempo alguém responde de verdade?",opts:["Em minutos","Em algumas horas","No mesmo dia","Quando dá — varia muito"]},
+      {id:"b4_quem",type:"text",label:"Quem responde esse primeiro contato hoje?",hint:"Você, recepção, vendedor, ninguém fixo?"},
+      {id:"b4_followup",type:"textarea",label:"E quando você manda um orçamento e o cliente some — o que acontece?",hint:"Tem alguém que retoma? Em quanto tempo? Ou simplesmente esfria?"},
+      {id:"b4_taxa",type:"choice",label:"Dos orçamentos que você envia, quantos viram obra (palpite)?",opts:["Menos de 20%","20–35%","35–50%","Mais de 50%","Não sei medir"]},
+      {type:"insight",tag:"Contexto do mercado",stat:"Estudos do setor de home services apontam que cerca de <b>78% dos clientes fecham com a primeira empresa que responde</b> — e remodeling tem o ciclo de venda mais longo de todos (3 a 8 semanas), o que faz o follow-up pesar mais aqui do que em qualquer outro serviço. Perto de <b>79% dos leads não fecham</b> sem alguém retomando o contato.",probe:"Quantos orçamentos dos últimos 3 meses simplesmente… esfriaram sem ninguém retomar?"}
+    ]},
+  { phase:"Canteiro de obras", title:"A obra em andamento",
+    intro:"Da assinatura à entrega das chaves — onde a coordenação trava.",
+    fields:[
+      {id:"b5_subs",type:"textarea",label:"Como você coordena empreiteiros e subs durante a obra?",hint:"Grupo de mensagem, ligação, planilha, o sistema da DreamMaker?"},
+      {id:"b5_cliente",type:"choice",label:"Como o cliente acompanha o andamento da obra dele?",opts:["Eu aviso quando lembro","Mensagem / fotos pontuais","Pelo sistema DreamMaker","Ele cobra, eu respondo"]},
+      {id:"b5_trava",type:"multichoice",label:"Onde a obra mais costuma travar?",hint:"Marque os vilões mais comuns.",opts:["Material / fornecedor","Mão de obra / sub sumiu","Agenda / sequência","Aprovação do cliente","Retrabalho","Clima / imprevisto"]},
+      {id:"b5_estresse",type:"text",label:"O que mais te tira do sério numa semana de obra?",hint:"Aquela coisa que se repete e você já sabe que vem."}
+    ]},
+  { phase:"Burocracia & permits", title:"Documentos, alvarás e prefeitura",
+    intro:"A parte chata e cara de tocar obra nos EUA — que você citou direto.",
+    fields:[
+      {id:"b6_permits",type:"textarea",label:"Como é o processo de permits e inspeções hoje?",hint:"Quem cuida, quanto tempo leva, quão imprevisível é."},
+      {id:"b6_tempo",type:"choice",label:"Quanto do tempo da equipe vai embora em papelada (permits, inspeções, contratos)?",opts:["Pouco — está controlado","Razoável","Muito mais do que deveria","É um buraco negro"]},
+      {id:"b6_perdeu",type:"textarea",label:"Já perdeu prazo, dinheiro ou cliente por causa de documentação ou burocracia?",hint:"Um exemplo concreto vale mais que mil teorias."},
+      {id:"b6_maquina",type:"text",label:"O que nessa parte burocrática você sente que 'uma máquina já devia estar fazendo'?"}
+    ]},
+  { phase:"Orçamento & números", title:"Orçamento e financeiro",
+    intro:"Como o número nasce e como você enxerga a obra por dentro.",
+    fields:[
+      {id:"b7_orcar",type:"textarea",label:"Como você monta um orçamento hoje, do pedido ao número final?",hint:"Ferramenta, planilha, sistema — e quanto tempo isso leva."},
+      {id:"b7_custo",type:"choice",label:"Durante a obra, você consegue ver se o custo está estourando o previsto?",opts:["Sim, em tempo real","Só no fechamento","Mais ou menos","Descubro tarde demais"]},
+      {id:"b7_pgto",type:"text",label:"Como você controla pagamentos — dos clientes e dos subs?",hint:"O que entra, o que sai, quem deve."},
+      {type:"insight",tag:"Contexto do mercado",stat:"Mais da <b>metade das pequenas empresas nos EUA</b> ainda controla clientes e negócios em planilha ou e-mail — e dos que adotam um sistema, a maioria usa menos da metade dos recursos que paga.",probe:"Se eu te pedisse agora a lista dos 10 orçamentos abertos, com valor e próximo passo de cada um — em quanto tempo você me daria?"}
+    ]},
+  { phase:"Ferramentas & apetite", title:"Maturidade digital e apetite por IA",
+    intro:"Onde vocês estão na curva — e quanto topam mexer no processo.",
+    fields:[
+      {id:"b8_ia",type:"textarea",label:"Você ou a equipe já usaram alguma IA — ChatGPT, assistentes, automações?",hint:"Pra quê? Como foi a experiência?"},
+      {id:"b8_dados",type:"scale",label:"Numa escala de 1 a 5, quão organizados estão os dados do negócio hoje?",lo:"Tudo espalhado",hi:"Tudo no lugar"},
+      {id:"b8_conforto",type:"choice",label:"Qual seu nível de conforto em mudar processos que já funcionam?",opts:["Alto — adoro testar","Médio — com cautela","Baixo — só se for muito claro"]},
+      {id:"b8_tempo",type:"text",label:"Se você ganhasse de volta 10 horas por semana, no que investiria?",hint:"Vale negócio ou vida — os dois contam."}
+    ]},
+  { phase:"Visão", title:"O que seria sucesso",
+    intro:"Pra onde isso aponta — e até onde pode ir.",
+    fields:[
+      {id:"b9_sucesso",type:"textarea",label:"O que faria você olhar pra trás daqui a 12 meses e dizer 'valeu muito a pena'?"},
+      {id:"b9_prioridade",type:"choice",label:"Se tivesse que escolher UMA prioridade agora:",opts:["Crescer volume de obras","Aumentar a margem","Tirar peso das minhas costas","Profissionalizar a operação"]},
+      {id:"b9_escala",type:"choice",label:"Se isso desse muito certo em Hollywood, faria sentido levar pros outros franqueados?",opts:["Com certeza — eu puxaria isso","Talvez, dependendo do resultado","Prefiro focar só em mim por ora"]},
+      {id:"b9_extra",type:"textarea",label:"Tem algo importante que eu não perguntei e você acha que eu deveria saber?",hint:"O espaço é seu."},
+      {type:"insight",tag:"Contexto do mercado",stat:"Indicações de clientes antigos convertem de <b>2 a 4 vezes mais</b> que leads frios, e reter um cliente custa de 5 a 7 vezes menos do que conquistar um novo. A DreamMaker fala em 'cliente para a vida toda' — mas isso só acontece se alguém cuidar do depois.",probe:"Quantos dos seus clientes antigos sabem que você faz cozinha inteira, e não só o banheiro que contrataram?"}
+    ]}
+];
+
+/* ====== ESTADO ====== */
+const A = {};
+let idx = 0;
+const TOTAL = blocks.length;
+let saveTimer = null;
+
+/* ====== BACKEND (Edge Function) ====== */
+async function callFn(acao, extra){
+  const headers = { "content-type":"application/json" };
+  if (CFG.APIKEY) { headers["apikey"] = CFG.APIKEY; headers["Authorization"] = "Bearer "+CFG.APIKEY; }
+  const res = await fetch(CFG.FUNCTION_URL, {
+    method:"POST", headers,
+    body: JSON.stringify(Object.assign({ acao, codigo: CODE }, extra||{}))
+  });
+  if(!res.ok){ const t=await res.text().catch(()=>res.status); throw new Error("HTTP "+res.status+" "+t); }
+  return res.json();
+}
+
+/* ====== GATE ====== */
+async function enterCode(){
+  const code = (document.getElementById("codeInput").value||"").trim();
+  const err = document.getElementById("gateErr");
+  const btn = document.getElementById("codeBtn");
+  if(code.length < 4){ err.textContent="Digite o código completo."; return; }
+  err.textContent=""; btn.disabled=true; btn.textContent="Verificando…";
+  CODE = code;
+  try{
+    const r = await callFn("validar", {});
+    if(!r || !r.ok){ throw new Error("invalido"); }
+    // carrega progresso salvo
+    if(r.respostas && typeof r.respostas==="object"){ Object.assign(A, r.respostas); }
+    idx = Number.isInteger(r.fase) ? r.fase : 0;
+    document.getElementById("gate").style.display="none";
+    if(r.concluido){ finish(true); return; }
+    if(idx>0){
+      const note=document.getElementById("resumeNote");
+      note.style.display="block";
+      note.innerHTML="👋 Que bom te ver de volta! Você parou na <b>Fase "+(idx+1)+"</b>. Pode continuar de onde estava.";
+      document.getElementById("startBtn").innerHTML='Continuar de onde parei <span class="arr">→</span>';
+    }
+    document.getElementById("hero").classList.add("show");
+  }catch(e){
+    CODE="";
+    err.textContent = String(e.message||e).includes("401") || String(e).includes("invalido")
+      ? "Código incorreto. Confira com o Guilherme."
+      : "Não consegui validar agora. Tente de novo em alguns segundos.";
+    btn.disabled=false; btn.textContent="Entrar";
+  }
+}
+
+/* ====== RENDER ====== */
+function fieldHTML(f){
+  if(f.type==="insight"){
+    return `<div class="insight"><p class="tag">◆ ${f.tag}</p><p class="stat">${f.stat}</p><p class="probe">${f.probe}</p></div>`;
+  }
+  let inner=""; const v=A[f.id];
+  if(f.type==="text"){
+    inner=`<input type="text" value="${v?escapeAttr(v):""}" placeholder="Escreva aqui…" oninput="setVal('${f.id}',this.value)">`;
+  } else if(f.type==="textarea"){
+    inner=`<textarea placeholder="Escreva aqui…" oninput="setVal('${f.id}',this.value)">${v?escapeHtml(v):""}</textarea>`;
+  } else if(f.type==="scale"){
+    let b=""; for(let n=1;n<=5;n++) b+=`<button class="${v==n?'sel':''}" onclick="setScale('${f.id}',${n})">${n}</button>`;
+    inner=`<div class="scale">${b}</div><div class="scale-ends"><span>${f.lo||'1'}</span><span>${f.hi||'5'}</span></div>`;
+  } else if(f.type==="choice"){
+    inner=`<div class="opts">`+f.opts.map(o=>`<div class="opt ${v===o?'sel':''}" onclick="setChoice('${f.id}','${escapeAttr(o)}')"><span class="mark"></span>${o}</div>`).join("")+`</div>`;
+  } else if(f.type==="multichoice"){
+    const arr=Array.isArray(v)?v:[];
+    inner=`<div class="opts">`+f.opts.map(o=>`<div class="opt check ${arr.includes(o)?'sel':''}" onclick="toggleMulti('${f.id}','${escapeAttr(o)}')"><span class="mark"></span>${o}</div>`).join("")+`</div>`;
+  }
+  return `<div class="q"><p class="q-label">${f.label}</p>${f.hint?`<p class="q-hint">${f.hint}</p>`:""}${inner}</div>`;
+}
+function renderBlock(){
+  const b=blocks[idx];
+  document.getElementById("blockArea").innerHTML=`
+    <div class="block-head fade">
+      <div class="b-eyebrow"><span class="ph">Fase ${String(idx+1).padStart(2,'0')}</span>${b.phase}</div>
+      <h2>${b.title}</h2>${b.intro?`<p>${b.intro}</p>`:""}
+    </div>
+    <div class="fade">${b.fields.map(fieldHTML).join("")}</div>`;
+  document.getElementById("pfill").style.width=((idx)/TOTAL)*100+"%";
+  document.getElementById("navStep").textContent="Fase "+(idx+1)+" de "+TOTAL;
+  document.getElementById("backBtn").disabled = idx===0;
+  document.getElementById("nextBtn").innerHTML = idx===TOTAL-1 ? 'Concluir levantamento <span class="arr">✓</span>' : 'Avançar <span class="arr">→</span>';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ====== INPUTS ====== */
+function setVal(id,val){ A[id]=val; scheduleSave(); }
+function setScale(id,n){ A[id]=n; renderBlock(); scheduleSave(); }
+function setChoice(id,val){ A[id]=val; renderBlock(); scheduleSave(); }
+function toggleMulti(id,val){ if(!Array.isArray(A[id]))A[id]=[]; const i=A[id].indexOf(val); if(i>=0)A[id].splice(i,1); else A[id].push(val); renderBlock(); scheduleSave(); }
+
+/* ====== AUTO-SAVE ====== */
+function setSaveState(state){
+  const el=document.getElementById("saveState"), lbl=document.getElementById("saveLabel");
+  el.className="savestate "+state;
+  lbl.textContent = state==="saving" ? "Salvando…" : state==="err" ? "Tento de novo" : "Salvo";
+}
+function scheduleSave(){ setSaveState("saving"); clearTimeout(saveTimer); saveTimer=setTimeout(()=>doSave(false),1500); }
+async function doSave(concluido){
+  if(!CODE) return;
+  setSaveState("saving");
+  try{
+    await callFn("salvar", { respostas:A, fase:idx, cliente_nome:"Antonio", concluido: !!concluido });
+    setSaveState("saved");
+  }catch(e){ setSaveState("err"); }
+}
+
+/* ====== NAVEGAÇÃO ====== */
+function start(){
+  document.getElementById("hero").classList.remove("show");
+  document.getElementById("hero").style.display="none";
+  document.getElementById("progress").style.display="block";
+  document.getElementById("stage").style.display="block";
+  document.getElementById("nav").style.display="block";
+  renderBlock();
+}
+function next(){ if(idx<TOTAL-1){ idx++; renderBlock(); doSave(false); } else { doSave(true); finish(false); } }
+function prev(){ if(idx>0){ idx--; renderBlock(); doSave(false); } }
+function finish(already){
+  document.getElementById("gate").style.display="none";
+  document.getElementById("hero").style.display="none";
+  document.getElementById("progress").style.display="none";
+  document.getElementById("stage").style.display="none";
+  document.getElementById("nav").style.display="none";
+  document.getElementById("final").style.display="block";
+  document.getElementById("summaryBox").innerHTML=summaryHTML();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ====== RESUMO / EXPORT ====== */
+function answerText(f){const v=A[f.id]; if(v===undefined||v===null||v==="")return"—"; if(Array.isArray(v))return v.length?v.join(", "):"—"; if(f.type==="scale")return v+" / 5"; return v;}
+function summaryPlain(){
+  let o="LEVANTAMENTO ESTRATÉGICO — DREAMMAKER HOLLYWOOD\n";
+  o+="Cliente: Antonio  |  Conduzido por: Guilherme (Zogui Labs)\nData: "+new Date().toLocaleDateString('pt-BR')+"\n"+"".padEnd(58,"=")+"\n";
+  blocks.forEach((b,i)=>{o+="\n## FASE "+String(i+1).padStart(2,'0')+" — "+b.title.toUpperCase()+"\n";b.fields.forEach(f=>{if(f.type==="insight")return;o+="\n• "+f.label+"\n  → "+answerText(f)+"\n";});});
+  return o;
+}
+function summaryHTML(){let o="";blocks.forEach((b,i)=>{o+=`<h4>Fase ${String(i+1).padStart(2,'0')} — ${escapeHtml(b.title)}</h4>`;b.fields.forEach(f=>{if(f.type==="insight")return;o+=`<div style="margin:0 0 10px"><b>${escapeHtml(f.label)}</b><br>→ ${escapeHtml(String(answerText(f)))}</div>`;});});return o;}
+function copySummary(){const t=summaryPlain();navigator.clipboard.writeText(t).then(()=>toast("Resumo copiado ✓")).catch(()=>{const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("Resumo copiado ✓");}catch(e){toast("Use o botão Baixar");}document.body.removeChild(ta);});}
+function downloadTxt(){const blob=new Blob([summaryPlain()],{type:"text/plain"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="Levantamento_DreamMaker_Hollywood.txt";a.click();URL.revokeObjectURL(url);toast("Cópia baixada ✓");}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);}
+function escapeHtml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function escapeAttr(s){return String(s).replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+document.getElementById("codeInput").addEventListener("keydown",e=>{if(e.key==="Enter")enterCode();});
+document.addEventListener("keydown",e=>{if(document.getElementById("stage").style.display==="block"&&e.key==="Enter"&&e.target.tagName!=="TEXTAREA")next();});
+</script>
+</body>
+</html>
