@@ -1,0 +1,5 @@
+project_id = "zvqwjtndvbqryonjplal"
+
+# Função pública: valida o código de acesso no servidor (não usa JWT do Supabase).
+[functions.entrevista-dreammaker]
+verify_jwt = false
