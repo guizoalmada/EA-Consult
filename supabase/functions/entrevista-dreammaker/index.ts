@@ -3,7 +3,12 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ACCESS_CODE  = Deno.env.get("ENTREVISTA_ACCESS_CODE") ?? "653421";
+// Aceita múltiplos códigos (um por pessoa) => cada código gera uma pesquisa separada.
+// Pode sobrescrever pelo secret ENTREVISTA_ACCESS_CODE (lista separada por vírgula).
+const ACCESS_CODES = new Set(
+  (Deno.env.get("ENTREVISTA_ACCESS_CODE") ?? "653421,000888,646464")
+    .split(",").map((c) => c.trim()).filter(Boolean)
+);
 const SLUG = "dreammaker-hollywood";
 
 const CORS: Record<string, string> = {
@@ -22,7 +27,7 @@ Deno.serve(async (req) => {
   try { p = await req.json(); } catch { return json({ ok: false, erro: "json" }, 400); }
 
   const { acao, codigo, respostas, fase, cliente_nome, concluido } = p ?? {};
-  if (codigo !== ACCESS_CODE) return json({ ok: false, erro: "codigo_invalido" }, 401);
+  if (!ACCESS_CODES.has(String(codigo))) return json({ ok: false, erro: "codigo_invalido" }, 401);
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
   const t = db.schema("core").from("entrevistas");
