@@ -20,10 +20,13 @@ Formato ADR curto: contexto, decisão, consequência.
 **Decisão:** a esteira comercial (`contratos.etapa`) usa apenas os marcos que o promotor consegue confirmar (`docs_enviados`, `assinatura_cliente`, `assinatura_diretoria`, `ativo`), com um estado `processamento_matriz` que não avança sozinho — só avança quando o campo informa o próximo marco.
 **Consequência:** o relatório gerencial (W4) precisa alertar quando um contrato fica parado além do SLA em `processamento_matriz`, já que ninguém no fluxo automatizado sabe o motivo real do atraso.
 
-## D-04 — Supabase é fonte de verdade; Sheets é espelho read-only
+## D-04 — Supabase é fonte de verdade; a planilha é espelho read-only
+
+> A ferramenta de planilha mudou de Google Sheets para Excel 365 em 10 Jul 2026 (ver D-07). O
+> princípio abaixo continua valendo integralmente.
 
 **Contexto:** a gerência quer visualizar dados em planilha, mas não deve haver duas fontes de verdade.
-**Decisão:** todo escrita acontece em Supabase; o Google Sheets (W5) é um espelho incremental, gerado 1x/dia, sem edição prevista de volta ao banco.
+**Decisão:** toda escrita acontece em Supabase; a planilha do W5 é um espelho incremental, gerado 1x/dia, sem edição prevista de volta ao banco.
 **Consequência:** qualquer correção de dado tem que ser feita via conversa (WhatsApp) ou diretamente no Supabase — nunca editando a planilha.
 
 ## D-05 — Número de teste Meta no piloto (5 destinatários verificados)
@@ -67,3 +70,29 @@ O cliente confirmou que os 5 usuários visitam lojas, incluindo Anderson (coorde
 - A superfície de edição da meta individual ficou pendente (B-02): hoje se define por SQL.
 - Nenhum texto de mensagem ao usuário fala mais em "promotor"; usa-se o nome da pessoa ou termo
   neutro ("sua rota", "suas visitas").
+
+## D-07 — Espelho em Excel 365 (OneDrive), não Google Sheets; pasta do projeto no OneDrive
+
+**Contexto:** o resto da operação da Morgana Ops vive no OneDrive, e a documentação do grupo é
+mantida em `.md` versionado — não em Google Docs. Manter o Rota Viva no Google Workspace criava
+uma segunda superfície para o cliente e para nós.
+
+**Decisão:**
+
+1. O espelho read-only do W5 passa a ser uma **pasta de trabalho Excel 365 no OneDrive**, escrita
+   via node `Microsoft Excel 365` (`resource: worksheet`, `operation: upsert`, casando por `id`).
+   D-04 não muda: continua sendo espelho, nunca fonte de verdade.
+2. `config.gsheets_id` foi renomeada para `config.excel_workbook_id` e passa a guardar o
+   **driveItem id** do `.xlsx` no Graph. Vazia = W5 não escreve nada (gate de go-live preservado).
+3. A credencial `CRED_GSHEETS` deixa de existir; entra `CRED_MS_EXCEL`.
+4. A pasta canônica do projeto passa a ser
+   `Morgana Ops\Produtos Próprios\Rota Viva\`, com o repositório clonado em `repo\`.
+5. Toda a documentação vive em `.md` dentro do repositório. Não há mais espelhos em Google Docs.
+
+**Consequência:**
+
+- Os Google Docs antigos em `I:\Meu Drive\Rota-Viva\` (SPEC, GO-LIVE, CREDENCIAIS) ficam órfãos e
+  desatualizados. Devem ser apagados por quem tem acesso — nenhum processo aponta mais para eles.
+- O W5 depende de um app registrado no Azure com `Files.ReadWrite`; ver `CREDENCIAIS.md`.
+- O arquivo `.xlsx` precisa ter as 3 abas com cabeçalho, incluindo a coluna `id` (chave do upsert),
+  antes da primeira execução. O node não cria a aba nem o cabeçalho.

@@ -13,14 +13,14 @@ Um coordenador envia a planilha de rota da véspera pelo WhatsApp; o sistema dis
 ```
 Meta WhatsApp Cloud API  ─┬─▶  n8n (orquestração / máquina de estados)  ──▶  Supabase (Postgres, schema rotaviva)
                           │                                                        │
-                          └── Webhooks (rota XLSX, conversa de campo)              └─▶ Google Sheets (espelho read-only)
+                          └── Webhooks (rota XLSX, conversa de campo)              └─▶ Excel 365 / OneDrive (espelho read-only)
 ```
 
 - **Canal**: WhatsApp via Meta Cloud API oficial (não Z-API) — ver `docs/DECISOES.md` D-02.
 - **Orquestração**: n8n — 6 workflows (`n8n/workflows/`), nomeados `[RotaViva] W{n} - {Nome}`.
 - **Dados**: Supabase Postgres, schema dedicado `rotaviva` (fonte de verdade). Todo DDL é migration versionada em `supabase/migrations/`.
 - **IA**: usada apenas onde nodes determinísticos não bastam — transcrição de áudio (Whisper) e estruturação de observações em JSON (Claude Haiku 4.5). Ver D-01.
-- **Espelho**: Google Sheets, sincronizado 1x/dia, somente leitura para a gerência (Supabase continua sendo a fonte de verdade).
+- **Espelho**: pasta de trabalho Excel 365 no OneDrive, sincronizada 1x/dia, somente leitura para a gerência (Supabase continua sendo a fonte de verdade).
 
 ## Stack
 
@@ -32,7 +32,7 @@ Meta WhatsApp Cloud API  ─┬─▶  n8n (orquestração / máquina de estados
 | Storage | Supabase Storage (bucket `rotaviva-fotos`) |
 | IA áudio | OpenAI Whisper |
 | IA estruturação | Anthropic Claude Haiku 4.5 |
-| Relatórios | E-mail (Gmail) + WhatsApp template + Google Sheets |
+| Relatórios | E-mail (Gmail) + WhatsApp template + Excel 365 (OneDrive) |
 
 ## Stack de produtos DPK
 

@@ -100,10 +100,10 @@ usuário numa "aba Config da Planilha Mestre", sincronizada de volta ao banco po
 **Estado real:** nada disso existe neste projeto.
 
 - Existem 6 workflows (W1–W6). Não há W7, nem nunca houve.
-- A única planilha do projeto é o **espelho** do W5 (abas `visitas`, `oportunidades`, `contratos`),
+- A única planilha do projeto é o **espelho** Excel do W5 (abas `visitas`, `oportunidades`, `contratos`),
   que é gerado 1x/dia e **não é lido de volta**. Não existe aba `Config` nem "chaves protegidas".
 - Escrever config da planilha de volta para o banco **contradiz D-04** ("Supabase é fonte de
-  verdade; Sheets é espelho read-only"), que é uma decisão vinculante desta fase.
+  verdade; a planilha é espelho read-only"), que é uma decisão vinculante desta fase.
 
 **Impacto:** a coluna `usuarios.meta_visitas_dia` foi criada e é lida pelo W4 (meta efetiva =
 individual, com fallback em `config.meta_visitas_dia`). O que falta é apenas a **superfície de
@@ -116,7 +116,7 @@ update rotaviva.usuarios set meta_visitas_dia = null where nome = 'Danton'; -- v
 
 **Decisão pendente do Guilherme:** (a) manter edição por SQL; (b) construir de fato uma planilha
 mestre editável + W7 de sincronização, o que exige revogar ou emendar D-04; ou (c) expor a meta
-numa superfície própria (painel), fora do Sheets.
+numa superfície própria (painel), fora da planilha.
 
 ---
 
@@ -124,12 +124,12 @@ numa superfície própria (painel), fora do Sheets.
 
 **Onde ocorre:** Mudança 4 do mesmo pedido — "Ranking e contagens ... e aba Ranking do W5".
 
-**Estado real:** o W5 sincroniza exatamente 3 abas (`visitas`, `oportunidades`, `contratos`). Não
-há aba `Ranking`.
+**Estado real:** o W5 sincroniza exatamente 3 abas (`visitas`, `oportunidades`, `contratos`) na
+pasta de trabalho Excel. Não há aba `Ranking`.
 
 **O que foi feito:** o ranking foi implementado onde ele de fato existe — no **W4**, que passou a
 ordenar os usuários por visitas realizadas e a exibir posição, realizadas/planejadas e % da meta
 efetiva de cada um, no corpo do e-mail diário. O objeto `ranking` também é exportado no output do
-node `Consolidar Metricas`, pronto para ser consumido caso a aba do Sheets venha a existir.
+node `Consolidar Metricas`, pronto para ser consumido caso a aba venha a existir.
 
-**Decisão pendente do Guilherme:** criar ou não uma 4ª aba `Ranking` no espelho do W5.
+**Decisão pendente do Guilherme:** criar ou não uma 4ª aba `Ranking` no espelho Excel do W5.

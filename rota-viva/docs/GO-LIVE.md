@@ -97,7 +97,7 @@ workflow no passo 8). Assine os campos `messages`.
 ## 5. Configurar as demais credenciais
 
 Siga a tabela completa em `CREDENCIAIS.md` para: `CRED_SUPABASE_ROTAVIVA`, `CRED_GMAIL_RELATORIO`,
-`CRED_GSHEETS`, `CRED_OPENAI_WHISPER`, `CRED_ANTHROPIC`, `CRED_GEOCODING`.
+`CRED_MS_EXCEL`, `CRED_OPENAI_WHISPER`, `CRED_ANTHROPIC`, `CRED_GEOCODING`.
 
 **🛑 BLOQUEANTE (ver `BLOQUEIOS.md` B-01):** os nodes WhatsApp e Anthropic dos workflows do Rota Viva
 estão hoje, **na instância n8n**, vinculados por `id` funcional às credenciais reais da ARMCOM
@@ -139,15 +139,21 @@ update rotaviva.usuarios set telefone = '+55XXXXXXXXXXX' where nome = 'Anderson 
 select nome, telefone, papel from rotaviva.usuarios order by nome;
 ```
 
-## 7. Criar a planilha Google Sheets do espelho
+## 7. Criar a pasta de trabalho Excel do espelho
 
-Crie uma planilha nova no Google Drive com 3 abas: `visitas`, `oportunidades`, `contratos`
-(cabeçalhos correspondentes às colunas de cada tabela — ver `supabase/migrations/`). Copie o ID da
-planilha (da URL) e grave em `config`:
+Crie um arquivo `.xlsx` novo no OneDrive da Morgana Ops com 3 planilhas (abas): `visitas`,
+`oportunidades`, `contratos`. A primeira linha de cada aba deve conter os cabeçalhos com os nomes
+exatos das colunas da tabela correspondente (ver `supabase/migrations/`) — o node do n8n faz upsert
+casando pela coluna `id`, então `id` precisa existir em todas as três.
+
+Pegue o **driveItem id** do arquivo (o `id` que o Microsoft Graph usa, não o nome nem o caminho) e
+grave em `config`:
 
 ```sql
-update rotaviva.config set valor = '<ID_DA_PLANILHA>' where chave = 'gsheets_id';
+update rotaviva.config set valor = '<DRIVEITEM_ID_DO_XLSX>' where chave = 'excel_workbook_id';
 ```
+
+Enquanto essa chave estiver vazia, o W5 termina no branch "Aguardar Go-Live" sem escrever nada.
 
 ## 8. Ativar os workflows na ordem
 
@@ -158,7 +164,7 @@ No n8n, ative (toggle "Active") os workflows importados de `n8n/workflows/` nest
 3. `[RotaViva] W3 - Rota Diária`
 4. `[RotaViva] W6 - Lembrete Retorno`
 5. `[RotaViva] W4 - Relatório Diário`
-6. `[RotaViva] W5 - Espelho Sheets`
+6. `[RotaViva] W5 - Espelho Excel`
 
 (W2 primeiro porque W1 depende do mesmo número/webhook já estar recebendo mensagens; os workflows
 agendados por último para dar tempo de revisar os dois primeiros em produção antes de ligar os
@@ -184,7 +190,7 @@ Checklist de 13 itens antes de considerar o piloto no ar:
       dia (W6 + W3).
 - [ ] 8. Relatório diário chega por WhatsApp ao gerente às 18h (W4).
 - [ ] 9. Relatório diário chega por e-mail aos 3 destinatários da config às 18h (W4).
-- [ ] 10. Espelho no Google Sheets é atualizado às 21h com os dados do dia (W5).
+- [ ] 10. Espelho no Excel (OneDrive) é atualizado às 21h com os dados do dia (W5).
 
 Itens de D-06 (todos os usuários fazem visitas):
 
