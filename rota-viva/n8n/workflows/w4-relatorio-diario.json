@@ -1,0 +1,321 @@
+{
+  "id": "tGFCtCr5GKSCVeYL",
+  "name": "[RotaViva] W4 - Relatório Diário",
+  "active": false,
+  "isArchived": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "description": "Relatório diário (seg-sáb 18h) com visitas, metas, oportunidades, perdas, contratos parados e retornos vencidos, enviado por WhatsApp ao gerente e por e-mail à lista de destinatários.",
+  "connections": {
+    "Gatilho 18h Seg-Sab": {
+      "main": [[{ "node": "Buscar Config", "type": "main", "index": 0 }]]
+    },
+    "Buscar Config": {
+      "main": [[{ "node": "Buscar Usuarios Campo", "type": "main", "index": 0 }]]
+    },
+    "Buscar Usuarios Campo": {
+      "main": [[{ "node": "Buscar Gerente", "type": "main", "index": 0 }]]
+    },
+    "Buscar Gerente": {
+      "main": [[{ "node": "Buscar Agenda Hoje", "type": "main", "index": 0 }]]
+    },
+    "Buscar Agenda Hoje": {
+      "main": [[{ "node": "Buscar Agenda Mes", "type": "main", "index": 0 }]]
+    },
+    "Buscar Agenda Mes": {
+      "main": [[{ "node": "Buscar Checkins Suspeitos", "type": "main", "index": 0 }]]
+    },
+    "Buscar Checkins Suspeitos": {
+      "main": [[{ "node": "Buscar Oportunidades Hoje", "type": "main", "index": 0 }]]
+    },
+    "Buscar Oportunidades Hoje": {
+      "main": [[{ "node": "Buscar Perdas Hoje", "type": "main", "index": 0 }]]
+    },
+    "Buscar Perdas Hoje": {
+      "main": [[{ "node": "Buscar Contratos Abertos", "type": "main", "index": 0 }]]
+    },
+    "Buscar Contratos Abertos": {
+      "main": [[{ "node": "Buscar Retornos Vencidos", "type": "main", "index": 0 }]]
+    },
+    "Buscar Retornos Vencidos": {
+      "main": [[{ "node": "Consolidar Metricas", "type": "main", "index": 0 }]]
+    },
+    "Consolidar Metricas": {
+      "main": [
+        [
+          { "node": "Enviar Email Relatorio", "type": "main", "index": 0 },
+          { "node": "Enviar WhatsApp Gerente", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "ea4068e8-d1fb-4513-bf80-c9c20fbbd5cf",
+      "name": "Gatilho 18h Seg-Sab",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [200, 380],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 0 18 * * 1-6" }]
+        }
+      }
+    },
+    {
+      "id": "f3ea956d-cc8a-48ab-b3cc-e695120747cb",
+      "name": "Buscar Config",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [460, 380],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=in.(meta_visitas_dia,meta_visitas_mes,sla_dias_padrao,emails_relatorio)&select=chave,valor",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "051502ba-50fb-49ec-939a-3a0f0d63b695",
+      "name": "Buscar Usuarios Campo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [680, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=in.(promotor,consultor)&ativo=eq.true&select=id,nome,papel,telefone",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "5e2b76ca-fc82-41c1-a576-3e3f95923c00",
+      "name": "Buscar Gerente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [900, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=eq.gerente&ativo=eq.true&select=id,nome,telefone&limit=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "f5756ee0-027c-4bc7-bcaa-02b864856b49",
+      "name": "Buscar Agenda Hoje",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1120, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=eq.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,status,origem",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "550429a3-6718-4a9d-abcc-2955c1bfa8eb",
+      "name": "Buscar Agenda Mes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1340, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=gte.{{ $today.startOf('month').toFormat('yyyy-MM-dd') }}&data=lte.{{ $today.toFormat('yyyy-MM-dd') }}&status=eq.realizada&select=id,usuario_id,data",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "b5aeab5f-e6e6-48dc-a136-77dc1570c2f0",
+      "name": "Buscar Checkins Suspeitos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1560, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?flag_suspeito=eq.true&checkin_at=gte.{{ $today.toISO() }}&checkin_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,usuario_id,loja_id,checkin_at",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "773befb6-e0fa-4f19-a889-3c2f33fbd2cb",
+      "name": "Buscar Oportunidades Hoje",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1780, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades?criado_em=gte.{{ $today.toISO() }}&criado_em=lt.{{ $today.plus(1,'days').toISO() }}&select=id,produto,loja_id,visita_id",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "ca145c2b-bfa4-4e21-bd88-1e65c575fb8c",
+      "name": "Buscar Perdas Hoje",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2000, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?status_1=eq.sem_interesse&checkout_at=gte.{{ $today.toISO() }}&checkout_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,loja_id,usuario_id,motivo_nao_fechamento",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "bdf04151-5d8e-4c9d-ae63-4e2a882508b3",
+      "name": "Buscar Contratos Abertos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2220, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?etapa=not.in.(ativo,cancelado)&select=id,loja_id,produto,etapa,etapa_desde,numero_fluig",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "7cff77d3-b23f-4cc6-b291-717630202efb",
+      "name": "Buscar Retornos Vencidos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2440, 380],
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?origem=eq.retorno&status=eq.pendente&data=lt.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,data",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+      },
+      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+    },
+    {
+      "id": "49846187-4eb9-4cb1-b83b-433939cb0bb2",
+      "name": "Consolidar Metricas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2680, 380],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst configRows = $('Buscar Config').all().map(i => i.json);\nconst config = {};\nconfigRows.forEach(r => { config[r.chave] = r.valor; });\n\nconst metaDia = parseFloat(config.meta_visitas_dia) || 12;\nconst metaMes = parseFloat(config.meta_visitas_mes) || 280;\nconst slaDias = parseFloat(config.sla_dias_padrao) || 3;\nconst emailsCsv = config.emails_relatorio || '';\nconst emailList = emailsCsv.split(',').map(s => s.trim()).filter(Boolean);\n\nconst usuariosCampo = $('Buscar Usuarios Campo').all().map(i => i.json);\nconst gerenteRows = $('Buscar Gerente').all().map(i => i.json);\nconst gerente = gerenteRows[0] || {};\n\nconst agendaHoje = $('Buscar Agenda Hoje').all().map(i => i.json);\nconst visitasPlanejadas = agendaHoje.length;\nconst visitasRealizadas = agendaHoje.filter(a => a.status === 'realizada').length;\n\nconst porUsuario = {};\nusuariosCampo.forEach(u => {\n  porUsuario[u.id] = { nome: u.nome, planejadas: 0, realizadas: 0 };\n});\nagendaHoje.forEach(a => {\n  if (!porUsuario[a.usuario_id]) {\n    porUsuario[a.usuario_id] = { nome: a.usuario_id, planejadas: 0, realizadas: 0 };\n  }\n  porUsuario[a.usuario_id].planejadas += 1;\n  if (a.status === 'realizada') porUsuario[a.usuario_id].realizadas += 1;\n});\n\nconst numPessoasCampo = usuariosCampo.length || 1;\nconst metaDiaEquipe = metaDia * numPessoasCampo;\nconst pctMetaDia = metaDiaEquipe > 0 ? Math.round((visitasRealizadas / metaDiaEquipe) * 1000) / 10 : 0;\n\nconst detalhePorUsuario = Object.values(porUsuario).map(u => {\n  const pct = metaDia > 0 ? Math.round((u.realizadas / metaDia) * 1000) / 10 : 0;\n  return { nome: u.nome, realizadas: u.realizadas, planejadas: u.planejadas, pctMeta: pct };\n});\n\nconst agendaMes = $('Buscar Agenda Mes').all().map(i => i.json);\nconst acumuladoMes = agendaMes.length;\nconst pctMetaMes = metaMes > 0 ? Math.round((acumuladoMes / metaMes) * 1000) / 10 : 0;\n\nconst suspeitosRows = $('Buscar Checkins Suspeitos').all().map(i => i.json);\nconst suspeitosCount = suspeitosRows.length;\n\nconst opRows = $('Buscar Oportunidades Hoje').all().map(i => i.json);\nconst oportunidadesCount = opRows.length;\nconst oportunidadesPorProduto = {};\nopRows.forEach(o => {\n  const p = o.produto || 'nao_informado';\n  oportunidadesPorProduto[p] = (oportunidadesPorProduto[p] || 0) + 1;\n});\n\nconst perdasRows = $('Buscar Perdas Hoje').all().map(i => i.json);\nconst perdasCount = perdasRows.length;\n\nconst contratosRows = $('Buscar Contratos Abertos').all().map(i => i.json);\nconst agora = Date.now();\nconst contratosComDias = contratosRows.map(c => {\n  const desde = c.etapa_desde ? new Date(c.etapa_desde).getTime() : agora;\n  const diasParado = Math.floor((agora - desde) / (1000 * 60 * 60 * 24));\n  return Object.assign({}, c, { diasParado: diasParado, atrasado: diasParado > slaDias });\n});\nconst contratosAtrasados = contratosComDias.filter(c => c.atrasado);\nconst contratosAtrasadosCount = contratosAtrasados.length;\n\nconst retornosRows = $('Buscar Retornos Vencidos').all().map(i => i.json);\nconst retornosVencidosCount = retornosRows.length;\n\nconst now = new Date();\nconst dd = String(now.getDate()).padStart(2, '0');\nconst mm = String(now.getMonth() + 1).padStart(2, '0');\nconst yyyy = now.getFullYear();\nconst dataFormatada = dd + '/' + mm;\nconst dataCompleta = dd + '/' + mm + '/' + yyyy;\n\nconst oportunidadesLinhas = Object.keys(oportunidadesPorProduto).length\n  ? Object.entries(oportunidadesPorProduto).map(function (e) { return '<li>' + e[0] + ': ' + e[1] + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst perdasLinhas = perdasRows.length\n  ? perdasRows.map(function (p) { return '<li>Loja ' + (p.loja_id || '-') + ' - motivo: ' + (p.motivo_nao_fechamento || 'nao informado') + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst contratosLinhas = contratosAtrasados.length\n  ? contratosAtrasados.map(function (c) { return '<li>Contrato ' + (c.numero_fluig || c.id) + ' - etapa: ' + c.etapa + ' - ' + c.diasParado + ' dias parado</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst retornosLinhas = retornosRows.length\n  ? retornosRows.map(function (r) { return '<li>Loja ' + (r.loja_id || '-') + ' - agendado para ' + r.data + '</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst detalhePorUsuarioLinhas = detalhePorUsuario.length\n  ? detalhePorUsuario.map(function (u) { return '<li>' + u.nome + ': ' + u.realizadas + '/' + u.planejadas + ' (' + u.pctMeta + '% da meta individual)</li>'; }).join('')\n  : '<li>sem dados</li>';\n\nconst htmlBody = '<h2>Relatorio Diario Rota Viva - ' + dataCompleta + '</h2>' +\n  '<h3>Visitas de hoje</h3>' +\n  '<p>Realizadas: ' + visitasRealizadas + ' | Planejadas: ' + visitasPlanejadas + ' | % da meta do dia: ' + pctMetaDia + '%</p>' +\n  '<ul>' + detalhePorUsuarioLinhas + '</ul>' +\n  '<h3>Acumulado do mes</h3>' +\n  '<p>' + acumuladoMes + ' de ' + metaMes + ' (' + pctMetaMes + '%)</p>' +\n  '<h3>Check-ins suspeitos hoje</h3>' +\n  '<p>' + suspeitosCount + '</p>' +\n  '<h3>Oportunidades novas hoje</h3>' +\n  '<ul>' + oportunidadesLinhas + '</ul>' +\n  '<h3>Perdas do dia (sem interesse)</h3>' +\n  '<ul>' + perdasLinhas + '</ul>' +\n  '<h3>Contratos parados alem do SLA (' + slaDias + ' dias)</h3>' +\n  '<ul>' + contratosLinhas + '</ul>' +\n  '<h3>Retornos vencidos nao cumpridos</h3>' +\n  '<ul>' + retornosLinhas + '</ul>';\n\nreturn [{\n  json: {\n    dataFormatada: dataFormatada,\n    dataCompleta: dataCompleta,\n    visitasRealizadas: visitasRealizadas,\n    visitasPlanejadas: visitasPlanejadas,\n    pctMetaDia: pctMetaDia,\n    acumuladoMes: acumuladoMes,\n    metaMes: metaMes,\n    pctMetaMes: pctMetaMes,\n    suspeitosCount: suspeitosCount,\n    oportunidadesCount: oportunidadesCount,\n    oportunidadesPorProduto: oportunidadesPorProduto,\n    perdasCount: perdasCount,\n    contratosAtrasadosCount: contratosAtrasadosCount,\n    retornosVencidosCount: retornosVencidosCount,\n    gerenteNome: gerente.nome || 'Gerente',\n    gerenteTelefone: gerente.telefone || '',\n    emailsRelatorioStr: emailList.join(','),\n    htmlBody: htmlBody\n  }\n}];\n"
+      }
+    },
+    {
+      "id": "2f2afffc-9726-4732-b3ac-e34169cfc2b3",
+      "name": "Enviar Email Relatorio",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [2940, 540],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.emailsRelatorioStr }}",
+        "subject": "=Relatorio Diario Rota Viva - {{ $json.dataFormatada }}",
+        "emailType": "html",
+        "message": "={{ $json.htmlBody }}"
+      },
+      "credentials": { "gmailOAuth2": { "name": "CRED_GMAIL_RELATORIO" } },
+      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_GMAIL_RELATORIO (gmailOAuth2) após o go-live."
+    },
+    {
+      "id": "ba4e768a-a32a-4ae7-8e13-6742babf9675",
+      "name": "Enviar WhatsApp Gerente",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [2940, 220],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendTemplate",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta phone_number_id) do RotaViva__>",
+        "recipientPhoneNumber": "={{ $json.gerenteTelefone }}",
+        "template": "relatorio_diario_gerente",
+        "components": {
+          "component": [
+            {
+              "type": "body",
+              "bodyParameters": {
+                "parameter": [
+                  { "type": "text", "text": "={{ $json.dataFormatada }}" },
+                  { "type": "text", "text": "={{ String($json.visitasRealizadas) }}" },
+                  { "type": "text", "text": "={{ String($json.visitasPlanejadas) }}" },
+                  { "type": "text", "text": "={{ String($json.pctMetaDia) + '%' }}" },
+                  { "type": "text", "text": "={{ String($json.acumuladoMes) + '/' + String($json.metaMes) }}" },
+                  { "type": "text", "text": "={{ String($json.suspeitosCount) }}" },
+                  { "type": "text", "text": "={{ String($json.oportunidadesCount) }}" },
+                  { "type": "text", "text": "={{ String($json.contratosAtrasadosCount) }}" }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "credentials": { "whatsAppApi": { "name": "ARMCOM - WhatsApp Cloud API" } },
+      "notes": "BLOQUEIO: o n8n auto-atribuiu a credencial REAL existente 'ARMCOM - WhatsApp Cloud API' (id qxbrAen7zi4DhywY, tipo whatsAppApi) a este node em 3 tentativas distintas (criação inicial via newCredential('CRED_META_CLOUD'), remoção+recriação sem campo credentials, remoção+recriação com credentials.name='CRED_META_CLOUD' e sem id). Isso ocorre porque essa é a única credencial do tipo whatsAppApi existente na conta e o servidor n8n auto-resolve/anexa credenciais reais para nodes de tipo predefinedCredentialType quando há exatamente uma correspondência, mesmo que o nome do placeholder não exista. Não foi encontrada nenhuma forma programática de deixar este campo vazio ou apontando só para o placeholder. AÇÃO MANUAL NECESSÁRIA antes de qualquer ativação: abrir este node no n8n e trocar a credencial para uma nova credencial CRED_META_CLOUD (ou desvincular), garantindo que a credencial real ARMCOM não seja usada indevidamente por este workflow."
+    }
+  ]
+}
