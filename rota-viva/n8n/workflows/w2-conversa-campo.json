@@ -348,7 +348,7 @@
       "main": [
         [
           {
-            "node": "Buscar Coordenadores",
+            "node": "Buscar Destinatarios Alerta",
             "type": "main",
             "index": 0
           }
@@ -362,44 +362,11 @@
         ]
       ]
     },
-    "Buscar Coordenadores": {
-      "main": [
-        [
-          {
-            "node": "Mapear Coordenadores",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mapear Coordenadores": {
-      "main": [
-        [
-          {
-            "node": "Enviar Template Checkin Suspeito",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Enviar Template Checkin Suspeito": {
       "main": [
         [
           {
-            "node": "Consolidar Alerta Coordenadores",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Consolidar Alerta Coordenadores": {
-      "main": [
-        [
-          {
-            "node": "Upsert Estado Aguardando Foto",
+            "node": "Consolidar Alerta Destinatarios",
             "type": "main",
             "index": 0
           }
@@ -815,6 +782,39 @@
         [
           {
             "node": "Motor de Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Destinatarios Alerta": {
+      "main": [
+        [
+          {
+            "node": "Mapear Destinatarios Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Destinatarios Alerta": {
+      "main": [
+        [
+          {
+            "node": "Enviar Template Checkin Suspeito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Alerta Destinatarios": {
+      "main": [
+        [
+          {
+            "node": "Upsert Estado Aguardando Foto",
             "type": "main",
             "index": 0
           }
@@ -1595,7 +1595,7 @@
     },
     {
       "id": "cf869053-6240-4cb9-9b92-2a37c1128c15",
-      "name": "Buscar Coordenadores",
+      "name": "Buscar Destinatarios Alerta",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
@@ -1604,7 +1604,7 @@
       ],
       "parameters": {
         "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=eq.coordenador&ativo=eq.true&select=*",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=in.(coordenador,gerente)&ativo=eq.true&select=*",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
@@ -1621,7 +1621,7 @@
     },
     {
       "id": "4a9abcfe-06b0-4608-be47-aca840811be2",
-      "name": "Mapear Coordenadores",
+      "name": "Mapear Destinatarios Alerta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -1631,7 +1631,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Avaliar Suspeita').first().json;\nreturn rows.map((c) => ({\n  json: {\n    coordenadorTelefone: c.telefone,\n    nomeUsuario: ctx.nomeUsuario,\n    lojaNome: ctx.lojaNome,\n    distanciaM: ctx.distanciaM,\n    raioCheckinM: ctx.raioCheckinM\n  }\n}));\n"
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Avaliar Suspeita').first().json;\nconst papelUsuario = $('Validar Usuario Ativo').first().json.papel;\n\n// Escalonamento: se quem fez o check-in suspeito e o proprio coordenador,\n// o alerta sobe para o gerente. Nos demais casos vai para o coordenador.\nconst papelDestino = papelUsuario === 'coordenador' ? 'gerente' : 'coordenador';\nconst destinatarios = rows.filter((u) => u.papel === papelDestino && u.telefone);\n\nreturn destinatarios.map((c) => ({\n  json: {\n    destinatarioTelefone: c.telefone,\n    destinatarioPapel: c.papel,\n    nomeUsuario: ctx.nomeUsuario,\n    lojaNome: ctx.lojaNome,\n    distanciaM: ctx.distanciaM,\n    raioCheckinM: ctx.raioCheckinM\n  }\n}));\n"
       }
     },
     {
@@ -1647,7 +1647,7 @@
         "resource": "message",
         "operation": "sendTemplate",
         "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
-        "recipientPhoneNumber": "={{ $json.coordenadorTelefone }}",
+        "recipientPhoneNumber": "={{ $json.destinatarioTelefone }}",
         "template": "checkin_suspeito",
         "components": {
           "component": [
@@ -1681,7 +1681,7 @@
     },
     {
       "id": "fa902efa-3614-4202-a6de-2469749d5429",
-      "name": "Consolidar Alerta Coordenadores",
+      "name": "Consolidar Alerta Destinatarios",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [

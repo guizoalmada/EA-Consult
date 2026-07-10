@@ -2,7 +2,7 @@
   "id": "4jArhsdZUcRbEbau",
   "name": "[RotaViva] W6 - Lembrete Retorno",
   "active": false,
-  "description": "Todos os dias às 08:00, busca visitas com data_retorno=hoje, envia lembrete WhatsApp ao promotor responsável e cria agenda_visitas de retorno (evitando duplicatas) para aparecer na rota do dia.",
+  "description": "Todos os dias às 08:00, busca visitas com data_retorno=hoje, envia lembrete WhatsApp ao usuário responsável e cria agenda_visitas de retorno (evitando duplicatas) para aparecer na rota do dia.",
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": true
