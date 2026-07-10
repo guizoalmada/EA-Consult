@@ -1,13 +1,22 @@
 # Bloqueios — Rota Viva
 
-## B-01 — n8n substitui o nome do placeholder `CRED_META_CLOUD` pelo nome de uma credencial real existente
+## B-01 — n8n substitui o nome de placeholders de credencial pelo nome de credenciais reais existentes
 
-**Onde ocorre:** todo node `WhatsApp Business Cloud` (`n8n-nodes-base.whatsApp`/
-`n8n-nodes-base.whatsAppTrigger`) criado nos workflows W1, W2, W3, W4 e W6 — qualquer node que
-precise da credencial `CRED_META_CLOUD`. **Confirmado de forma independente em 4 dos 5 workflows
-que usam WhatsApp (W1, W3, W4, W6)** — comportamento sistemático, não uma falha pontual de um
-agente. No W1, o mesmo problema também afetou o WhatsApp Trigger e o node `mediaUrlGet`
-(auto-atribuídos a "ARMCOM - WhatsApp Trigger"/"ARMCOM - WhatsApp Cloud API").
+**Onde ocorre:** todo node que exige um tipo de credencial para o qual já existe **exatamente uma**
+credencial real daquele tipo na conta n8n (de outro cliente/projeto) — confirmado para
+`WhatsApp Business Cloud` (`n8n-nodes-base.whatsApp`/`n8n-nodes-base.whatsAppTrigger`, credencial
+`CRED_META_CLOUD`) nos workflows W1, W2, W3, W4 e W6, e para o **Anthropic Chat Model**
+(`@n8n/n8n-nodes-langchain.lmChatAnthropic`, credencial `CRED_ANTHROPIC`) no W2 — nesse caso a
+ferramenta auto-associou "ARMCOM - Anthropic". **Confirmado de forma independente em 5 dos 6
+workflows (W1, W2, W3, W4, W6)** — comportamento sistemático da ferramenta de criação/atualização
+de workflows do n8n, não uma falha pontual de um agente. No W1, o mesmo problema também afetou o
+WhatsApp Trigger e o node `mediaUrlGet` (auto-atribuídos a "ARMCOM - WhatsApp Trigger"/"ARMCOM -
+WhatsApp Cloud API"). **Importante:** isso significa que o mesmo risco se aplica a QUALQUER
+credencial nova que o cliente configurar no futuro para um tipo já usado por outro
+projeto/cliente na mesma conta n8n (ex.: se só existir uma credencial `openAiApi` ou
+`gmailOAuth2` no momento em que outro workflow desta conta for criado/editado por uma ferramenta
+similar) — não é exclusivo do WhatsApp nem do Anthropic, é uma característica geral da ferramenta
+de criação de workflows quando há exatamente um candidato de credencial do tipo exigido.
 
 **O que foi tentado (3 tentativas por workflow, repetido de forma independente em pelo menos
 quatro workflows — W1, W3, W4 e W6 — sempre com o mesmo resultado):**
@@ -53,4 +62,7 @@ corrigir esse campo antes de ativar qualquer workflow.
 **Ação humana necessária antes do go-live:** em cada workflow (W1, W2, W3, W4, W6), abrir todo node
 "WhatsApp Business Cloud" na UI do n8n e confirmar/trocar explicitamente a credencial para a
 `CRED_META_CLOUD` real do Rota Viva (criada conforme `CREDENCIAIS.md`) — nunca reutilizar
-"ARMCOM - WhatsApp Cloud API".
+"ARMCOM - WhatsApp Cloud API". No W2, também abrir o node "Anthropic Chat Model" e confirmar/trocar
+para a `CRED_ANTHROPIC` real do Rota Viva — nunca reutilizar "ARMCOM - Anthropic". Ao configurar
+qualquer credencial nova nesta conta n8n compartilhada, é prudente verificar, logo após criar o
+workflow, se algum node ficou apontando para uma credencial de outro projeto antes de ativar.

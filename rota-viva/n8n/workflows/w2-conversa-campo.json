@@ -1,0 +1,2846 @@
+{
+  "id": "AlnFEu0bffETX6UV",
+  "name": "[RotaViva] W2 - Conversa Campo",
+  "active": false,
+  "isArchived": false,
+  "versionId": "c65dd90f-9f64-4903-849f-33698c807e1c",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "createdAt": "2026-07-10T02:22:43.110Z",
+  "updatedAt": "2026-07-10T02:22:43.110Z",
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuario Ativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuario Ativo": {
+      "main": [
+        [
+          {
+            "node": "Validar Usuario Ativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Usuario Ativo": {
+      "main": [
+        [
+          {
+            "node": "Texto e Comando?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Texto e Comando?": {
+      "main": [
+        [
+          {
+            "node": "Rotear Comando",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Estado Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotear Comando": {
+      "main": [
+        [
+          {
+            "node": "Buscar Loja por Codcl (Contrato)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Loja por Codcl (Maquininha)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Comando Desconhecido - Ignorar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Loja por Codcl (Contrato)": {
+      "main": [
+        [
+          {
+            "node": "Extrair Loja Contrato Assinado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Loja Contrato Assinado": {
+      "main": [
+        [
+          {
+            "node": "Buscar Contrato Atual (Assinatura)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Contrato Atual (Assinatura)": {
+      "main": [
+        [
+          {
+            "node": "Extrair Contrato Atual Assinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Contrato Atual Assinatura": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Contrato Assinatura Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Contrato Assinatura Cliente": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Contrato Assinado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Loja por Codcl (Maquininha)": {
+      "main": [
+        [
+          {
+            "node": "Extrair Loja Maquininha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Loja Maquininha": {
+      "main": [
+        [
+          {
+            "node": "Buscar Contrato Atual (Maquininha)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Contrato Atual (Maquininha)": {
+      "main": [
+        [
+          {
+            "node": "Extrair Contrato Maquininha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Contrato Maquininha": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Contrato Ativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Contrato Ativo": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Maquininha Ativada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Estado Conversa": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Estado": {
+      "main": [
+        [
+          {
+            "node": "Rotear Estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotear Estado": {
+      "main": [
+        [
+          {
+            "node": "Mensagem e Localizacao?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem e Imagem?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Observacao Por Audio?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Estado Desconhecido - Ignorar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem e Localizacao?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Agenda Pendente Hoje",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ocioso - Nao E Localizacao - Ignorar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Agenda Pendente Hoje": {
+      "main": [
+        [
+          {
+            "node": "Calcular Loja Mais Proxima",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular Loja Mais Proxima": {
+      "main": [
+        [
+          {
+            "node": "Nenhuma Visita Pendente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nenhuma Visita Pendente?": {
+      "main": [
+        [
+          {
+            "node": "Avisar Sem Visita Pendente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Config Raio Checkin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Config Raio Checkin": {
+      "main": [
+        [
+          {
+            "node": "Avaliar Suspeita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avaliar Suspeita": {
+      "main": [
+        [
+          {
+            "node": "Flag Suspeito?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag Suspeito?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Coordenadores",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upsert Estado Aguardando Foto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Coordenadores": {
+      "main": [
+        [
+          {
+            "node": "Mapear Coordenadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Coordenadores": {
+      "main": [
+        [
+          {
+            "node": "Enviar Template Checkin Suspeito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Template Checkin Suspeito": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Alerta Coordenadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Alerta Coordenadores": {
+      "main": [
+        [
+          {
+            "node": "Upsert Estado Aguardando Foto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Estado Aguardando Foto": {
+      "main": [
+        [
+          {
+            "node": "Pedir Foto Fachada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem e Imagem?": {
+      "main": [
+        [
+          {
+            "node": "Buscar URL Midia Foto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aguardando Foto - Nao E Imagem - Ignorar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar URL Midia Foto": {
+      "main": [
+        [
+          {
+            "node": "Baixar Foto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Foto": {
+      "main": [
+        [
+          {
+            "node": "Upload Foto Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Foto Storage": {
+      "main": [
+        [
+          {
+            "node": "Preparar Contexto Apos Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Contexto Apos Upload": {
+      "main": [
+        [
+          {
+            "node": "Criar Visita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Visita": {
+      "main": [
+        [
+          {
+            "node": "Preparar Contexto Apos Visita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Contexto Apos Visita": {
+      "main": [
+        [
+          {
+            "node": "Upsert Estado Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Estado Checkout": {
+      "main": [
+        [
+          {
+            "node": "Enviar Pergunta Decisor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Observacao Por Audio?": {
+      "main": [
+        [
+          {
+            "node": "Buscar URL Midia Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Resultado Texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar URL Midia Audio": {
+      "main": [
+        [
+          {
+            "node": "Baixar Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcrever Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrever Audio": {
+      "main": [
+        [
+          {
+            "node": "Estruturar Observacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estruturar Observacao": {
+      "main": [
+        [
+          {
+            "node": "Preparar Resultado Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo Anthropic Claude Haiku": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Estruturar Observacao",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Estruturado Observacao": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Estruturar Observacao",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Resultado Audio": {
+      "main": [
+        [
+          {
+            "node": "Motor de Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Motor de Checkout": {
+      "main": [
+        [
+          {
+            "node": "Tem Atualizacoes de Visita?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Atualizacoes de Visita?": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Visita",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sem Atualizacao de Visita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Visita": {
+      "main": [
+        [
+          {
+            "node": "Rotear Acao Especial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotear Acao Especial": {
+      "main": [
+        [
+          {
+            "node": "Criar Agenda Reagendada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar Oportunidade",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sem Acao Especial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Agenda Reagendada": {
+      "main": [
+        [
+          {
+            "node": "Marcar Agenda Realizada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar Agenda Realizada?": {
+      "main": [
+        [
+          {
+            "node": "Marcar Agenda Realizada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sem Marcar Realizada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar Agenda Realizada": {
+      "main": [
+        [
+          {
+            "node": "Upsert Estado Final Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Estado Final Checkout": {
+      "main": [
+        [
+          {
+            "node": "Rotear Mensagem de Saida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotear Mensagem de Saida": {
+      "main": [
+        [
+          {
+            "node": "Enviar Texto Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Lista Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Botoes Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem Saida Desconhecida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sem Marcar Realizada": {
+      "main": [
+        [
+          {
+            "node": "Upsert Estado Final Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Oportunidade": {
+      "main": [
+        [
+          {
+            "node": "Criar Contrato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Contrato": {
+      "main": [
+        [
+          {
+            "node": "Marcar Agenda Realizada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sem Acao Especial": {
+      "main": [
+        [
+          {
+            "node": "Marcar Agenda Realizada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sem Atualizacao de Visita": {
+      "main": [
+        [
+          {
+            "node": "Rotear Acao Especial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Resultado Texto": {
+      "main": [
+        [
+          {
+            "node": "Motor de Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "120acb2f-446e-4d9e-8c67-716a2f437715",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "updates": [
+          "messages"
+        ]
+      },
+      "webhookId": "d7c0db11-473c-42b8-9413-4af895b7b53c"
+    },
+    {
+      "id": "3d8303e3-8111-4225-b5b6-3e95e4c0ac95",
+      "name": "Normalizar Mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "\nconst raw = $json;\nconst value = (raw.messages ? raw : (raw.body && raw.body.entry && raw.body.entry[0] && raw.body.entry[0].changes && raw.body.entry[0].changes[0] && raw.body.entry[0].changes[0].value)) || raw;\nconst msg = (value.messages && value.messages[0]) || {};\nconst tipoMensagem = msg.type || 'desconhecido';\nlet texto = '';\nlet respostaId = '';\nif (tipoMensagem === 'text') {\n  texto = (msg.text && msg.text.body) || '';\n} else if (tipoMensagem === 'interactive') {\n  if (msg.interactive && msg.interactive.type === 'button_reply') {\n    respostaId = (msg.interactive.button_reply && msg.interactive.button_reply.id) || '';\n    texto = (msg.interactive.button_reply && msg.interactive.button_reply.title) || '';\n  } else if (msg.interactive && msg.interactive.type === 'list_reply') {\n    respostaId = (msg.interactive.list_reply && msg.interactive.list_reply.id) || '';\n    texto = (msg.interactive.list_reply && msg.interactive.list_reply.title) || '';\n  }\n} else if (tipoMensagem === 'button') {\n  respostaId = (msg.button && msg.button.payload) || '';\n  texto = (msg.button && msg.button.text) || '';\n}\nconst lat = (msg.location && msg.location.latitude != null) ? msg.location.latitude : null;\nconst long = (msg.location && msg.location.longitude != null) ? msg.location.longitude : null;\nconst mediaId = (msg.image && msg.image.id) || (msg.audio && msg.audio.id) || null;\nconst fromRaw = msg.from || '';\nconst telefone = fromRaw.indexOf('+') === 0 ? fromRaw : ('+' + fromRaw);\nconst textoNormalizado = texto.trim();\nconst matchContrato = textoNormalizado.match(/^contrato\\s+(\\S+)\\s+assinado$/i);\nconst matchMaquininha = textoNormalizado.match(/^maquininha\\s+(\\S+)\\s+ativada$/i);\nlet comandoTipo = '';\nlet comandoCodcl = '';\nif (matchContrato) {\n  comandoTipo = 'contrato_assinado';\n  comandoCodcl = matchContrato[1];\n} else if (matchMaquininha) {\n  comandoTipo = 'maquininha_ativada';\n  comandoCodcl = matchMaquininha[1];\n}\nreturn {\n  json: {\n    telefone: telefone,\n    tipoMensagem: tipoMensagem,\n    texto: textoNormalizado,\n    respostaId: respostaId,\n    lat: lat,\n    long: long,\n    mediaId: mediaId,\n    waMessageId: msg.id || null,\n    comandoTipo: comandoTipo,\n    comandoCodcl: comandoCodcl\n  }\n};\n"
+      }
+    },
+    {
+      "id": "262b3680-04e5-40ba-b1cf-a9dd712477c1",
+      "name": "Buscar Usuario Ativo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?telefone=eq.{{ $json.telefone }}&ativo=eq.true&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "f51fd9ce-5ed3-4680-b320-ed83f809707f",
+      "name": "Validar Usuario Ativo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) {\n  return [];\n}\nconst usuario = rows[0];\nconst msg = $('Normalizar Mensagem').first().json;\nreturn [{\n  json: Object.assign({}, msg, {\n    usuarioId: usuario.id,\n    papel: usuario.papel,\n    nomeUsuario: usuario.nome\n  })\n}];\n"
+      }
+    },
+    {
+      "id": "9ad0719c-3ca8-42c4-b8e9-ec60ae75f36c",
+      "name": "Texto e Comando?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.comandoTipo }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              },
+              "rightValue": ""
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "d68e2f71-350c-495b-abfa-6ffec51ef015",
+      "name": "Rotear Comando",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1000,
+        -300
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "outputKey": "contrato_assinado",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.comandoTipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "contrato_assinado"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "maquininha_ativada",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.comandoTipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "maquininha_ativada"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Desconhecido"
+        }
+      }
+    },
+    {
+      "id": "2d14f7da-fb04-43c4-921f-cc1790ac9c29",
+      "name": "Buscar Loja por Codcl (Contrato)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        -350
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?codcl=eq.{{ $json.comandoCodcl }}&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cd87e669-6ee2-4338-ab80-bf64f6727844",
+      "name": "Extrair Loja Contrato Assinado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        -350
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst loja = rows[0];\nconst ctx = $('Validar Usuario Ativo').first().json;\nreturn [{ json: Object.assign({}, ctx, { lojaId: loja.id, lojaNome: loja.nome }) }];\n"
+      }
+    },
+    {
+      "id": "763d234d-e282-4813-be8b-d1702c8e85bb",
+      "name": "Buscar Contrato Atual (Assinatura)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1600,
+        -350
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?loja_id=eq.{{ $json.lojaId }}&etapa=in.(docs_enviados,processamento_matriz)&order=criado_em.desc&limit=1&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "20da192a-1921-4996-881e-645923d76966",
+      "name": "Extrair Contrato Atual Assinatura",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        -350
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst contrato = rows[0];\nconst ctx = $('Extrair Loja Contrato Assinado').first().json;\nreturn [{ json: Object.assign({}, ctx, { contratoId: contrato.id }) }];\n"
+      }
+    },
+    {
+      "id": "8683536a-9c4f-43ca-ad5d-6a24db958626",
+      "name": "Atualizar Contrato Assinatura Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2000,
+        -350
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?id=eq.{{ $json.contratoId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"etapa\": \"assinatura_cliente\", \"etapa_desde\": $today.toISODate(), \"atualizado_por\": $json.usuarioId, \"atualizado_em\": $now.toISO() } }}"
+      }
+    },
+    {
+      "id": "48f560da-ed92-459c-9b68-3b4e800e20fd",
+      "name": "Confirmar Contrato Assinado",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        -350
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $(\"Extrair Contrato Atual Assinatura\").item.json.telefone }}",
+        "messageType": "text",
+        "textBody": "=Contrato da loja {{ $(\"Extrair Contrato Atual Assinatura\").item.json.lojaNome }} atualizado: assinatura do cliente confirmada. Obrigado!"
+      },
+      "webhookId": "ad143cb0-5b31-4b14-a740-bcbae6b89568"
+    },
+    {
+      "id": "bd6992fb-1a32-46c2-b76e-1583516ee011",
+      "name": "Buscar Loja por Codcl (Maquininha)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        -250
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?codcl=eq.{{ $json.comandoCodcl }}&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "12bb2e22-3804-465b-ac3a-8099f4e7cddf",
+      "name": "Extrair Loja Maquininha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        -250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst loja = rows[0];\nconst ctx = $('Validar Usuario Ativo').first().json;\nreturn [{ json: Object.assign({}, ctx, { lojaId: loja.id, lojaNome: loja.nome }) }];\n"
+      }
+    },
+    {
+      "id": "70f77d35-076f-480d-9705-bcff07abf255",
+      "name": "Buscar Contrato Atual (Maquininha)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1600,
+        -250
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?loja_id=eq.{{ $json.lojaId }}&order=criado_em.desc&limit=1&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fcf8de2f-30e8-4d10-be95-18700b4ba9ac",
+      "name": "Extrair Contrato Maquininha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        -250
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst contrato = rows[0];\nconst ctx = $('Extrair Loja Maquininha').first().json;\nconst vigenciaInicio = $today.plus({ months: 1 }).startOf('month').toISODate();\nconst patchBody = { etapa: 'ativo', data_ativacao: $today.toISODate() };\nif (contrato.produto === 'top_service') {\n  patchBody.vigencia_inicio = vigenciaInicio;\n}\nreturn [{ json: Object.assign({}, ctx, { contratoId: contrato.id, produtoContrato: contrato.produto, patchBody: patchBody }) }];\n"
+      }
+    },
+    {
+      "id": "1b66ee62-bc14-4031-abc2-7c3ab99ab491",
+      "name": "Atualizar Contrato Ativo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2000,
+        -250
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?id=eq.{{ $json.contratoId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.patchBody }}"
+      }
+    },
+    {
+      "id": "1fa962a1-1672-4c1d-9a05-7ea353323cb4",
+      "name": "Confirmar Maquininha Ativada",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        -250
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $(\"Extrair Contrato Maquininha\").item.json.telefone }}",
+        "messageType": "text",
+        "textBody": "=Maquininha da loja {{ $(\"Extrair Contrato Maquininha\").item.json.lojaNome }} marcada como ativa. Obrigado!"
+      },
+      "webhookId": "37cea68c-105e-40e3-97f7-c02282a9e2a4"
+    },
+    {
+      "id": "3241efd6-a89d-4cd2-9a50-9164665f9122",
+      "name": "Comando Desconhecido - Ignorar",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -400
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "ef23986b-461e-4a2c-9a0f-dae4d635b876",
+      "name": "Buscar Estado Conversa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1000,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?telefone=eq.{{ $json.telefone }}&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "7480072d-6d11-47d0-9a1f-cdbca7b91a33",
+      "name": "Normalizar Estado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        200
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst found = (Array.isArray(rows) && rows.length) ? rows[0] : null;\nconst usuario = $('Validar Usuario Ativo').first().json;\nconst estado = found ? found.estado : 'ocioso';\nconst contexto = (found && found.contexto) ? found.contexto : {};\nreturn [{\n  json: Object.assign({}, usuario, {\n    estado: estado,\n    contexto: contexto\n  })\n}];\n"
+      }
+    },
+    {
+      "id": "1266e551-b5c4-4c75-ab51-1e9f112acd00",
+      "name": "Rotear Estado",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1400,
+        200
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "outputKey": "ocioso",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.estado }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "ocioso"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "aguardando_foto",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.estado }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "aguardando_foto"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "checkout",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.estado }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "checkout"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Desconhecido"
+        }
+      }
+    },
+    {
+      "id": "9cd307c3-1909-4a74-83bc-079f422ea910",
+      "name": "Mensagem e Localizacao?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        -50
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.tipoMensagem }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "location"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "daffbe80-3a15-423f-a3ca-7b3b68d86683",
+      "name": "Buscar Agenda Pendente Hoje",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1800,
+        -50
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?usuario_id=eq.{{ $json.usuarioId }}&data=eq.{{ $today.toISODate() }}&status=eq.pendente&select=*,lojas(*)",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "b6ec43b5-4ac4-4387-88fb-3e5d74e34bbd",
+      "name": "Calcular Loja Mais Proxima",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        -50
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Normalizar Estado').first().json;\nif (!Array.isArray(rows) || rows.length === 0) {\n  return [{ json: Object.assign({}, ctx, { nenhumaVisitaPendente: 'true' }) }];\n}\nconst lat1 = parseFloat(ctx.lat);\nconst lon1 = parseFloat(ctx.long);\nfunction toRad(v) { return (v * Math.PI) / 180; }\nfunction haversine(la1, lo1, la2, lo2) {\n  const R = 6371000;\n  const dLat = toRad(la2 - la1);\n  const dLon = toRad(lo2 - lo1);\n  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +\n    Math.cos(toRad(la1)) * Math.cos(toRad(la2)) *\n    Math.sin(dLon / 2) * Math.sin(dLon / 2);\n  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n  return R * c;\n}\nlet melhor = null;\nlet melhorDist = Infinity;\nfor (const row of rows) {\n  const loja = row.lojas || {};\n  if (loja.lat == null || loja.long == null) continue;\n  const d = haversine(lat1, lon1, parseFloat(loja.lat), parseFloat(loja.long));\n  if (d < melhorDist) {\n    melhorDist = d;\n    melhor = { agendaId: row.id, lojaId: loja.id, lojaNome: loja.nome };\n  }\n}\nif (!melhor) {\n  return [{ json: Object.assign({}, ctx, { nenhumaVisitaPendente: 'true' }) }];\n}\nreturn [{\n  json: Object.assign({}, ctx, {\n    nenhumaVisitaPendente: 'false',\n    agendaId: melhor.agendaId,\n    lojaId: melhor.lojaId,\n    lojaNome: melhor.lojaNome,\n    distanciaM: Math.round(melhorDist),\n    checkinLat: lat1,\n    checkinLong: lon1\n  })\n}];\n"
+      }
+    },
+    {
+      "id": "09e4ded1-f759-46fc-86a6-f449a13f72d4",
+      "name": "Nenhuma Visita Pendente?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2200,
+        -50
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.nenhumaVisitaPendente }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fb4d6ffd-b29d-4e1f-bb8e-c4e72f4e8864",
+      "name": "Avisar Sem Visita Pendente",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        -150
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $json.telefone }}",
+        "messageType": "text",
+        "textBody": "Nao encontrei nenhuma visita pendente para hoje na sua rota."
+      },
+      "webhookId": "72e61a7d-925b-40da-9537-fce6e5c20833"
+    },
+    {
+      "id": "43e97754-b53f-47de-a103-28f7f6c89fa1",
+      "name": "Buscar Config Raio Checkin",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2400,
+        -50
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=eq.raio_checkin_m&select=valor",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c8e352c7-d836-4673-967c-966bc1160f65",
+      "name": "Avaliar Suspeita",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        -50
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Calcular Loja Mais Proxima').first().json;\nconst raio = rows.length ? parseFloat(rows[0].valor) : 200;\nconst flagSuspeito = ctx.distanciaM > raio ? 'true' : 'false';\nreturn [{\n  json: Object.assign({}, ctx, {\n    raioCheckinM: raio,\n    flagSuspeito: flagSuspeito\n  })\n}];\n"
+      }
+    },
+    {
+      "id": "2f03a52e-f4fa-45da-8114-05c1a490c279",
+      "name": "Flag Suspeito?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2800,
+        -50
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.flagSuspeito }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cf869053-6240-4cb9-9b92-2a37c1128c15",
+      "name": "Buscar Coordenadores",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3000,
+        -150
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=eq.coordenador&ativo=eq.true&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4a9abcfe-06b0-4608-be47-aca840811be2",
+      "name": "Mapear Coordenadores",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3200,
+        -150
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Avaliar Suspeita').first().json;\nreturn rows.map((c) => ({\n  json: {\n    coordenadorTelefone: c.telefone,\n    nomeUsuario: ctx.nomeUsuario,\n    lojaNome: ctx.lojaNome,\n    distanciaM: ctx.distanciaM,\n    raioCheckinM: ctx.raioCheckinM\n  }\n}));\n"
+      }
+    },
+    {
+      "id": "66527dca-ff14-4cb0-8a6a-7e001c50e910",
+      "name": "Enviar Template Checkin Suspeito",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        3400,
+        -150
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendTemplate",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $json.coordenadorTelefone }}",
+        "template": "checkin_suspeito",
+        "components": {
+          "component": [
+            {
+              "type": "body",
+              "bodyParameters": {
+                "parameter": [
+                  {
+                    "type": "text",
+                    "text": "={{ $json.nomeUsuario }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $json.lojaNome }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $json.distanciaM }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ $json.raioCheckinM }}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "webhookId": "43b9ce4e-40b1-4db7-a6b6-8fec3bb26bc5"
+    },
+    {
+      "id": "fa902efa-3614-4202-a6de-2469749d5429",
+      "name": "Consolidar Alerta Coordenadores",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3600,
+        -150
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst ctx = $('Avaliar Suspeita').first().json;\nreturn [{ json: ctx }];\n"
+      }
+    },
+    {
+      "id": "c45343e1-2f19-45c8-aa03-8dc5da09b0bb",
+      "name": "Upsert Estado Aguardando Foto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3800,
+        -50
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"telefone\": $json.telefone, \"estado\": \"aguardando_foto\", \"contexto\": { \"agenda_id\": $json.agendaId, \"loja_id\": $json.lojaId, \"checkin_lat\": $json.checkinLat, \"checkin_long\": $json.checkinLong, \"distancia_m\": $json.distanciaM, \"flag_suspeito\": $json.flagSuspeito === \"true\" }, \"atualizado_em\": $now.toISO() } }}"
+      }
+    },
+    {
+      "id": "2df866c6-888f-4ee8-9ba1-36c045937350",
+      "name": "Pedir Foto Fachada",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        4000,
+        -50
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $(\"Avaliar Suspeita\").item.json.telefone }}",
+        "messageType": "text",
+        "textBody": "=Check-in confirmado. Envie uma foto da fachada da loja {{ $(\"Avaliar Suspeita\").item.json.lojaNome }} para continuar."
+      },
+      "webhookId": "87992c05-3468-4477-a017-cd7b342777ea"
+    },
+    {
+      "id": "e9b13e5a-36bf-431f-b5bf-a85494d7b01c",
+      "name": "Ocioso - Nao E Localizacao - Ignorar",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        -150
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "f878296b-2563-4aef-a309-84ab45c8c184",
+      "name": "Mensagem e Imagem?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        150
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.tipoMensagem }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "image"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3e38937a-1a08-4dba-b813-49e2088ba859",
+      "name": "Buscar URL Midia Foto",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1800,
+        150
+      ],
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.mediaId }}"
+      },
+      "webhookId": "d27db361-95ee-4523-8084-49f5a6888727"
+    },
+    {
+      "id": "2bbc151e-f690-4879-bd63-cfc35a891c2c",
+      "name": "Baixar Foto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2000,
+        150
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "f10002d1-1786-4078-a001-7c6e91433d57",
+      "name": "Upload Foto Storage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2200,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/storage/v1/object/rotaviva-fotos/{{ $(\"Normalizar Estado\").item.json.contexto.agenda_id }}.jpg",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "image/jpeg"
+            },
+            {
+              "name": "x-upsert",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data"
+      }
+    },
+    {
+      "id": "5c754104-162a-436b-80a8-95da1b547c26",
+      "name": "Preparar Contexto Apos Upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        150
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst ctx = $('Normalizar Estado').first().json;\nconst contexto = ctx.contexto || {};\nconst agendaId = contexto.agenda_id;\nconst fotoUrl = 'rotaviva-fotos/' + agendaId + '.jpg';\nreturn [{ json: Object.assign({}, ctx, { fotoUrl: fotoUrl }) }];\n"
+      }
+    },
+    {
+      "id": "4cd3f1c4-2f59-4515-93f2-71bbcb35098e",
+      "name": "Criar Visita",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2600,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"agenda_id\": $json.contexto.agenda_id, \"usuario_id\": $json.usuarioId, \"loja_id\": $json.contexto.loja_id, \"checkin_at\": $now.toISO(), \"checkin_lat\": $json.contexto.checkin_lat, \"checkin_long\": $json.contexto.checkin_long, \"distancia_m\": $json.contexto.distancia_m, \"foto_url\": $json.fotoUrl, \"flag_suspeito\": $json.contexto.flag_suspeito } }}"
+      }
+    },
+    {
+      "id": "841be7ad-5eec-42e9-b6ba-d82d10c143f0",
+      "name": "Preparar Contexto Apos Visita",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2800,
+        150
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst visita = Array.isArray(rows) ? rows[0] : rows;\nconst ctx = $('Preparar Contexto Apos Upload').first().json;\nreturn [{ json: Object.assign({}, ctx, { visitaId: visita.id }) }];\n"
+      }
+    },
+    {
+      "id": "77a339f1-d137-4e61-8973-9e241a6f3f51",
+      "name": "Upsert Estado Checkout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3000,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"telefone\": $json.telefone, \"estado\": \"checkout\", \"contexto\": { ...$json.contexto, \"visita_id\": $json.visitaId, \"etapa_checkout\": \"decisor\" }, \"atualizado_em\": $now.toISO() } }}"
+      }
+    },
+    {
+      "id": "6ea71aab-7070-4c15-b2a9-547dc58f8494",
+      "name": "Enviar Pergunta Decisor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3200,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__URL completa: https://graph.facebook.com/v19.0/<PHONE_NUMBER_ID>/messages__>",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $json[0].telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"list\", \"body\": { \"text\": \"Falou com o decisor da loja?\" }, \"action\": { \"button\": \"Selecionar\", \"sections\": [ { \"title\": \"Opcoes\", \"rows\": [ { \"id\": \"decisor_sim\", \"title\": \"Sim\" }, { \"id\": \"decisor_nao\", \"title\": \"Nao\" }, { \"id\": \"decisor_loja_fechada\", \"title\": \"Loja fechada\" }, { \"id\": \"decisor_contato_ausente\", \"title\": \"Contato ausente\" } ] } ] } } } }}"
+      }
+    },
+    {
+      "id": "f82328f4-e0d2-4d8a-ae8f-eb1b5af2a9f9",
+      "name": "Aguardando Foto - Nao E Imagem - Ignorar",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        250
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "953ca5e3-6861-40b1-9aee-c983b68eb733",
+      "name": "Observacao Por Audio?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        450
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.contexto.etapa_checkout }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "observacao"
+            },
+            {
+              "leftValue": "={{ $json.tipoMensagem }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2be99bb6-9557-4624-9da5-31acb06cd754",
+      "name": "Buscar URL Midia Audio",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1800,
+        400
+      ],
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.mediaId }}"
+      },
+      "webhookId": "005131ef-f789-4acb-a03e-8dbcd3b2484f"
+    },
+    {
+      "id": "42170ff6-b61c-4df8-a13b-f3342b23b693",
+      "name": "Baixar Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2000,
+        400
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "8cfffa9e-bb95-40da-82de-22d199ef4218",
+      "name": "Transcrever Audio",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        2200,
+        400
+      ],
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "data",
+        "options": {}
+      }
+    },
+    {
+      "id": "9e281273-1395-4b33-8772-f22e3266157e",
+      "name": "Estruturar Observacao",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2400,
+        400
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extraia motivo, contraproposta, data de retorno sugerida e um resumo curto a partir da observacao de campo a seguir, em portugues do Brasil. Se um campo nao for mencionado, retorne string vazia.\n\nObservacao transcrita: {{ $json.text }}",
+        "hasOutputParser": true
+      }
+    },
+    {
+      "id": "00ba137f-fe1a-4a75-aa4a-ec09e667a40e",
+      "name": "Modelo Anthropic Claude Haiku",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        2400,
+        500
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-haiku-4-5",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      }
+    },
+    {
+      "id": "c5cb4c46-3aa1-42ad-b665-2a319f433d94",
+      "name": "Parser Estruturado Observacao",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2600,
+        500
+      ],
+      "parameters": {
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{ \"motivo\": \"\", \"contraproposta\": \"\", \"data_retorno_sugerida\": \"\", \"resumo\": \"\" }"
+      }
+    },
+    {
+      "id": "99b7234c-b035-499a-ac02-692156709acf",
+      "name": "Preparar Resultado Audio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        400
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst ctx = $('Normalizar Estado').first().json;\nconst transcricao = $('Transcrever Audio').first().json;\nconst estruturado = ($input.first().json && $input.first().json.output) || {};\nreturn [{ json: Object.assign({}, ctx, {\n  obsAudioTranscrito: (transcricao && transcricao.text) || '',\n  motivoEstruturado: estruturado.motivo || null,\n  contrapropostaEstruturada: estruturado.contraproposta || null,\n  dataRetornoSugeridaEstruturada: estruturado.data_retorno_sugerida || null,\n  resumoEstruturado: estruturado.resumo || null\n}) }];\n"
+      }
+    },
+    {
+      "id": "16e8abf5-31aa-4bcd-9f03-bfe958347ca7",
+      "name": "Motor de Checkout",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2800,
+        450
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "\nconst item = $json;\nconst contexto = item.contexto || {};\nconst etapaAtual = contexto.etapa_checkout || null;\nconst respostaId = item.respostaId || '';\nconst textoResp = (item.texto || '').trim();\nconst tipoMensagem = item.tipoMensagem;\nconst usuarioId = item.usuarioId;\nconst telefone = item.telefone;\nconst visitaId = contexto.visita_id;\nconst agendaId = contexto.agenda_id;\nconst lojaId = contexto.loja_id;\n\nconst hoje = $today.toISODate();\n\nfunction proximoDiaUtil() {\n  let d = $today.plus({ days: 1 });\n  while (d.weekday === 6 || d.weekday === 7) {\n    d = d.plus({ days: 1 });\n  }\n  return d.toISODate();\n}\n\nlet novoEstado = 'checkout';\nlet novoContexto = Object.assign({}, contexto);\nlet visitaUpdates = {};\nlet temVisitaUpdates = 'false';\nlet acaoEspecial = 'nenhuma';\nlet dadosAgendaReagendada = null;\nlet dadosOportunidade = null;\nlet dadosContrato = null;\nlet marcarAgendaRealizada = 'false';\nlet mensagemSaida = { tipo: 'text', texto: 'Nao entendi sua resposta. Pode tentar novamente?', opcoes: [] };\n\nfunction listaProduto() {\n  return {\n    tipo: 'list',\n    texto: 'Interesse em qual produto?',\n    opcoes: [\n      { id: 'produto_autocred', titulo: 'Autocred' },\n      { id: 'produto_top_service', titulo: 'Top Service' },\n      { id: 'produto_ambos', titulo: 'Ambos' },\n      { id: 'produto_nenhum', titulo: 'Nenhum' }\n    ]\n  };\n}\nfunction botoesFecharAnalisar() {\n  return {\n    tipo: 'buttons',\n    texto: 'Fechou ou vai analisar?',\n    opcoes: [\n      { id: 'fa_fechou', titulo: 'Fechou' },\n      { id: 'fa_analisar', titulo: 'Analisar' }\n    ]\n  };\n}\nfunction listaDataRetorno() {\n  return {\n    tipo: 'list',\n    texto: 'Qual a data de retorno prevista?',\n    opcoes: [\n      { id: 'dr_amanha', titulo: 'Amanha' },\n      { id: 'dr_3dias', titulo: '3 dias' },\n      { id: 'dr_prox_semana', titulo: 'Proxima semana' },\n      { id: 'dr_outra', titulo: 'Outra data' }\n    ]\n  };\n}\nfunction listaMotivo() {\n  return {\n    tipo: 'list',\n    texto: 'Qual o motivo?',\n    opcoes: [\n      { id: 'motivo_taxas', titulo: 'Taxas concorrente' },\n      { id: 'motivo_ja_possui', titulo: 'Ja possui' },\n      { id: 'motivo_decisor_ausente', titulo: 'Decisor ausente' },\n      { id: 'motivo_outro', titulo: 'Outro' }\n    ]\n  };\n}\nfunction botoesContraproposta() {\n  return {\n    tipo: 'buttons',\n    texto: 'Houve contraproposta?',\n    opcoes: [\n      { id: 'cp_sim', titulo: 'Sim' },\n      { id: 'cp_nao', titulo: 'Nao' }\n    ]\n  };\n}\nfunction textoObservacao(prefixo) {\n  return {\n    tipo: 'text',\n    texto: (prefixo ? prefixo + '\\n\\n' : '') + 'Alguma observacao sobre a visita? (texto, audio, ou responda nao)',\n    opcoes: []\n  };\n}\n\nif (etapaAtual === 'decisor') {\n  if (['decisor_sim', 'decisor_nao', 'decisor_loja_fechada', 'decisor_contato_ausente'].indexOf(respostaId) === -1) {\n    mensagemSaida = {\n      tipo: 'list',\n      texto: 'Nao entendi. Falou com o decisor da loja?',\n      opcoes: [\n        { id: 'decisor_sim', titulo: 'Sim' },\n        { id: 'decisor_nao', titulo: 'Nao' },\n        { id: 'decisor_loja_fechada', titulo: 'Loja fechada' },\n        { id: 'decisor_contato_ausente', titulo: 'Contato ausente' }\n      ]\n    };\n  } else if (respostaId === 'decisor_loja_fechada' || respostaId === 'decisor_contato_ausente') {\n    visitaUpdates = {\n      resultado: respostaId === 'decisor_loja_fechada' ? 'loja_fechada' : 'contato_ausente',\n      checkout_at: $now.toISO()\n    };\n    temVisitaUpdates = 'true';\n    marcarAgendaRealizada = 'true';\n    acaoEspecial = 'reagendar';\n    dadosAgendaReagendada = { data: proximoDiaUtil(), usuario_id: usuarioId, loja_id: lojaId, origem: 'reagendada', status: 'pendente' };\n    novoEstado = 'ocioso';\n    novoContexto = {};\n    mensagemSaida = { tipo: 'text', texto: 'Visita encerrada. Obrigado! Reagendei essa loja para o proximo dia util.', opcoes: [] };\n  } else {\n    visitaUpdates = { falou_decisor: respostaId === 'decisor_sim', resultado: 'normal' };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'produto' });\n    mensagemSaida = listaProduto();\n  }\n} else if (etapaAtual === 'produto') {\n  const mapaProduto = { produto_autocred: 'autocred', produto_top_service: 'top_service', produto_ambos: 'ambos', produto_nenhum: 'nenhum' };\n  if (!mapaProduto[respostaId]) {\n    mensagemSaida = listaProduto();\n  } else {\n    visitaUpdates = { produto_interesse: mapaProduto[respostaId] };\n    temVisitaUpdates = 'true';\n    if (respostaId === 'produto_nenhum') {\n      novoContexto = Object.assign({}, contexto, { etapa_checkout: 'motivo' });\n      mensagemSaida = listaMotivo();\n    } else {\n      novoContexto = Object.assign({}, contexto, { etapa_checkout: 'fechou_ou_analisar', produto_selecionado: mapaProduto[respostaId] });\n      mensagemSaida = botoesFecharAnalisar();\n    }\n  }\n} else if (etapaAtual === 'fechou_ou_analisar') {\n  if (respostaId === 'fa_fechou') {\n    visitaUpdates = { status_1: 'fechou' };\n    temVisitaUpdates = 'true';\n    acaoEspecial = 'oportunidade';\n    dadosOportunidade = { visita_id: visitaId, loja_id: lojaId, produto: contexto.produto_selecionado, status: 'aberta' };\n    dadosContrato = { loja_id: lojaId, produto: contexto.produto_selecionado, etapa: 'docs_enviados', etapa_desde: hoje };\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Registrado! Envie a documentacao a matriz e me avise quando o cliente assinar.');\n  } else if (respostaId === 'fa_analisar') {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'data_retorno' });\n    mensagemSaida = listaDataRetorno();\n  } else {\n    mensagemSaida = botoesFecharAnalisar();\n  }\n} else if (etapaAtual === 'data_retorno') {\n  const mapaData = { dr_amanha: 1, dr_3dias: 3, dr_prox_semana: 7 };\n  if (respostaId === 'dr_outra') {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'data_retorno_outra' });\n    mensagemSaida = { tipo: 'text', texto: 'Informe a data de retorno (dd/mm/aaaa):', opcoes: [] };\n  } else if (mapaData[respostaId]) {\n    const dataRetorno = $today.plus({ days: mapaData[respostaId] }).toISODate();\n    visitaUpdates = { status_1: 'analisar', data_retorno: dataRetorno };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Combinado, retorno agendado para ' + dataRetorno + '.');\n  } else {\n    mensagemSaida = listaDataRetorno();\n  }\n} else if (etapaAtual === 'data_retorno_outra') {\n  if (!textoResp) {\n    mensagemSaida = { tipo: 'text', texto: 'Nao entendi. Informe a data de retorno (dd/mm/aaaa):', opcoes: [] };\n  } else {\n    visitaUpdates = { status_1: 'analisar', data_retorno: textoResp };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Combinado, retorno agendado para ' + textoResp + '.');\n  }\n} else if (etapaAtual === 'motivo') {\n  const mapaMotivo = { motivo_taxas: 'Taxas concorrente', motivo_ja_possui: 'Ja possui', motivo_decisor_ausente: 'Decisor ausente', motivo_outro: 'Outro' };\n  if (!mapaMotivo[respostaId]) {\n    mensagemSaida = listaMotivo();\n  } else {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'contraproposta', motivo_selecionado: mapaMotivo[respostaId] });\n    mensagemSaida = botoesContraproposta();\n  }\n} else if (etapaAtual === 'contraproposta') {\n  if (respostaId !== 'cp_sim' && respostaId !== 'cp_nao') {\n    mensagemSaida = botoesContraproposta();\n  } else {\n    visitaUpdates = {\n      status_1: 'sem_interesse',\n      motivo_nao_fechamento: contexto.motivo_selecionado,\n      contraproposta: respostaId === 'cp_sim' ? 'Sim' : 'Nao'\n    };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Entendido.');\n  }\n} else if (etapaAtual === 'observacao') {\n  const updates = { checkout_at: $now.toISO() };\n  if (tipoMensagem === 'audio') {\n    updates.obs_audio_transcrito = item.obsAudioTranscrito || '';\n    if (item.motivoEstruturado) updates.motivo_nao_fechamento = item.motivoEstruturado;\n    if (item.contrapropostaEstruturada) updates.contraproposta = item.contrapropostaEstruturada;\n    if (item.dataRetornoSugeridaEstruturada) updates.data_retorno = item.dataRetornoSugeridaEstruturada;\n  } else {\n    const textoLower = textoResp.toLowerCase();\n    const textoSemAcento = textoLower.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n    if (textoSemAcento !== 'nao') {\n      updates.obs_texto = textoResp;\n    }\n  }\n  visitaUpdates = updates;\n  temVisitaUpdates = 'true';\n  marcarAgendaRealizada = 'true';\n  novoEstado = 'ocioso';\n  novoContexto = {};\n  mensagemSaida = { tipo: 'text', texto: 'Obrigado! Visita concluida com sucesso.', opcoes: [] };\n} else {\n  novoEstado = 'ocioso';\n  novoContexto = {};\n  mensagemSaida = { tipo: 'text', texto: 'Ocorreu um erro no fluxo de checkout. Por favor, envie sua localizacao para reiniciar o check-in.', opcoes: [] };\n}\n\nreturn {\n  json: {\n    telefone: telefone,\n    novoEstado: novoEstado,\n    novoContexto: novoContexto,\n    visitaId: visitaId,\n    agendaIdParaRealizar: agendaId,\n    visitaUpdates: visitaUpdates,\n    temVisitaUpdates: temVisitaUpdates,\n    acaoEspecial: acaoEspecial,\n    dadosAgendaReagendada: dadosAgendaReagendada,\n    dadosOportunidade: dadosOportunidade,\n    dadosContrato: dadosContrato,\n    marcarAgendaRealizada: marcarAgendaRealizada,\n    mensagemSaida: mensagemSaida\n  }\n};\n"
+      }
+    },
+    {
+      "id": "a3142ae3-e044-4dd7-beda-528f014cb8e9",
+      "name": "Tem Atualizacoes de Visita?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3000,
+        450
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $(\"Motor de Checkout\").item.json.temVisitaUpdates }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "b8a5f64b-f5ef-4815-a3d4-0893d5cdc4ec",
+      "name": "Atualizar Visita",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3200,
+        400
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?id=eq.{{ $(\"Motor de Checkout\").item.json.visitaId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.visitaUpdates }}"
+      }
+    },
+    {
+      "id": "7713d731-af2b-489b-9bc3-7b62db2ef874",
+      "name": "Rotear Acao Especial",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        3400,
+        450
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "outputKey": "reagendar",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $(\"Motor de Checkout\").item.json.acaoEspecial }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "reagendar"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "oportunidade",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $(\"Motor de Checkout\").item.json.acaoEspecial }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "oportunidade"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Nenhuma"
+        }
+      }
+    },
+    {
+      "id": "d79bec7a-ab6b-4cfa-ab54-be25641940d9",
+      "name": "Criar Agenda Reagendada",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3600,
+        350
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosAgendaReagendada }}"
+      }
+    },
+    {
+      "id": "a9dfd212-67ab-46aa-9a68-8d581c1c8a69",
+      "name": "Marcar Agenda Realizada?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4000,
+        450
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $(\"Motor de Checkout\").item.json.marcarAgendaRealizada }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "674ccef6-c2cc-47d1-9449-bfaba9337a87",
+      "name": "Marcar Agenda Realizada",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4200,
+        400
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?id=eq.{{ $(\"Motor de Checkout\").item.json.agendaIdParaRealizar }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"status\": \"realizada\" } }}"
+      }
+    },
+    {
+      "id": "32e59e0d-0e31-4e7e-bed8-88868581e5b7",
+      "name": "Upsert Estado Final Checkout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4400,
+        450
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"telefone\": $(\"Motor de Checkout\").item.json.telefone, \"estado\": $(\"Motor de Checkout\").item.json.novoEstado, \"contexto\": $(\"Motor de Checkout\").item.json.novoContexto, \"atualizado_em\": $now.toISO() } }}"
+      }
+    },
+    {
+      "id": "7f9e3bdc-6422-4b7c-a71b-0cef65917818",
+      "name": "Rotear Mensagem de Saida",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        4600,
+        450
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "outputKey": "text",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $(\"Motor de Checkout\").item.json.mensagemSaida.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "text"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "list",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $(\"Motor de Checkout\").item.json.mensagemSaida.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "list"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "buttons",
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $(\"Motor de Checkout\").item.json.mensagemSaida.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "buttons"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Desconhecido"
+        }
+      }
+    },
+    {
+      "id": "886ef07e-a1fc-4a02-bb5e-f636bf712465",
+      "name": "Enviar Texto Checkout",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        4800,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $(\"Motor de Checkout\").item.json.telefone }}",
+        "messageType": "text",
+        "textBody": "={{ $(\"Motor de Checkout\").item.json.mensagemSaida.texto }}"
+      },
+      "webhookId": "6d03c2b4-9244-4f85-bb88-72ed8ee73a67"
+    },
+    {
+      "id": "2a841aeb-f4ba-4242-963d-42ce9f35e702",
+      "name": "Enviar Lista Checkout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4800,
+        450
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__URL completa: https://graph.facebook.com/v19.0/<PHONE_NUMBER_ID>/messages__>",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $(\"Motor de Checkout\").item.json.telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"list\", \"body\": { \"text\": $(\"Motor de Checkout\").item.json.mensagemSaida.texto }, \"action\": { \"button\": \"Selecionar\", \"sections\": [ { \"title\": \"Opcoes\", \"rows\": $(\"Motor de Checkout\").item.json.mensagemSaida.opcoes.map(o => ({ id: o.id, title: o.titulo })) } ] } } } }}"
+      }
+    },
+    {
+      "id": "91104968-13e7-46ac-a56f-3b24efb70ee2",
+      "name": "Enviar Botoes Checkout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4800,
+        600
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__URL completa: https://graph.facebook.com/v19.0/<PHONE_NUMBER_ID>/messages__>",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $(\"Motor de Checkout\").item.json.telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"button\", \"body\": { \"text\": $(\"Motor de Checkout\").item.json.mensagemSaida.texto }, \"action\": { \"buttons\": $(\"Motor de Checkout\").item.json.mensagemSaida.opcoes.map(o => ({ type: \"reply\", reply: { id: o.id, title: o.titulo } })) } } } }}"
+      }
+    },
+    {
+      "id": "8167e1f8-859f-4aa9-98d9-247ae5a105cc",
+      "name": "Mensagem Saida Desconhecida",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        750
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "f8789a1c-e160-4db4-9f4d-358d89833c27",
+      "name": "Sem Marcar Realizada",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4200,
+        550
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "d2ad2b37-1614-4cf1-9c7a-2199f7539870",
+      "name": "Criar Oportunidade",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3600,
+        450
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosOportunidade }}"
+      }
+    },
+    {
+      "id": "2fd53f37-2856-4ba4-aae8-a3499b55c253",
+      "name": "Criar Contrato",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3800,
+        450
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { ...$(\"Motor de Checkout\").item.json.dadosContrato, \"oportunidade_id\": $json[0].id } }}"
+      }
+    },
+    {
+      "id": "7e97fe3f-dcef-4bf9-bdc5-eb7232a23c69",
+      "name": "Sem Acao Especial",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        550
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "2d9b2809-5c09-4808-81ed-6f656dab50c6",
+      "name": "Sem Atualizacao de Visita",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3200,
+        550
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "ff8359c9-7fef-4580-9c7d-2f7d540cb5b4",
+      "name": "Preparar Resultado Texto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        550
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst ctx = $input.first().json;\nreturn [{ json: Object.assign({}, ctx, {\n  obsAudioTranscrito: null,\n  motivoEstruturado: null,\n  contrapropostaEstruturada: null,\n  dataRetornoSugeridaEstruturada: null,\n  resumoEstruturado: null\n}) }];\n"
+      }
+    },
+    {
+      "id": "441e5654-aa17-4762-80ec-d7e28d45670d",
+      "name": "Estado Desconhecido - Ignorar",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        500
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "6613a0c6-3a97-40d4-8c6a-6865ec2b36f7",
+      "name": "Sticky Note 3e04a6ea",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2750,
+        400
+      ],
+      "parameters": {
+        "content": "SIMPLIFICACAO ARQUITETURAL: a maquina de sub-estados do checkout (decisor / produto / fechou_ou_analisar / data_retorno / data_retorno_outra / motivo / contraproposta / observacao) foi consolidada no node de codigo \"Motor de Checkout\" em vez de multiplos nodes Switch aninhados, para manter o grafo gerenciavel. Toda a logica de negocio da especificacao (D-01: apenas nodes deterministicos decidem estado - IF/Switch/Code, sem AI Agent orquestrando) foi preservada dentro do codigo. Os nodes seguintes (IF/Switch) apenas executam os efeitos colaterais (updates no Supabase e envio de mensagem) com base no plano calculado por este node.",
+        "color": 5,
+        "width": 300,
+        "height": 200
+      }
+    },
+    {
+      "id": "0c36c0d7-efd0-4ce9-9566-1fd5a8acc8ac",
+      "name": "Sticky Note 12472041",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1750,
+        -300
+      ],
+      "parameters": {
+        "content": "LIMITACAO DOCUMENTADA: em \"Extrair Contrato Maquininha\", vigencia_inicio para produto Top Service e aproximada como o primeiro dia do mes seguinte a HOJE (data do comando \"maquininha ativada\"), pois este workflow nao tem acesso ao historico de quando o contrato passou pela etapa assinatura_diretoria (a tabela contratos guarda apenas a etapa atual e etapa_desde). Uma tabela de historico de etapas seria necessaria para o calculo exato pedido na especificacao.",
+        "color": 4,
+        "width": 500,
+        "height": 200
+      }
+    },
+    {
+      "id": "26e58cdd-6508-4c7a-9405-d513535d567e",
+      "name": "Sticky Note 0bfbdf93",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2150,
+        100
+      ],
+      "parameters": {
+        "content": "NOTA: o bucket rotaviva-fotos e privado, entao visitas.foto_url grava apenas o caminho do objeto no storage (rotaviva-fotos/{agenda_id}.jpg), nao uma URL publica. A aplicacao consumidora deve gerar uma signed URL sob demanda.",
+        "color": 3,
+        "width": 700,
+        "height": 200
+      }
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "parentFolderId": null,
+  "description": "Maquina de estados da conversa de campo via WhatsApp (check-in, foto, checkout com decisor/produto/observacao, e comandos de texto livre) com IA apenas para transcrever/estruturar observacoes em audio.",
+  "scopes": [
+    "execution:reveal",
+    "workflow:create",
+    "workflow:delete",
+    "workflow:disableRedaction",
+    "workflow:enableRedaction",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:export",
+    "workflow:import",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update"
+  ],
+  "canExecute": true
+}

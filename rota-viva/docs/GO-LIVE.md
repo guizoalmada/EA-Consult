@@ -101,12 +101,14 @@ Siga a tabela completa em `CREDENCIAIS.md` para: `CRED_SUPABASE_ROTAVIVA`, `CRED
 `CRED_GSHEETS`, `CRED_OPENAI_WHISPER`, `CRED_ANTHROPIC`, `CRED_GEOCODING`.
 
 **⚠️ Verificação obrigatória (ver `BLOQUEIOS.md` B-01):** ao criar os workflows, a ferramenta do
-n8n substituiu automaticamente, em todo node "WhatsApp Business Cloud" (W1, W2, W3, W4, W6), o
-nome do placeholder `CRED_META_CLOUD` pelo nome de uma credencial real de outro cliente/projeto já
-existente na conta ("ARMCOM - WhatsApp Cloud API"). Antes de configurar `CRED_META_CLOUD` de
-verdade, abra cada node WhatsApp Business Cloud (trigger, envio de mensagem, envio de template,
-mediaUrlGet) em cada um dos 5 workflows e confirme/troque explicitamente a credencial para a nova
-`CRED_META_CLOUD` do Rota Viva — **nunca reutilize "ARMCOM - WhatsApp Cloud API"**, que pertence a
+n8n substituiu automaticamente, em todo node cujo tipo de credencial já tinha exatamente uma
+credencial real de outro cliente/projeto na conta, o nome do placeholder pelo nome dessa credencial
+real — confirmado em "WhatsApp Business Cloud" (W1, W2, W3, W4, W6, credencial "ARMCOM - WhatsApp
+Cloud API" / "ARMCOM - WhatsApp Trigger") e no "Anthropic Chat Model" (W2, credencial "ARMCOM -
+Anthropic"). Antes de configurar `CRED_META_CLOUD` e `CRED_ANTHROPIC` de verdade, abra cada node
+WhatsApp Business Cloud (trigger, envio de mensagem, envio de template, mediaUrlGet) e o node
+Anthropic Chat Model em cada workflow afetado e confirme/troque explicitamente a credencial para a
+nova credencial do Rota Viva — **nunca reutilize as credenciais "ARMCOM - ..."**, que pertencem a
 outro cliente.
 
 Antes de testar qualquer chamada ao Supabase, confirme que o schema `rotaviva` está na lista de
