@@ -10,43 +10,139 @@
   "description": "Relatório diário (seg-sáb 18h) com visitas, metas, oportunidades, perdas, contratos parados e retornos vencidos, enviado por WhatsApp ao gerente e por e-mail à lista de destinatários.",
   "connections": {
     "Gatilho 18h Seg-Sab": {
-      "main": [[{ "node": "Buscar Config", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Config": {
-      "main": [[{ "node": "Buscar Usuarios Campo", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Usuarios Campo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Usuarios Campo": {
-      "main": [[{ "node": "Buscar Gerente", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Gerente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Gerente": {
-      "main": [[{ "node": "Buscar Agenda Hoje", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Agenda Hoje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Agenda Hoje": {
-      "main": [[{ "node": "Buscar Agenda Mes", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Agenda Mes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Agenda Mes": {
-      "main": [[{ "node": "Buscar Checkins Suspeitos", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Checkins Suspeitos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Checkins Suspeitos": {
-      "main": [[{ "node": "Buscar Oportunidades Hoje", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Oportunidades Hoje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Oportunidades Hoje": {
-      "main": [[{ "node": "Buscar Perdas Hoje", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Perdas Hoje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Perdas Hoje": {
-      "main": [[{ "node": "Buscar Contratos Abertos", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Contratos Abertos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Contratos Abertos": {
-      "main": [[{ "node": "Buscar Retornos Vencidos", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Retornos Vencidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Retornos Vencidos": {
-      "main": [[{ "node": "Consolidar Metricas", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Consolidar Metricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Consolidar Metricas": {
       "main": [
         [
-          { "node": "Enviar Email Relatorio", "type": "main", "index": 0 },
-          { "node": "Enviar WhatsApp Gerente", "type": "main", "index": 0 }
+          {
+            "node": "Enviar Email Relatorio",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar WhatsApp Gerente",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
@@ -57,10 +153,18 @@
       "name": "Gatilho 18h Seg-Sab",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
-      "position": [200, 380],
+      "position": [
+        200,
+        380
+      ],
       "parameters": {
         "rule": {
-          "interval": [{ "field": "cronExpression", "expression": "0 0 18 * * 1-6" }]
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 18 * * 1-6"
+            }
+          ]
         }
       }
     },
@@ -69,7 +173,10 @@
       "name": "Buscar Config",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [460, 380],
+      "position": [
+        460,
+        380
+      ],
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=in.(meta_visitas_dia,meta_visitas_mes,sla_dias_padrao,emails_relatorio)&select=chave,valor",
@@ -77,9 +184,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -87,18 +205,32 @@
       "name": "Buscar Usuarios Campo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [680, 380],
+      "position": [
+        680,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
-        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=in.(promotor,consultor)&ativo=eq.true&select=id,nome,papel,telefone",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?faz_visitas=eq.true&ativo=eq.true&select=id,nome,papel,telefone,meta_visitas_dia",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -106,7 +238,10 @@
       "name": "Buscar Gerente",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [900, 380],
+      "position": [
+        900,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
@@ -115,9 +250,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -125,7 +271,10 @@
       "name": "Buscar Agenda Hoje",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [1120, 380],
+      "position": [
+        1120,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
@@ -134,9 +283,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -144,7 +304,10 @@
       "name": "Buscar Agenda Mes",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [1340, 380],
+      "position": [
+        1340,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
@@ -153,9 +316,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -163,7 +337,10 @@
       "name": "Buscar Checkins Suspeitos",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [1560, 380],
+      "position": [
+        1560,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
@@ -172,9 +349,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -182,7 +370,10 @@
       "name": "Buscar Oportunidades Hoje",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [1780, 380],
+      "position": [
+        1780,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
@@ -191,9 +382,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -201,7 +403,10 @@
       "name": "Buscar Perdas Hoje",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [2000, 380],
+      "position": [
+        2000,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
@@ -210,9 +415,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -220,7 +436,10 @@
       "name": "Buscar Contratos Abertos",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [2220, 380],
+      "position": [
+        2220,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
@@ -229,9 +448,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -239,7 +469,10 @@
       "name": "Buscar Retornos Vencidos",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [2440, 380],
+      "position": [
+        2440,
+        380
+      ],
       "executeOnce": true,
       "parameters": {
         "method": "GET",
@@ -248,9 +481,20 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } },
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
     },
     {
@@ -258,11 +502,14 @@
       "name": "Consolidar Metricas",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2680, 380],
+      "position": [
+        2680,
+        380
+      ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "\nconst configRows = $('Buscar Config').all().map(i => i.json);\nconst config = {};\nconfigRows.forEach(r => { config[r.chave] = r.valor; });\n\nconst metaDia = parseFloat(config.meta_visitas_dia) || 12;\nconst metaMes = parseFloat(config.meta_visitas_mes) || 280;\nconst slaDias = parseFloat(config.sla_dias_padrao) || 3;\nconst emailsCsv = config.emails_relatorio || '';\nconst emailList = emailsCsv.split(',').map(s => s.trim()).filter(Boolean);\n\nconst usuariosCampo = $('Buscar Usuarios Campo').all().map(i => i.json);\nconst gerenteRows = $('Buscar Gerente').all().map(i => i.json);\nconst gerente = gerenteRows[0] || {};\n\nconst agendaHoje = $('Buscar Agenda Hoje').all().map(i => i.json);\nconst visitasPlanejadas = agendaHoje.length;\nconst visitasRealizadas = agendaHoje.filter(a => a.status === 'realizada').length;\n\nconst porUsuario = {};\nusuariosCampo.forEach(u => {\n  porUsuario[u.id] = { nome: u.nome, planejadas: 0, realizadas: 0 };\n});\nagendaHoje.forEach(a => {\n  if (!porUsuario[a.usuario_id]) {\n    porUsuario[a.usuario_id] = { nome: a.usuario_id, planejadas: 0, realizadas: 0 };\n  }\n  porUsuario[a.usuario_id].planejadas += 1;\n  if (a.status === 'realizada') porUsuario[a.usuario_id].realizadas += 1;\n});\n\nconst numPessoasCampo = usuariosCampo.length || 1;\nconst metaDiaEquipe = metaDia * numPessoasCampo;\nconst pctMetaDia = metaDiaEquipe > 0 ? Math.round((visitasRealizadas / metaDiaEquipe) * 1000) / 10 : 0;\n\nconst detalhePorUsuario = Object.values(porUsuario).map(u => {\n  const pct = metaDia > 0 ? Math.round((u.realizadas / metaDia) * 1000) / 10 : 0;\n  return { nome: u.nome, realizadas: u.realizadas, planejadas: u.planejadas, pctMeta: pct };\n});\n\nconst agendaMes = $('Buscar Agenda Mes').all().map(i => i.json);\nconst acumuladoMes = agendaMes.length;\nconst pctMetaMes = metaMes > 0 ? Math.round((acumuladoMes / metaMes) * 1000) / 10 : 0;\n\nconst suspeitosRows = $('Buscar Checkins Suspeitos').all().map(i => i.json);\nconst suspeitosCount = suspeitosRows.length;\n\nconst opRows = $('Buscar Oportunidades Hoje').all().map(i => i.json);\nconst oportunidadesCount = opRows.length;\nconst oportunidadesPorProduto = {};\nopRows.forEach(o => {\n  const p = o.produto || 'nao_informado';\n  oportunidadesPorProduto[p] = (oportunidadesPorProduto[p] || 0) + 1;\n});\n\nconst perdasRows = $('Buscar Perdas Hoje').all().map(i => i.json);\nconst perdasCount = perdasRows.length;\n\nconst contratosRows = $('Buscar Contratos Abertos').all().map(i => i.json);\nconst agora = Date.now();\nconst contratosComDias = contratosRows.map(c => {\n  const desde = c.etapa_desde ? new Date(c.etapa_desde).getTime() : agora;\n  const diasParado = Math.floor((agora - desde) / (1000 * 60 * 60 * 24));\n  return Object.assign({}, c, { diasParado: diasParado, atrasado: diasParado > slaDias });\n});\nconst contratosAtrasados = contratosComDias.filter(c => c.atrasado);\nconst contratosAtrasadosCount = contratosAtrasados.length;\n\nconst retornosRows = $('Buscar Retornos Vencidos').all().map(i => i.json);\nconst retornosVencidosCount = retornosRows.length;\n\nconst now = new Date();\nconst dd = String(now.getDate()).padStart(2, '0');\nconst mm = String(now.getMonth() + 1).padStart(2, '0');\nconst yyyy = now.getFullYear();\nconst dataFormatada = dd + '/' + mm;\nconst dataCompleta = dd + '/' + mm + '/' + yyyy;\n\nconst oportunidadesLinhas = Object.keys(oportunidadesPorProduto).length\n  ? Object.entries(oportunidadesPorProduto).map(function (e) { return '<li>' + e[0] + ': ' + e[1] + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst perdasLinhas = perdasRows.length\n  ? perdasRows.map(function (p) { return '<li>Loja ' + (p.loja_id || '-') + ' - motivo: ' + (p.motivo_nao_fechamento || 'nao informado') + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst contratosLinhas = contratosAtrasados.length\n  ? contratosAtrasados.map(function (c) { return '<li>Contrato ' + (c.numero_fluig || c.id) + ' - etapa: ' + c.etapa + ' - ' + c.diasParado + ' dias parado</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst retornosLinhas = retornosRows.length\n  ? retornosRows.map(function (r) { return '<li>Loja ' + (r.loja_id || '-') + ' - agendado para ' + r.data + '</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst detalhePorUsuarioLinhas = detalhePorUsuario.length\n  ? detalhePorUsuario.map(function (u) { return '<li>' + u.nome + ': ' + u.realizadas + '/' + u.planejadas + ' (' + u.pctMeta + '% da meta individual)</li>'; }).join('')\n  : '<li>sem dados</li>';\n\nconst htmlBody = '<h2>Relatorio Diario Rota Viva - ' + dataCompleta + '</h2>' +\n  '<h3>Visitas de hoje</h3>' +\n  '<p>Realizadas: ' + visitasRealizadas + ' | Planejadas: ' + visitasPlanejadas + ' | % da meta do dia: ' + pctMetaDia + '%</p>' +\n  '<ul>' + detalhePorUsuarioLinhas + '</ul>' +\n  '<h3>Acumulado do mes</h3>' +\n  '<p>' + acumuladoMes + ' de ' + metaMes + ' (' + pctMetaMes + '%)</p>' +\n  '<h3>Check-ins suspeitos hoje</h3>' +\n  '<p>' + suspeitosCount + '</p>' +\n  '<h3>Oportunidades novas hoje</h3>' +\n  '<ul>' + oportunidadesLinhas + '</ul>' +\n  '<h3>Perdas do dia (sem interesse)</h3>' +\n  '<ul>' + perdasLinhas + '</ul>' +\n  '<h3>Contratos parados alem do SLA (' + slaDias + ' dias)</h3>' +\n  '<ul>' + contratosLinhas + '</ul>' +\n  '<h3>Retornos vencidos nao cumpridos</h3>' +\n  '<ul>' + retornosLinhas + '</ul>';\n\nreturn [{\n  json: {\n    dataFormatada: dataFormatada,\n    dataCompleta: dataCompleta,\n    visitasRealizadas: visitasRealizadas,\n    visitasPlanejadas: visitasPlanejadas,\n    pctMetaDia: pctMetaDia,\n    acumuladoMes: acumuladoMes,\n    metaMes: metaMes,\n    pctMetaMes: pctMetaMes,\n    suspeitosCount: suspeitosCount,\n    oportunidadesCount: oportunidadesCount,\n    oportunidadesPorProduto: oportunidadesPorProduto,\n    perdasCount: perdasCount,\n    contratosAtrasadosCount: contratosAtrasadosCount,\n    retornosVencidosCount: retornosVencidosCount,\n    gerenteNome: gerente.nome || 'Gerente',\n    gerenteTelefone: gerente.telefone || '',\n    emailsRelatorioStr: emailList.join(','),\n    htmlBody: htmlBody\n  }\n}];\n"
+        "jsCode": "\nconst configRows = $('Buscar Config').all().map(i => i.json);\nconst config = {};\nconfigRows.forEach(r => { config[r.chave] = r.valor; });\n\nconst metaDia = parseFloat(config.meta_visitas_dia) || 12;\nconst metaMes = parseFloat(config.meta_visitas_mes) || 280;\nconst slaDias = parseFloat(config.sla_dias_padrao) || 3;\nconst emailsCsv = config.emails_relatorio || '';\nconst emailList = emailsCsv.split(',').map(s => s.trim()).filter(Boolean);\n\nconst usuariosCampo = $('Buscar Usuarios Campo').all().map(i => i.json);\n// meta efetiva: individual (usuarios.meta_visitas_dia) com fallback na config\nconst metaDoUsuario = (u) => (u && u.meta_visitas_dia != null ? parseFloat(u.meta_visitas_dia) : metaDia);\nconst gerenteRows = $('Buscar Gerente').all().map(i => i.json);\nconst gerente = gerenteRows[0] || {};\n\nconst agendaHoje = $('Buscar Agenda Hoje').all().map(i => i.json);\nconst visitasPlanejadas = agendaHoje.length;\nconst visitasRealizadas = agendaHoje.filter(a => a.status === 'realizada').length;\n\nconst porUsuario = {};\nusuariosCampo.forEach(u => {\n  porUsuario[u.id] = { nome: u.nome, meta: metaDoUsuario(u), planejadas: 0, realizadas: 0 };\n});\n// agenda de quem nao esta no roster (usuario removido/inativo, ou linha sem responsavel)\nagendaHoje.forEach(a => {\n  const chave = a.usuario_id || 'sem_responsavel';\n  if (!porUsuario[chave]) {\n    porUsuario[chave] = {\n      nome: a.usuario_id ? a.usuario_id : 'sem responsavel',\n      meta: metaDia, planejadas: 0, realizadas: 0\n    };\n  }\n  porUsuario[chave].planejadas += 1;\n  if (a.status === 'realizada') porUsuario[chave].realizadas += 1;\n});\n\n// so entra no ranking quem tinha rota hoje ou registrou visita:\n// quem nao tem visita planejada nao aparece como abaixo da meta.\nconst rankingUsuarios = Object.values(porUsuario)\n  .filter(u => u.planejadas > 0 || u.realizadas > 0)\n  .sort((a, b) => (b.realizadas - a.realizadas) || a.nome.localeCompare(b.nome));\n\n// meta do dia da equipe = soma das metas efetivas de quem tinha rota hoje\nconst metaDiaEquipe = rankingUsuarios.reduce((acc, u) => acc + u.meta, 0);\nconst pctMetaDia = metaDiaEquipe > 0 ? Math.round((visitasRealizadas / metaDiaEquipe) * 1000) / 10 : 0;\n\nconst detalhePorUsuario = rankingUsuarios.map((u, idx) => {\n  const pct = u.meta > 0 ? Math.round((u.realizadas / u.meta) * 1000) / 10 : 0;\n  return { posicao: idx + 1, nome: u.nome, realizadas: u.realizadas, planejadas: u.planejadas, meta: u.meta, pctMeta: pct };\n});\n\nconst agendaMes = $('Buscar Agenda Mes').all().map(i => i.json);\nconst acumuladoMes = agendaMes.length;\nconst pctMetaMes = metaMes > 0 ? Math.round((acumuladoMes / metaMes) * 1000) / 10 : 0;\n\nconst suspeitosRows = $('Buscar Checkins Suspeitos').all().map(i => i.json);\nconst suspeitosCount = suspeitosRows.length;\n\nconst opRows = $('Buscar Oportunidades Hoje').all().map(i => i.json);\nconst oportunidadesCount = opRows.length;\nconst oportunidadesPorProduto = {};\nopRows.forEach(o => {\n  const p = o.produto || 'nao_informado';\n  oportunidadesPorProduto[p] = (oportunidadesPorProduto[p] || 0) + 1;\n});\n\nconst perdasRows = $('Buscar Perdas Hoje').all().map(i => i.json);\nconst perdasCount = perdasRows.length;\n\nconst contratosRows = $('Buscar Contratos Abertos').all().map(i => i.json);\nconst agora = Date.now();\nconst contratosComDias = contratosRows.map(c => {\n  const desde = c.etapa_desde ? new Date(c.etapa_desde).getTime() : agora;\n  const diasParado = Math.floor((agora - desde) / (1000 * 60 * 60 * 24));\n  return Object.assign({}, c, { diasParado: diasParado, atrasado: diasParado > slaDias });\n});\nconst contratosAtrasados = contratosComDias.filter(c => c.atrasado);\nconst contratosAtrasadosCount = contratosAtrasados.length;\n\nconst retornosRows = $('Buscar Retornos Vencidos').all().map(i => i.json);\nconst retornosVencidosCount = retornosRows.length;\n\nconst now = new Date();\nconst dd = String(now.getDate()).padStart(2, '0');\nconst mm = String(now.getMonth() + 1).padStart(2, '0');\nconst yyyy = now.getFullYear();\nconst dataFormatada = dd + '/' + mm;\nconst dataCompleta = dd + '/' + mm + '/' + yyyy;\n\nconst oportunidadesLinhas = Object.keys(oportunidadesPorProduto).length\n  ? Object.entries(oportunidadesPorProduto).map(function (e) { return '<li>' + e[0] + ': ' + e[1] + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst perdasLinhas = perdasRows.length\n  ? perdasRows.map(function (p) { return '<li>Loja ' + (p.loja_id || '-') + ' - motivo: ' + (p.motivo_nao_fechamento || 'nao informado') + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst contratosLinhas = contratosAtrasados.length\n  ? contratosAtrasados.map(function (c) { return '<li>Contrato ' + (c.numero_fluig || c.id) + ' - etapa: ' + c.etapa + ' - ' + c.diasParado + ' dias parado</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst retornosLinhas = retornosRows.length\n  ? retornosRows.map(function (r) { return '<li>Loja ' + (r.loja_id || '-') + ' - agendado para ' + r.data + '</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst detalhePorUsuarioLinhas = detalhePorUsuario.length\n  ? detalhePorUsuario.map(function (u) { return '<li>' + u.posicao + '. ' + u.nome + ': ' + u.realizadas + '/' + u.planejadas + ' realizadas - ' + u.pctMeta + '% da meta de ' + u.meta + '</li>'; }).join('')\n  : '<li>ninguem com rota hoje</li>';\n\nconst htmlBody = '<h2>Relatorio Diario Rota Viva - ' + dataCompleta + '</h2>' +\n  '<h3>Visitas de hoje</h3>' +\n  '<p>Realizadas: ' + visitasRealizadas + ' | Planejadas: ' + visitasPlanejadas + ' | % da meta do dia: ' + pctMetaDia + '%</p>' +\n  '<h4>Ranking do dia</h4><ul>' + detalhePorUsuarioLinhas + '</ul>' +\n  '<h3>Acumulado do mes</h3>' +\n  '<p>' + acumuladoMes + ' de ' + metaMes + ' (' + pctMetaMes + '%)</p>' +\n  '<h3>Check-ins suspeitos hoje</h3>' +\n  '<p>' + suspeitosCount + '</p>' +\n  '<h3>Oportunidades novas hoje</h3>' +\n  '<ul>' + oportunidadesLinhas + '</ul>' +\n  '<h3>Perdas do dia (sem interesse)</h3>' +\n  '<ul>' + perdasLinhas + '</ul>' +\n  '<h3>Contratos parados alem do SLA (' + slaDias + ' dias)</h3>' +\n  '<ul>' + contratosLinhas + '</ul>' +\n  '<h3>Retornos vencidos nao cumpridos</h3>' +\n  '<ul>' + retornosLinhas + '</ul>';\n\nreturn [{\n  json: {\n    dataFormatada: dataFormatada,\n    dataCompleta: dataCompleta,\n    visitasRealizadas: visitasRealizadas,\n    visitasPlanejadas: visitasPlanejadas,\n    metaDiaEquipe: metaDiaEquipe,\n    ranking: detalhePorUsuario,\n    pctMetaDia: pctMetaDia,\n    acumuladoMes: acumuladoMes,\n    metaMes: metaMes,\n    pctMetaMes: pctMetaMes,\n    suspeitosCount: suspeitosCount,\n    oportunidadesCount: oportunidadesCount,\n    oportunidadesPorProduto: oportunidadesPorProduto,\n    perdasCount: perdasCount,\n    contratosAtrasadosCount: contratosAtrasadosCount,\n    retornosVencidosCount: retornosVencidosCount,\n    gerenteNome: gerente.nome || 'Gerente',\n    gerenteTelefone: gerente.telefone || '',\n    emailsRelatorioStr: emailList.join(','),\n    htmlBody: htmlBody\n  }\n}];\n"
       }
     },
     {
@@ -270,7 +517,10 @@
       "name": "Enviar Email Relatorio",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
-      "position": [2940, 540],
+      "position": [
+        2940,
+        540
+      ],
       "parameters": {
         "resource": "message",
         "operation": "send",
@@ -279,7 +529,11 @@
         "emailType": "html",
         "message": "={{ $json.htmlBody }}"
       },
-      "credentials": { "gmailOAuth2": { "name": "CRED_GMAIL_RELATORIO" } },
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "CRED_GMAIL_RELATORIO"
+        }
+      },
       "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_GMAIL_RELATORIO (gmailOAuth2) após o go-live."
     },
     {
@@ -287,7 +541,10 @@
       "name": "Enviar WhatsApp Gerente",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
-      "position": [2940, 220],
+      "position": [
+        2940,
+        220
+      ],
       "parameters": {
         "resource": "message",
         "operation": "sendTemplate",
@@ -300,21 +557,49 @@
               "type": "body",
               "bodyParameters": {
                 "parameter": [
-                  { "type": "text", "text": "={{ $json.dataFormatada }}" },
-                  { "type": "text", "text": "={{ String($json.visitasRealizadas) }}" },
-                  { "type": "text", "text": "={{ String($json.visitasPlanejadas) }}" },
-                  { "type": "text", "text": "={{ String($json.pctMetaDia) + '%' }}" },
-                  { "type": "text", "text": "={{ String($json.acumuladoMes) + '/' + String($json.metaMes) }}" },
-                  { "type": "text", "text": "={{ String($json.suspeitosCount) }}" },
-                  { "type": "text", "text": "={{ String($json.oportunidadesCount) }}" },
-                  { "type": "text", "text": "={{ String($json.contratosAtrasadosCount) }}" }
+                  {
+                    "type": "text",
+                    "text": "={{ $json.dataFormatada }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ String($json.visitasRealizadas) }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ String($json.visitasPlanejadas) }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ String($json.pctMetaDia) + '%' }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ String($json.acumuladoMes) + '/' + String($json.metaMes) }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ String($json.suspeitosCount) }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ String($json.oportunidadesCount) }}"
+                  },
+                  {
+                    "type": "text",
+                    "text": "={{ String($json.contratosAtrasadosCount) }}"
+                  }
                 ]
               }
             }
           ]
         }
       },
-      "credentials": { "whatsAppApi": { "name": "ARMCOM - WhatsApp Cloud API" } },
+      "credentials": {
+        "whatsAppApi": {
+          "name": "ARMCOM - WhatsApp Cloud API"
+        }
+      },
       "notes": "BLOQUEIO: o n8n auto-atribuiu a credencial REAL existente 'ARMCOM - WhatsApp Cloud API' (id qxbrAen7zi4DhywY, tipo whatsAppApi) a este node em 3 tentativas distintas (criação inicial via newCredential('CRED_META_CLOUD'), remoção+recriação sem campo credentials, remoção+recriação com credentials.name='CRED_META_CLOUD' e sem id). Isso ocorre porque essa é a única credencial do tipo whatsAppApi existente na conta e o servidor n8n auto-resolve/anexa credenciais reais para nodes de tipo predefinedCredentialType quando há exatamente uma correspondência, mesmo que o nome do placeholder não exista. Não foi encontrada nenhuma forma programática de deixar este campo vazio ou apontando só para o placeholder. AÇÃO MANUAL NECESSÁRIA antes de qualquer ativação: abrir este node no n8n e trocar a credencial para uma nova credencial CRED_META_CLOUD (ou desvincular), garantindo que a credencial real ARMCOM não seja usada indevidamente por este workflow."
     }
   ]
