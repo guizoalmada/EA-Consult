@@ -64,9 +64,12 @@ O cliente confirmou que os 5 usuários visitam lojas, incluindo Anderson (coorde
 
 - `agenda_visitas.usuario_id` passa a ser legitimamente nulo para linhas com PROMO não reconhecido.
   O W4 agrupa essas visitas sob "sem responsavel" no ranking, em vez de perdê-las.
-- O W3 envia rota para qualquer pessoa com `faz_visitas=true` e visitas pendentes. Como o alerta de
-  rota vazia é por usuário, Anderson e Jansen passarão a gerar alerta nos dias em que a planilha do
-  coordenador não incluir rota para eles — ver pergunta aberta em `BLOQUEIOS.md` B-02.
+- O W3 envia rota para qualquer pessoa com `faz_visitas=true` e visitas pendentes.
+- O alerta de rota vazia continua existindo e continua indo ao coordenador, mas **só é disparado
+  quando quem ficou sem rota é promotor ou consultor**. Coordenador e gerente também visitam, porém
+  nem sempre têm rota no dia — a ausência de rota deles é normal e não vira alerta diário. Este é o
+  único ponto do W3 em que o papel é consultado, e ele decide *sobre quem se alerta*, não quem
+  visita.
 - A superfície de edição da meta individual ficou pendente (B-02): hoje se define por SQL.
 - Nenhum texto de mensagem ao usuário fala mais em "promotor"; usa-se o nome da pessoa ou termo
   neutro ("sua rota", "suas visitas").

@@ -187,7 +187,7 @@
             },
             {
               "name": "select",
-              "value": "id,nome,telefone,meta_visitas_dia"
+              "value": "id,nome,telefone,papel,meta_visitas_dia"
             }
           ]
         }
@@ -264,7 +264,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const usuario = $('Loop Usuários').first().json;\nconst rawItems = $input.all().map(function (item) { return item.json; });\nconst visitas = rawItems.filter(function (v) { return v && v.id; });\nconst retornos = visitas.filter(function (v) { return v.origem === 'retorno'; });\n\nfunction formatVisita(v, idx) {\n  const loja = v.lojas || {};\n  const nome = loja.nome || 'Loja sem nome';\n  const bairro = loja.bairro || '-';\n  const contato = loja.contato || '-';\n  const telefonesRaw = loja.telefones;\n  const telefones = Array.isArray(telefonesRaw) ? telefonesRaw.join(', ') : (telefonesRaw || '-');\n  return (idx + 1) + '. ' + nome + ' - ' + bairro + ' - ' + contato + ' - ' + telefones;\n}\n\nconst listaVisitasTexto = visitas.length > 0\n  ? visitas.map(function (v, idx) { return formatVisita(v, idx); }).join('\\n')\n  : 'Nenhuma visita.';\n\nconst listaRetornosTexto = retornos.length > 0\n  ? retornos.map(function (v, idx) { return formatVisita(v, idx); }).join('\\n')\n  : 'nenhum';\n\nreturn [{\n  json: {\n    usuario_id: usuario.id,\n    nome: usuario.nome,\n    telefone: usuario.telefone,\n    hasVisits: visitas.length > 0,\n    qtdVisitas: visitas.length,\n    listaVisitasTexto: listaVisitasTexto,\n    listaRetornosTexto: listaRetornosTexto,\n    dataFormatada: $now.toFormat('dd/LL')\n  }\n}];\n"
+        "jsCode": "const usuario = $('Loop Usuários').first().json;\nconst rawItems = $input.all().map(function (item) { return item.json; });\nconst visitas = rawItems.filter(function (v) { return v && v.id; });\nconst retornos = visitas.filter(function (v) { return v.origem === 'retorno'; });\n\nfunction formatVisita(v, idx) {\n  const loja = v.lojas || {};\n  const nome = loja.nome || 'Loja sem nome';\n  const bairro = loja.bairro || '-';\n  const contato = loja.contato || '-';\n  const telefonesRaw = loja.telefones;\n  const telefones = Array.isArray(telefonesRaw) ? telefonesRaw.join(', ') : (telefonesRaw || '-');\n  return (idx + 1) + '. ' + nome + ' - ' + bairro + ' - ' + contato + ' - ' + telefones;\n}\n\nconst listaVisitasTexto = visitas.length > 0\n  ? visitas.map(function (v, idx) { return formatVisita(v, idx); }).join('\\n')\n  : 'Nenhuma visita.';\n\nconst listaRetornosTexto = retornos.length > 0\n  ? retornos.map(function (v, idx) { return formatVisita(v, idx); }).join('\\n')\n  : 'nenhum';\n\nreturn [{\n  json: {\n    usuario_id: usuario.id,\n    nome: usuario.nome,\n    papel: usuario.papel,\n    telefone: usuario.telefone,\n    hasVisits: visitas.length > 0,\n    qtdVisitas: visitas.length,\n    listaVisitasTexto: listaVisitasTexto,\n    listaRetornosTexto: listaRetornosTexto,\n    dataFormatada: $now.toFormat('dd/LL')\n  }\n}];\n"
       }
     },
     {
@@ -339,7 +339,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const usuario = $input.first().json;\nconst coordenadores = $('Buscar Coordenadores Ativos').all().map(function (item) { return item.json; });\n\nreturn coordenadores.map(function (c) {\n  return {\n    json: {\n      coordenador_nome: c.nome,\n      coordenador_telefone: c.telefone,\n      usuario_nome: usuario.nome,\n      data: usuario.dataFormatada\n    }\n  };\n});\n"
+        "jsCode": "const usuario = $input.first().json;\n\n// O alerta serve para o coordenador saber que alguem de campo ficou sem rota.\n// Coordenador e gerente tambem fazem visitas (D-06), mas nem sempre tem rota no dia:\n// a ausencia de rota deles e normal e nao deve virar alerta diario.\nif (usuario.papel === 'coordenador' || usuario.papel === 'gerente') {\n  return [];\n}\n\nconst coordenadores = $('Buscar Coordenadores Ativos').all().map(function (item) { return item.json; });\n\nreturn coordenadores.map(function (c) {\n  return {\n    json: {\n      coordenador_nome: c.nome,\n      coordenador_telefone: c.telefone,\n      usuario_nome: usuario.nome,\n      data: usuario.dataFormatada\n    }\n  };\n});\n"
       }
     },
     {

@@ -70,7 +70,7 @@ Máquina de estados por telefone (`estado_conversa`):
 
 ### 4.3 Rotina diária
 
-- **W3 — Rota diária (07:30, seg–sáb):** envia a cada usuário ativo com `faz_visitas=true` e visitas pendentes hoje (incluindo retornos criados pelo W6) a lista de visitas do dia + retornos agendados. Alerta o coordenador se a rota do dia estiver vazia.
+- **W3 — Rota diária (07:30, seg–sáb):** envia a cada usuário ativo com `faz_visitas=true` e visitas pendentes hoje (incluindo retornos criados pelo W6) a lista de visitas do dia + retornos agendados. Alerta o coordenador quando um promotor ou consultor fica sem rota no dia (coordenador e gerente sem rota não geram alerta — ver D-06).
 - **W4 — Relatório diário (18:00, seg–sáb):** agrega visitas realizadas vs. planejadas, ranking do dia (todos os usuários com visitas no período, qualquer papel), % contra a meta efetiva de cada um, acumulado mensal, check-ins suspeitos, oportunidades novas, perdas do dia, contratos parados além do SLA e retornos vencidos. Envia por WhatsApp ao gerente e por e-mail aos 3 destinatários configurados.
 - **W5 — Espelho Excel (21:00):** sincroniza incrementalmente `visitas`, `oportunidades`, `contratos` para uma pasta de trabalho do Excel 365 no OneDrive (somente leitura). Ver D-07.
 - **W6 — Lembrete de retorno (08:00):** avisa o usuário responsável sobre retornos agendados para o dia e os inclui na rota do dia (origem `retorno`). A lógica é toda por `usuario_id`, nunca por papel.

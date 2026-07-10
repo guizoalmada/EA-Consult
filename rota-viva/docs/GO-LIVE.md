@@ -141,10 +141,14 @@ select nome, telefone, papel from rotaviva.usuarios order by nome;
 
 ## 7. Criar a pasta de trabalho Excel do espelho
 
-Crie um arquivo `.xlsx` novo no OneDrive da Morgana Ops com 3 planilhas (abas): `visitas`,
-`oportunidades`, `contratos`. A primeira linha de cada aba deve conter os cabeçalhos com os nomes
-exatos das colunas da tabela correspondente (ver `supabase/migrations/`) — o node do n8n faz upsert
-casando pela coluna `id`, então `id` precisa existir em todas as três.
+Já existe um modelo pronto em
+`Morgana Ops\Produtos Próprios\Rota Viva\Espelho_Rota_Viva_MODELO.xlsx`, com as 3 abas
+(`visitas`, `oportunidades`, `contratos`), os cabeçalhos corretos e um LEIA-ME. Copie-o para o
+local definitivo no OneDrive e renomeie como quiser.
+
+Se preferir criar do zero: as 3 abas precisam ter, na primeira linha, os nomes exatos das colunas da
+tabela correspondente (ver `supabase/migrations/`). O node do n8n faz upsert casando pela coluna
+`id`, então `id` precisa existir em todas as três.
 
 Pegue o **driveItem id** do arquivo (o `id` que o Microsoft Graph usa, não o nome nem o caminho) e
 grave em `config`:
