@@ -43,7 +43,7 @@ Bom dia, {{1}}! Sua rota de {{2}} tem {{3}} visita(s):
 Retornos agendados para hoje: {{5}}
 ```
 
-Variáveis: `{{1}}` nome do promotor · `{{2}}` data (dd/mm) · `{{3}}` quantidade de visitas ·
+Variáveis: `{{1}}` nome do usuário · `{{2}}` data (dd/mm) · `{{3}}` quantidade de visitas ·
 `{{4}}` lista numerada de lojas (nome, bairro, contato, telefone) · `{{5}}` lista de retornos
 agendados para o dia (ou "nenhum").
 
@@ -53,7 +53,7 @@ agendados para o dia (ou "nenhum").
 Olá, {{1}}! Você tem um retorno agendado hoje na loja {{2}} ({{3}}). Contato: {{4}}.
 ```
 
-Variáveis: `{{1}}` nome do promotor · `{{2}}` nome da loja · `{{3}}` bairro · `{{4}}`
+Variáveis: `{{1}}` nome do usuário · `{{2}}` nome da loja · `{{3}}` bairro · `{{4}}`
 telefone/contato.
 
 ### 3.3 `relatorio_diario_gerente`
@@ -77,8 +77,7 @@ novas · `{{8}}` qtd. contratos parados além do SLA.
 Atenção, {{1}}: a rota de {{2}} está vazia para {{3}}. Verifique se a planilha foi enviada corretamente.
 ```
 
-Variáveis: `{{1}}` nome do coordenador · `{{2}}` data · `{{3}}` nome do promotor/consultor sem
-rota.
+Variáveis: `{{1}}` nome do coordenador · `{{2}}` data · `{{3}}` nome do usuário sem rota.
 
 ### 3.5 `checkin_suspeito`
 
@@ -86,7 +85,7 @@ rota.
 Alerta: check-in de {{1}} na loja {{2}} foi registrado a {{3}}m de distância (acima do limite de {{4}}m). Verifique.
 ```
 
-Variáveis: `{{1}}` nome do promotor · `{{2}}` nome da loja · `{{3}}` distância em metros · `{{4}}`
+Variáveis: `{{1}}` nome do usuário · `{{2}}` nome da loja · `{{3}}` distância em metros · `{{4}}`
 raio configurado em metros.
 
 ## 4. Configurar o webhook da Meta
@@ -100,16 +99,27 @@ workflow no passo 8). Assine os campos `messages`.
 Siga a tabela completa em `CREDENCIAIS.md` para: `CRED_SUPABASE_ROTAVIVA`, `CRED_GMAIL_RELATORIO`,
 `CRED_GSHEETS`, `CRED_OPENAI_WHISPER`, `CRED_ANTHROPIC`, `CRED_GEOCODING`.
 
-**⚠️ Verificação obrigatória (ver `BLOQUEIOS.md` B-01):** ao criar os workflows, a ferramenta do
-n8n substituiu automaticamente, em todo node cujo tipo de credencial já tinha exatamente uma
-credencial real de outro cliente/projeto na conta, o nome do placeholder pelo nome dessa credencial
-real — confirmado em "WhatsApp Business Cloud" (W1, W2, W3, W4, W6, credencial "ARMCOM - WhatsApp
-Cloud API" / "ARMCOM - WhatsApp Trigger") e no "Anthropic Chat Model" (W2, credencial "ARMCOM -
-Anthropic"). Antes de configurar `CRED_META_CLOUD` e `CRED_ANTHROPIC` de verdade, abra cada node
-WhatsApp Business Cloud (trigger, envio de mensagem, envio de template, mediaUrlGet) e o node
-Anthropic Chat Model em cada workflow afetado e confirme/troque explicitamente a credencial para a
-nova credencial do Rota Viva — **nunca reutilize as credenciais "ARMCOM - ..."**, que pertencem a
-outro cliente.
+**🛑 BLOQUEANTE (ver `BLOQUEIOS.md` B-01):** os nodes WhatsApp e Anthropic dos workflows do Rota Viva
+estão hoje, **na instância n8n**, vinculados por `id` funcional às credenciais reais da ARMCOM
+("ARMCOM - WhatsApp Cloud API" `qxbrAen7zi4DhywY`, "ARMCOM - WhatsApp Trigger" `oWOgKLFpUr5DdRWd`,
+"ARMCOM - Anthropic" `KRPStNscv88T1xYa`). Ativar qualquer workflow nesse estado dispara mensagens
+reais pela WABA de outro cliente.
+
+Antes de ativar qualquer coisa, abra **cada** node abaixo na UI do n8n e troque explicitamente a
+credencial para a do Rota Viva:
+
+- W1 — WhatsApp Trigger · Obter URL do Media · Baixar Arquivo da Rota · Responder Coordenador
+- W2 — WhatsApp Trigger · Pedir Foto Fachada · Buscar URL Midia Foto · Buscar URL Midia Audio ·
+  Enviar Texto Checkout · Enviar Template Checkin Suspeito · Avisar Sem Visita Pendente ·
+  Confirmar Contrato Assinado · Confirmar Maquininha Ativada · Transcrever Audio ·
+  **Modelo Anthropic Claude Haiku**
+- W3 — Enviar Rota Diária · Enviar Alerta Rota Vazia
+- W4 — Enviar WhatsApp Gerente
+- W6 — Enviar Lembrete Retorno
+
+Confirme com `list_credentials` (ou na UI) que nenhum node do Rota Viva referencia um id de
+credencial cujo nome comece por "ARMCOM - ". Os nodes Supabase (`httpCustomAuth`) não têm credencial
+vinculada e falham fechado — precisam receber `CRED_SUPABASE_ROTAVIVA`.
 
 Antes de testar qualquer chamada ao Supabase, confirme que o schema `rotaviva` está na lista de
 "Exposed schemas" do PostgREST: Supabase Dashboard → projeto Morgana Ops → Project Settings → API →
@@ -156,22 +166,39 @@ cron jobs.)
 
 ## 9. Teste ponta-a-ponta
 
-Checklist de 10 itens antes de considerar o piloto no ar:
+Checklist de 13 itens antes de considerar o piloto no ar:
 
 - [ ] 1. Coordenador envia planilha de rota (XLSX) pelo WhatsApp → recebe confirmação com
-      contagem de visitas/promotores/lojas sem geolocalização (W1).
-- [ ] 2. Promotor envia localização dentro do raio configurado → recebe pedido de foto da
+      contagem de visitas/responsáveis/lojas sem geolocalização (W1).
+- [ ] 2. Usuário envia localização dentro do raio configurado → recebe pedido de foto da
       fachada, sem alerta de suspeita (W2).
-- [ ] 3. Promotor envia localização fora do raio configurado → coordenador recebe template
-      `checkin_suspeito` (W2).
-- [ ] 4. Promotor responde "Loja fechada" no checkout → visita é registrada como realizada e uma
+- [ ] 3. Usuário envia localização fora do raio configurado → coordenador (Anderson) recebe
+      template `checkin_suspeito` (W2).
+- [ ] 4. Usuário responde "Loja fechada" no checkout → visita é registrada como realizada e uma
       nova visita aparece agendada para o próximo dia útil (W2).
-- [ ] 5. Promotor completa um fechamento (produto + "Fechou") → oportunidade e contrato são
+- [ ] 5. Usuário completa um fechamento (produto + "Fechou") → oportunidade e contrato são
       criados com etapa `docs_enviados` (W2).
-- [ ] 6. Promotor envia uma observação em ÁUDIO → transcrição e estruturação aparecem corretamente
+- [ ] 6. Usuário envia uma observação em ÁUDIO → transcrição e estruturação aparecem corretamente
       na visita (W2, Whisper + Claude Haiku).
-- [ ] 7. Um retorno agendado para hoje gera lembrete ao promotor pela manhã e aparece na rota do
+- [ ] 7. Um retorno agendado para hoje gera lembrete ao responsável pela manhã e aparece na rota do
       dia (W6 + W3).
 - [ ] 8. Relatório diário chega por WhatsApp ao gerente às 18h (W4).
 - [ ] 9. Relatório diário chega por e-mail aos 3 destinatários da config às 18h (W4).
 - [ ] 10. Espelho no Google Sheets é atualizado às 21h com os dados do dia (W5).
+
+Itens de D-06 (todos os usuários fazem visitas):
+
+- [ ] 11. Check-in feito pelo **Jansen (gerente)** aparece no ranking do relatório diário (W4), e
+      ele recebe rota às 07:30 se tiver visitas pendentes (W3).
+- [ ] 12. Check-in suspeito simulado do **Anderson (coordenador)** notifica o **Jansen (gerente)**,
+      e não o próprio Anderson (W2, escalonamento).
+- [ ] 13. Planilha de rota com um nome desconhecido na coluna PROMO (ex.: "MARCOS") → a linha é
+      importada como visita pendente **sem responsável**, e a confirmação ao coordenador lista
+      "1 linha com responsavel nao reconhecido: MARCOS" (W1).
+
+Meta individual (opcional, enquanto B-02 não é resolvido): defina uma meta diferente por SQL e
+confirme que o % no relatório usa a meta efetiva.
+
+```sql
+update rotaviva.usuarios set meta_visitas_dia = 4 where nome = 'Jansen Araújo';
+```

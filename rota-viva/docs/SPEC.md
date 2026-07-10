@@ -22,17 +22,23 @@ A matriz **não reporta** mudanças de etapa de volta ao campo — por isso a es
 
 ## 2. Equipe
 
-| Nome | Papel | Contato |
-|---|---|---|
-| Danton | Promotor | telefone a cadastrar |
-| Guilherme | Promotor | telefone a cadastrar |
-| Leonardo Rosa | Consultor (também visita) | leonardo.rosa@dpk.com.br |
-| Anderson Lemos | Coordenador (monta e envia a rota diária, véspera ou até 06:30) | Anderson.lemos@dpk.com.br |
-| Jansen Araújo | Gerente MG | jansen.araujo@dpk.com.br / +55 27 99226-1227 |
+**Os 5 usuários fazem visitas** (D-06), inclusive o coordenador e o gerente. O papel não define quem
+visita — isso é `usuarios.faz_visitas`. O papel define quem **recebe alerta**.
+
+| Nome | Papel | Faz visitas | Contato |
+|---|---|---|---|
+| Danton | Promotor | sim | telefone a cadastrar |
+| Guilherme | Promotor | sim | telefone a cadastrar |
+| Leonardo Rosa | Consultor | sim | leonardo.rosa@dpk.com.br |
+| Anderson Lemos | Coordenador (monta e envia a rota diária, véspera ou até 06:30) | sim | Anderson.lemos@dpk.com.br |
+| Jansen Araújo | Gerente MG | sim | jansen.araujo@dpk.com.br / +55 27 99226-1227 |
 
 ## 3. Metas e SLA
 
-- 12 visitas/dia por pessoa de campo.
+- Meta diária padrão: 12 visitas/dia (`config.meta_visitas_dia`).
+- Meta individual: `usuarios.meta_visitas_dia` sobrepõe a padrão quando preenchida; `NULL` herda a
+  padrão. Hoje os 5 estão em `NULL` — a superfície de edição está pendente (ver `BLOQUEIOS.md` B-02).
+- Meta do dia da equipe = soma das metas efetivas de quem tinha rota naquele dia.
 - 280 visitas/mês.
 - Loja fechada **conta como visita realizada** e gera reagendamento automático para o dia útil seguinte.
 - SLA padrão: 3 dias em qualquer etapa da esteira comercial (configurável em `config.sla_dias_padrao`).
@@ -41,13 +47,15 @@ A matriz **não reporta** mudanças de etapa de volta ao campo — por isso a es
 
 ### 4.1 Ingestão da rota (W1)
 
-O coordenador envia, pelo WhatsApp, um arquivo XLSX com a rota do dia (colunas: `DATA, PROMO, VEND, CODCL, CNPJ, NOME_CLIENTE, ENDERECO, BAIRRO, CIDADE, FONE, CONTATO, CARACTERISTICA`). O sistema normaliza, faz upsert de lojas, geocodifica endereços novos e popula a agenda de visitas do dia, respondendo com um resumo (visitas, promotores, lojas sem geolocalização).
+O coordenador envia, pelo WhatsApp, um arquivo XLSX com a rota do dia (colunas: `DATA, PROMO, VEND, CODCL, CNPJ, NOME_CLIENTE, ENDERECO, BAIRRO, CIDADE, FONE, CONTATO, CARACTERISTICA`). O sistema normaliza, faz upsert de lojas, geocodifica endereços novos e popula a agenda de visitas do dia, respondendo com um resumo (visitas, responsáveis, lojas sem geolocalização).
+
+A coluna `PROMO` aceita qualquer um dos 5 usuários que fazem visitas, sem diferenciar maiúsculas/minúsculas e ignorando acentos (`rotaviva.resolver_usuario_por_nome()`). Nome não reconhecido não descarta a linha: a visita entra pendente e **sem responsável**, e os nomes aparecem na confirmação enviada ao coordenador ("3 linhas com responsavel nao reconhecido: ...").
 
 ### 4.2 Conversa de campo (W2)
 
 Máquina de estados por telefone (`estado_conversa`):
 
-1. **Ocioso** → promotor envia localização → sistema busca a visita pendente mais próxima (distância Haversine); se estiver fora do raio de check-in (`config.raio_checkin_m`, padrão 200 m), marca `flag_suspeito` e notifica o coordenador; pede foto da fachada.
+1. **Ocioso** → o usuário envia localização → sistema busca a visita pendente mais próxima (distância Haversine); se estiver fora do raio de check-in (`config.raio_checkin_m`, padrão 200 m), marca `flag_suspeito` e notifica o coordenador — **exceto se o próprio check-in suspeito for do coordenador, caso em que o alerta escala para o gerente** (D-06); pede foto da fachada.
 2. **Aguardando foto** → imagem recebida é salva no Storage, registra check-in, avança para checkout.
 3. **Checkout** — sequência de botões nativos do WhatsApp:
    - Falou com o decisor? *Sim / Não / Loja fechada / Contato ausente* — os dois últimos encerram a visita como realizada e criam reagendamento automático (D+1 útil, origem `reagendada`).
@@ -62,10 +70,10 @@ Máquina de estados por telefone (`estado_conversa`):
 
 ### 4.3 Rotina diária
 
-- **W3 — Rota diária (07:30, seg–sáb):** envia a cada promotor/consultor a lista de visitas do dia + retornos agendados. Alerta o coordenador se a rota do dia estiver vazia.
-- **W4 — Relatório diário (18:00, seg–sáb):** agrega visitas realizadas vs. planejadas, % vs. meta, acumulado mensal, check-ins suspeitos, oportunidades novas, perdas do dia, contratos parados além do SLA e retornos vencidos. Envia por WhatsApp ao gerente e por e-mail aos 3 destinatários configurados.
+- **W3 — Rota diária (07:30, seg–sáb):** envia a cada usuário ativo com `faz_visitas=true` e visitas pendentes hoje (incluindo retornos criados pelo W6) a lista de visitas do dia + retornos agendados. Alerta o coordenador se a rota do dia estiver vazia.
+- **W4 — Relatório diário (18:00, seg–sáb):** agrega visitas realizadas vs. planejadas, ranking do dia (todos os usuários com visitas no período, qualquer papel), % contra a meta efetiva de cada um, acumulado mensal, check-ins suspeitos, oportunidades novas, perdas do dia, contratos parados além do SLA e retornos vencidos. Envia por WhatsApp ao gerente e por e-mail aos 3 destinatários configurados.
 - **W5 — Espelho Sheets (21:00):** sincroniza incrementalmente `visitas`, `oportunidades`, `contratos` para uma planilha Google (somente leitura).
-- **W6 — Lembrete de retorno (08:00):** avisa o promotor responsável sobre retornos agendados para o dia e os inclui na rota do dia (origem `retorno`).
+- **W6 — Lembrete de retorno (08:00):** avisa o usuário responsável sobre retornos agendados para o dia e os inclui na rota do dia (origem `retorno`). A lógica é toda por `usuario_id`, nunca por papel.
 
 ## 5. Dados
 

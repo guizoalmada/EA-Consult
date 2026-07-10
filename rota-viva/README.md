@@ -4,9 +4,9 @@ Sistema de gestão de visitas de campo via WhatsApp para a **DPK** (distribuidor
 
 ## Visão geral
 
-Promotores e consultores de campo recebem, todo dia, a rota de lojas a visitar diretamente no WhatsApp. O check-in/check-out, a coleta de resultado da visita (interesse em produto, motivo de não-fechamento, observações em áudio) e o acompanhamento da esteira comercial pós-venda (Autocred / Top Service) acontecem por conversa — sem app, sem treinamento.
+A equipe de campo — os 5 usuários, incluindo coordenador e gerente — recebe, todo dia, a rota de lojas a visitar diretamente no WhatsApp. O check-in/check-out, a coleta de resultado da visita (interesse em produto, motivo de não-fechamento, observações em áudio) e o acompanhamento da esteira comercial pós-venda (Autocred / Top Service) acontecem por conversa — sem app, sem treinamento.
 
-Um coordenador envia a planilha de rota da véspera pelo WhatsApp; o sistema distribui as visitas do dia a cada promotor, registra tudo em banco e envia relatório gerencial diário por WhatsApp e e-mail.
+Um coordenador envia a planilha de rota da véspera pelo WhatsApp; o sistema distribui as visitas do dia a cada responsável, registra tudo em banco e envia relatório gerencial diário por WhatsApp e e-mail.
 
 ## Arquitetura
 
