@@ -1,0 +1,369 @@
+{
+  "id": "Z0bzcrgLeK945NLn",
+  "name": "[RotaViva] W5 - Espelho Sheets",
+  "active": false,
+  "isArchived": false,
+  "versionId": "139ba54c-09a1-4ed0-b48c-11b647e10ded",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "createdAt": "2026-07-10T01:42:53.048Z",
+  "updatedAt": "2026-07-10T01:42:53.048Z",
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "connections": {
+    "Agendamento Diario 21h": {
+      "main": [
+        [
+          { "node": "Buscar ID Planilha (Config)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Buscar ID Planilha (Config)": {
+      "main": [
+        [
+          { "node": "Planilha Configurada?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Planilha Configurada?": {
+      "main": [
+        [
+          { "node": "Aguardar Go-Live (Planilha Vazia)", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Continuar Sincronizacao", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Continuar Sincronizacao": {
+      "main": [
+        [
+          { "node": "Buscar Visitas (Supabase)", "type": "main", "index": 0 },
+          { "node": "Buscar Oportunidades (Supabase)", "type": "main", "index": 0 },
+          { "node": "Buscar Contratos (Supabase)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Buscar Visitas (Supabase)": {
+      "main": [
+        [
+          { "node": "Sincronizar Aba Visitas", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Buscar Oportunidades (Supabase)": {
+      "main": [
+        [
+          { "node": "Sincronizar Aba Oportunidades", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Buscar Contratos (Supabase)": {
+      "main": [
+        [
+          { "node": "Sincronizar Aba Contratos", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "3cc96f76-b485-4038-8261-0c555a9c8a10",
+      "name": "Agendamento Diario 21h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-200, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 0 21 * * *" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "63b7a283-a64e-4a79-8eb6-cc768a73dee8",
+      "name": "Buscar ID Planilha (Config)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [80, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=eq.gsheets_id&select=valor",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept-Profile", "value": "rotaviva" }
+          ]
+        }
+      },
+      "credentials": {
+        "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" }
+      }
+    },
+    {
+      "id": "9b688e0b-7acc-4892-8256-753521c223b0",
+      "name": "Planilha Configurada?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [360, 300],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.valor }}",
+              "operator": { "type": "string", "operation": "empty" },
+              "rightValue": ""
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "75537dd7-866c-4daa-8c0d-07998b0cc413",
+      "name": "Aguardar Go-Live (Planilha Vazia)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [640, 140],
+      "parameters": {}
+    },
+    {
+      "id": "1f6f8f12-4709-4e02-b35f-8476653901f1",
+      "name": "Continuar Sincronizacao",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [640, 460],
+      "parameters": {}
+    },
+    {
+      "id": "0ef7d9f3-66d3-4ffc-be3c-78987f5a36d6",
+      "name": "Buscar Visitas (Supabase)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [920, 60],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept-Profile", "value": "rotaviva" }
+          ]
+        }
+      },
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" }
+      }
+    },
+    {
+      "id": "04d9e051-6c9c-4478-beed-8933717f8fe2",
+      "name": "Sincronizar Aba Visitas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1200, 60],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "appendOrUpdate",
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Continuar Sincronizacao').first().json.valor }}"
+        },
+        "sheetName": { "__rl": true, "mode": "name", "value": "visitas" },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": ["id"],
+          "value": {},
+          "schema": [
+            { "id": "id", "displayName": "id", "required": false, "defaultMatch": true, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "agenda_id", "displayName": "agenda_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "usuario_id", "displayName": "usuario_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "loja_id", "displayName": "loja_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "checkin_at", "displayName": "checkin_at", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "checkin_lat", "displayName": "checkin_lat", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "checkin_long", "displayName": "checkin_long", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "distancia_m", "displayName": "distancia_m", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "foto_url", "displayName": "foto_url", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "flag_suspeito", "displayName": "flag_suspeito", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "checkout_at", "displayName": "checkout_at", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "falou_decisor", "displayName": "falou_decisor", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "resultado", "displayName": "resultado", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "produto_interesse", "displayName": "produto_interesse", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "status_1", "displayName": "status_1", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "data_retorno", "displayName": "data_retorno", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "motivo_nao_fechamento", "displayName": "motivo_nao_fechamento", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "contraproposta", "displayName": "contraproposta", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "obs_texto", "displayName": "obs_texto", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "obs_audio_transcrito", "displayName": "obs_audio_transcrito", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "criado_em", "displayName": "criado_em", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false }
+          ]
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": { "name": "CRED_GSHEETS" }
+      }
+    },
+    {
+      "id": "41317233-9224-4a66-aa72-f0ce91f5c12a",
+      "name": "Buscar Oportunidades (Supabase)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [920, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades?select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept-Profile", "value": "rotaviva" }
+          ]
+        }
+      },
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" }
+      }
+    },
+    {
+      "id": "0f6c5c3a-a2e8-4888-bc75-b1447bec685b",
+      "name": "Sincronizar Aba Oportunidades",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1200, 300],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "appendOrUpdate",
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Continuar Sincronizacao').first().json.valor }}"
+        },
+        "sheetName": { "__rl": true, "mode": "name", "value": "oportunidades" },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": ["id"],
+          "value": {},
+          "schema": [
+            { "id": "id", "displayName": "id", "required": false, "defaultMatch": true, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "visita_id", "displayName": "visita_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "loja_id", "displayName": "loja_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "produto", "displayName": "produto", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "status", "displayName": "status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "criado_em", "displayName": "criado_em", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false }
+          ]
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": { "name": "CRED_GSHEETS" }
+      }
+    },
+    {
+      "id": "e345252c-d408-4958-9122-cdea12bafc2f",
+      "name": "Buscar Contratos (Supabase)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [920, 540],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept-Profile", "value": "rotaviva" }
+          ]
+        }
+      },
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" }
+      }
+    },
+    {
+      "id": "a7ee98cd-3af9-496f-86d4-0a341a825bd4",
+      "name": "Sincronizar Aba Contratos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1200, 540],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "appendOrUpdate",
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Continuar Sincronizacao').first().json.valor }}"
+        },
+        "sheetName": { "__rl": true, "mode": "name", "value": "contratos" },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": ["id"],
+          "value": {},
+          "schema": [
+            { "id": "id", "displayName": "id", "required": false, "defaultMatch": true, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "oportunidade_id", "displayName": "oportunidade_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "loja_id", "displayName": "loja_id", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "produto", "displayName": "produto", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "numero_fluig", "displayName": "numero_fluig", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "etapa", "displayName": "etapa", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "etapa_desde", "displayName": "etapa_desde", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "data_ativacao", "displayName": "data_ativacao", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "vigencia_inicio", "displayName": "vigencia_inicio", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "atualizado_por", "displayName": "atualizado_por", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "atualizado_em", "displayName": "atualizado_em", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false }
+          ]
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": { "name": "CRED_GSHEETS" }
+      }
+    },
+    {
+      "id": "72d4195b-2e16-4956-b66b-9f50a250e27b",
+      "name": "Sticky Note ee079a09",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-250, 250],
+      "parameters": {
+        "content": "## W5 - Espelho Sheets\n\nGoogle Sheets e um espelho SOMENTE LEITURA para a gerencia (decisao D-04: Supabase e a fonte de verdade).\n\nRoda 1x/dia as 21:00. Le o ID da planilha em config.gsheets_id; se vazio (antes do go-live), encerra sem erro.\nDepois sincroniza (upsert por id, via appendOrUpdate) as tabelas visitas, oportunidades e contratos para abas homonimas. Ver nota de simplificacao abaixo.",
+        "color": 4,
+        "width": 860,
+        "height": 200
+      }
+    },
+    {
+      "id": "9699af41-9709-4f72-8d84-e5df701aed87",
+      "name": "Sticky Note 5b6b9ee3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [870, 10],
+      "parameters": {
+        "content": "## Simplificacao assumida\n\nNem todas as tabelas tem um campo de atualizacao consistente (contratos tem atualizado_em; visitas e oportunidades so tem criado_em). Por isso este workflow NAO filtra por timestamp: traz TODOS os registros de cada tabela a cada execucao e usa Google Sheets appendOrUpdate (upsert por id) para refletir o estado atual. E um sync completo (full sync), nao um sync incremental por data.",
+        "color": 3,
+        "width": 580,
+        "height": 680
+      }
+    }
+  ],
+  "tags": [],
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "parentFolderId": null,
+  "description": "Sincroniza diariamente (21h) as tabelas visitas, oportunidades e contratos do Supabase para um espelho somente-leitura em Google Sheets, respeitando o gate de go-live via config.gsheets_id."
+}
