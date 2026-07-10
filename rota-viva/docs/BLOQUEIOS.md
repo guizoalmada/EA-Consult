@@ -46,13 +46,32 @@ nenhuma forma de: (a) criar uma credencial-placeholder de fato (não há `create
 impedir esse auto-preenchimento de nome, ou (c) desvincular um node de credencial sem apontar para
 um ID de credencial real já existente.
 
-**Risco real avaliado:** BAIXO no estado atual. O campo gravado tem apenas `name`, sem `id` — sem
-um `id` de credencial válido, o n8n não consegue de fato autenticar/executar usando essa
-credencial (é uma referência solta, não uma vinculação funcional). Não há, portanto, risco de o
-workflow disparar mensagens reais pela credencial da ARMCOM enquanto o `id` não for preenchido.
-O risco é de **confusão humana**: ao abrir o node na UI do n8n, o campo pode aparecer pré-preenchido
-sugerindo "ARMCOM - WhatsApp Cloud API", e um humano apressado poderia selecioná-la sem perceber
-que é a credencial de outro cliente.
+**Risco real avaliado:** ~~BAIXO~~ → **ALTO**. Corrigido em 10 Jul 2026 na auditoria de D-06.
+
+A avaliação original ("o campo gravado tem apenas `name`, sem `id`, logo é uma referência solta e
+não uma vinculação funcional") estava **errada**. Ela descrevia os JSONs exportados para
+`n8n/workflows/`, que de fato só carregam `name`. Mas a auditoria direta da instância n8n
+(`n8n.guizoalmada.com.br`) mostra que os nodes **têm o `id` funcional da credencial da ARMCOM**:
+
+| Workflow | Node | Credencial vinculada |
+|---|---|---|
+| W1 | WhatsApp Trigger | `oWOgKLFpUr5DdRWd` — ARMCOM - WhatsApp Trigger |
+| W1 | Obter URL do Media | `qxbrAen7zi4DhywY` — ARMCOM - WhatsApp Cloud API |
+| W1 | Responder Coordenador | `qxbrAen7zi4DhywY` — ARMCOM - WhatsApp Cloud API |
+| W2 | WhatsApp Trigger | `oWOgKLFpUr5DdRWd` — ARMCOM - WhatsApp Trigger |
+| W2 | Enviar Template Checkin Suspeito | `qxbrAen7zi4DhywY` — ARMCOM - WhatsApp Cloud API |
+| W2 | Modelo Anthropic Claude Haiku | `KRPStNscv88T1xYa` — ARMCOM - Anthropic |
+| W3 | Enviar Rota Diária / Enviar Alerta Rota Vazia | `qxbrAen7zi4DhywY` — ARMCOM - WhatsApp Cloud API |
+| W4 | Enviar WhatsApp Gerente | ARMCOM - WhatsApp Cloud API |
+| W6 | Enviar Lembrete Retorno | `qxbrAen7zi4DhywY` — ARMCOM - WhatsApp Cloud API |
+
+Consequência prática: **se qualquer um desses workflows for ativado hoje, ele autentica e dispara
+mensagens reais pela WABA da ARMCOM** — outro cliente, outro número, outra conta de faturamento.
+Não é confusão humana; é envio cross-cliente. Os workflows estão salvos inativos, que é o único
+motivo de isso ainda não ter acontecido.
+
+Os nodes que falam com o Supabase (`httpCustomAuth`) não têm credencial nenhuma vinculada — esses
+falham fechado (erro de autenticação), não abrem para outro cliente.
 
 **Mitigação aplicada:** cada node WhatsApp Business Cloud afetado recebeu uma nota (`notes`)
 explícita no próprio workflow explicando o problema e instruindo a correção manual. Além disso,
@@ -66,3 +85,51 @@ corrigir esse campo antes de ativar qualquer workflow.
 para a `CRED_ANTHROPIC` real do Rota Viva — nunca reutilizar "ARMCOM - Anthropic". Ao configurar
 qualquer credencial nova nesta conta n8n compartilhada, é prudente verificar, logo após criar o
 workflow, se algum node ficou apontando para uma credencial de outro projeto antes de ativar.
+
+**Isso agora é bloqueante, não uma recomendação.** Nenhum workflow do Rota Viva pode ser ativado
+antes que a tabela acima esteja toda apontando para credenciais do Rota Viva.
+
+---
+
+## B-02 — "Planilha Mestre" com aba Config e o W7 de sincronização não existem
+
+**Onde ocorre:** o pedido de mudança de 10 Jul 2026 (D-06) previa, na Mudança 5, incluir metas por
+usuário numa "aba Config da Planilha Mestre", sincronizada de volta ao banco por um workflow W7
+("no formato tabular equivalente ao que o W7 já parseia"), preservando as "chaves protegidas".
+
+**Estado real:** nada disso existe neste projeto.
+
+- Existem 6 workflows (W1–W6). Não há W7, nem nunca houve.
+- A única planilha do projeto é o **espelho** do W5 (abas `visitas`, `oportunidades`, `contratos`),
+  que é gerado 1x/dia e **não é lido de volta**. Não existe aba `Config` nem "chaves protegidas".
+- Escrever config da planilha de volta para o banco **contradiz D-04** ("Supabase é fonte de
+  verdade; Sheets é espelho read-only"), que é uma decisão vinculante desta fase.
+
+**Impacto:** a coluna `usuarios.meta_visitas_dia` foi criada e é lida pelo W4 (meta efetiva =
+individual, com fallback em `config.meta_visitas_dia`). O que falta é apenas a **superfície de
+edição** para o gestor. Até haver decisão, a meta individual se define por SQL:
+
+```sql
+update rotaviva.usuarios set meta_visitas_dia = 8 where nome = 'Anderson Lemos';
+update rotaviva.usuarios set meta_visitas_dia = null where nome = 'Danton'; -- volta a herdar a config
+```
+
+**Decisão pendente do Guilherme:** (a) manter edição por SQL; (b) construir de fato uma planilha
+mestre editável + W7 de sincronização, o que exige revogar ou emendar D-04; ou (c) expor a meta
+numa superfície própria (painel), fora do Sheets.
+
+---
+
+## B-03 — A "aba Ranking do W5" não existe
+
+**Onde ocorre:** Mudança 4 do mesmo pedido — "Ranking e contagens ... e aba Ranking do W5".
+
+**Estado real:** o W5 sincroniza exatamente 3 abas (`visitas`, `oportunidades`, `contratos`). Não
+há aba `Ranking`.
+
+**O que foi feito:** o ranking foi implementado onde ele de fato existe — no **W4**, que passou a
+ordenar os usuários por visitas realizadas e a exibir posição, realizadas/planejadas e % da meta
+efetiva de cada um, no corpo do e-mail diário. O objeto `ranking` também é exportado no output do
+node `Consolidar Metricas`, pronto para ser consumido caso a aba do Sheets venha a existir.
+
+**Decisão pendente do Guilherme:** criar ou não uma 4ª aba `Ranking` no espelho do W5.
