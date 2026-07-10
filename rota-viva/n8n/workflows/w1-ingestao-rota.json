@@ -11,110 +11,257 @@
   "connections": {
     "Guard Coordenador Ativo": {
       "main": [
-        [ { "node": "Mensagem tem documento?", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Mensagem tem documento?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Mensagem tem documento?": {
       "main": [
-        [ { "node": "Obter URL do Media", "type": "main", "index": 0 } ],
-        [ { "node": "Ignorar (nao e documento)", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Obter URL do Media",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ignorar (nao e documento)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Baixar Arquivo da Rota": {
       "main": [
-        [ { "node": "Extrair Planilha da Rota", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Extrair Planilha da Rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Extrair Planilha da Rota": {
       "main": [
-        [ { "node": "Normalizar Linhas", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Normalizar Linhas",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Normalizar Linhas": {
       "main": [
         [
-          { "node": "Upsert Loja", "type": "main", "index": 0 },
-          { "node": "Agregar Linhas da Rota", "type": "main", "index": 0 }
+          {
+            "node": "Upsert Loja",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Agregar Linhas da Rota",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Upsert Loja": {
       "main": [
-        [ { "node": "Precisa Geocodificar?", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Precisa Geocodificar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Precisa Geocodificar?": {
       "main": [
-        [ { "node": "Geocodificar Endereco", "type": "main", "index": 0 } ],
-        [ { "node": "Marcar Ja Geocodificada", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Geocodificar Endereco",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar Ja Geocodificada",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Geocodificar Endereco": {
       "main": [
-        [ { "node": "Interpretar Resultado Geocoding", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Interpretar Resultado Geocoding",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Interpretar Resultado Geocoding": {
       "main": [
-        [ { "node": "Atualizar Lat Long da Loja", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Atualizar Lat Long da Loja",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Atualizar Lat Long da Loja": {
       "main": [
-        [ { "node": "Marcar Geocodificado", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Marcar Geocodificado",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Marcar Geocodificado": {
       "main": [
-        [ { "node": "Prepare Agenda Item", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Prepare Agenda Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Marcar Ja Geocodificada": {
       "main": [
-        [ { "node": "Prepare Agenda Item", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Prepare Agenda Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Prepare Agenda Item": {
       "main": [
         [
-          { "node": "Agregar Flags de Geolocalizacao", "type": "main", "index": 0 },
-          { "node": "Buscar Usuario Promotor", "type": "main", "index": 0 }
+          {
+            "node": "Resolver Responsavel (RPC)",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Agregar Flags de Geolocalizacao": {
       "main": [
-        [ { "node": "Combinar Agregados", "type": "main", "index": 1 } ]
-      ]
-    },
-    "Buscar Usuario Promotor": {
-      "main": [
-        [ { "node": "Inserir Agenda Visita", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Combinar Agregados",
+            "type": "main",
+            "index": 1
+          }
+        ]
       ]
     },
     "Agregar Linhas da Rota": {
       "main": [
-        [ { "node": "Combinar Agregados", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Combinar Agregados",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Combinar Agregados": {
       "main": [
-        [ { "node": "Calcular Resumo", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Calcular Resumo",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "WhatsApp Trigger": {
       "main": [
-        [ { "node": "Guard Coordenador Ativo", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Guard Coordenador Ativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Obter URL do Media": {
       "main": [
-        [ { "node": "Baixar Arquivo da Rota", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Baixar Arquivo da Rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Calcular Resumo": {
       "main": [
-        [ { "node": "Responder Coordenador", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Responder Coordenador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolver Responsavel (RPC)": {
+      "main": [
+        [
+          {
+            "node": "Marcar Responsavel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar Responsavel": {
+      "main": [
+        [
+          {
+            "node": "Inserir Agenda Visita",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Agregar Flags de Geolocalizacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -124,16 +271,30 @@
       "name": "WhatsApp Trigger",
       "type": "n8n-nodes-base.whatsAppTrigger",
       "typeVersion": 1,
-      "position": [0, 0],
-      "parameters": { "updates": ["messages"] },
-      "credentials": { "whatsAppTriggerApi": { "name": "CRED_META_CLOUD" } }
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "updates": [
+          "messages"
+        ]
+      },
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "name": "CRED_META_CLOUD"
+        }
+      }
     },
     {
       "id": "c8db4b91-187f-4d47-b72d-d910e51ba26e",
       "name": "Guard Coordenador Ativo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [260, 0],
+      "position": [
+        260,
+        0
+      ],
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?telefone=eq.{{ $json.messages[0].from }}&papel=eq.coordenador&ativo=eq.true&select=*",
@@ -141,24 +302,45 @@
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [ { "name": "Accept-Profile", "value": "rotaviva" } ] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } }
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      }
     },
     {
       "id": "99703d3f-9fa5-4c56-8125-9c118a14c103",
       "name": "Mensagem tem documento?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [520, 0],
+      "position": [
+        520,
+        0
+      ],
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
           "combinator": "and",
           "conditions": [
             {
               "leftValue": "={{ $('WhatsApp Trigger').item.json.messages[0].type }}",
-              "operator": { "type": "string", "operation": "equals" },
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
               "rightValue": "document"
             }
           ]
@@ -170,39 +352,65 @@
       "name": "Obter URL do Media",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
-      "position": [780, -150],
+      "position": [
+        780,
+        -150
+      ],
       "parameters": {
         "resource": "media",
         "operation": "mediaUrlGet",
         "mediaGetId": "={{ $('WhatsApp Trigger').item.json.messages[0].document.id }}"
       },
-      "credentials": { "whatsAppApi": { "name": "CRED_META_CLOUD" } }
+      "credentials": {
+        "whatsAppApi": {
+          "name": "CRED_META_CLOUD"
+        }
+      }
     },
     {
       "id": "20f1f3e9-d217-439c-949e-cc70fbd4445e",
       "name": "Baixar Arquivo da Rota",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [1040, -150],
+      "position": [
+        1040,
+        -150
+      ],
       "parameters": {
         "method": "GET",
         "url": "={{ $json.url }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "whatsAppApi",
-        "options": { "response": { "response": { "responseFormat": "file", "outputPropertyName": "data" } } }
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
       },
-      "credentials": { "whatsAppApi": { "name": "CRED_META_CLOUD" } }
+      "credentials": {
+        "whatsAppApi": {
+          "name": "CRED_META_CLOUD"
+        }
+      }
     },
     {
       "id": "938f499d-f347-465e-a0bb-e393710b2a67",
       "name": "Extrair Planilha da Rota",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
-      "position": [1300, -150],
+      "position": [
+        1300,
+        -150
+      ],
       "parameters": {
         "operation": "xlsx",
         "binaryPropertyName": "data",
-        "options": { "headerRow": true }
+        "options": {
+          "headerRow": true
+        }
       }
     },
     {
@@ -210,7 +418,10 @@
       "name": "Normalizar Linhas",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1560, -150],
+      "position": [
+        1560,
+        -150
+      ],
       "parameters": {
         "mode": "runOnceForEachItem",
         "language": "javaScript",
@@ -222,7 +433,10 @@
       "name": "Upsert Loja",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [1820, -250],
+      "position": [
+        1820,
+        -250
+      ],
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?on_conflict=codcl",
@@ -232,9 +446,18 @@
         "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Profile", "value": "rotaviva" },
-            { "name": "Content-Type", "value": "application/json" },
-            { "name": "Prefer", "value": "resolution=merge-duplicates,return=representation" }
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
           ]
         },
         "sendBody": true,
@@ -242,22 +465,36 @@
         "specifyBody": "json",
         "jsonBody": "={{ { \"codcl\": $json.CODCL, \"cnpj\": $json.CNPJ, \"nome\": $json.NOME_CLIENTE, \"endereco\": $json.ENDERECO, \"bairro\": $json.BAIRRO, \"cidade\": $json.CIDADE, \"telefones\": $json.telefones, \"contato\": $json.CONTATO, \"caracteristica\": $json.CARACTERISTICA, \"vendedor_dpk\": $json.VEND } }}"
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } }
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      }
     },
     {
       "id": "eae3144f-032b-422f-bb69-ad664232c6a1",
       "name": "Precisa Geocodificar?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [2080, -250],
+      "position": [
+        2080,
+        -250
+      ],
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
           "combinator": "and",
           "conditions": [
             {
               "leftValue": "={{ $json.lat === null || $json.lat === undefined }}",
-              "operator": { "type": "boolean", "operation": "equals" },
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
               "rightValue": true
             }
           ]
@@ -269,7 +506,10 @@
       "name": "Geocodificar Endereco",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [2340, -400],
+      "position": [
+        2340,
+        -400
+      ],
       "onError": "continueRegularOutput",
       "parameters": {
         "method": "GET",
@@ -280,18 +520,28 @@
         "specifyQuery": "keypair",
         "queryParameters": {
           "parameters": [
-            { "name": "address", "value": "={{ $json.endereco }}, {{ $json.bairro }}, {{ $json.cidade }}, MG, Brasil" }
+            {
+              "name": "address",
+              "value": "={{ $json.endereco }}, {{ $json.bairro }}, {{ $json.cidade }}, MG, Brasil"
+            }
           ]
         }
       },
-      "credentials": { "httpQueryAuth": { "name": "CRED_GEOCODING" } }
+      "credentials": {
+        "httpQueryAuth": {
+          "name": "CRED_GEOCODING"
+        }
+      }
     },
     {
       "id": "fe5e3c6f-1c03-4aa1-bce0-4e2efbe8e052",
       "name": "Interpretar Resultado Geocoding",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2600, -400],
+      "position": [
+        2600,
+        -400
+      ],
       "parameters": {
         "mode": "runOnceForEachItem",
         "language": "javaScript",
@@ -303,7 +553,10 @@
       "name": "Atualizar Lat Long da Loja",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [2860, -400],
+      "position": [
+        2860,
+        -400
+      ],
       "onError": "continueRegularOutput",
       "parameters": {
         "method": "PATCH",
@@ -314,9 +567,18 @@
         "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Profile", "value": "rotaviva" },
-            { "name": "Content-Type", "value": "application/json" },
-            { "name": "Prefer", "value": "return=representation" }
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
           ]
         },
         "sendBody": true,
@@ -324,23 +586,50 @@
         "specifyBody": "json",
         "jsonBody": "={{ { \"lat\": $json.lat, \"long\": $json.long } }}"
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } }
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      }
     },
     {
       "id": "2da52c98-fb9e-4cc2-b0b3-de954578169a",
       "name": "Marcar Geocodificado",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [3120, -400],
+      "position": [
+        3120,
+        -400
+      ],
       "parameters": {
         "mode": "manual",
         "includeOtherFields": true,
         "assignments": {
           "assignments": [
-            { "id": "sem-geo", "name": "sem_geo", "value": "={{ $json.lat === null || $json.lat === undefined }}", "type": "boolean" },
-            { "id": "loja-id", "name": "loja_id", "value": "={{ $json.id }}", "type": "number" },
-            { "id": "promo", "name": "promo", "value": "={{ $('Normalizar Linhas').item.json.PROMO }}", "type": "string" },
-            { "id": "data-visita", "name": "data_visita", "value": "={{ $('Normalizar Linhas').item.json.data_normalizada }}", "type": "string" }
+            {
+              "id": "sem-geo",
+              "name": "sem_geo",
+              "value": "={{ $json.lat === null || $json.lat === undefined }}",
+              "type": "boolean"
+            },
+            {
+              "id": "loja-id",
+              "name": "loja_id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "promo",
+              "name": "promo",
+              "value": "={{ $('Normalizar Linhas').item.json.PROMO }}",
+              "type": "string"
+            },
+            {
+              "id": "data-visita",
+              "name": "data_visita",
+              "value": "={{ $('Normalizar Linhas').item.json.data_normalizada }}",
+              "type": "string"
+            }
           ]
         }
       }
@@ -350,16 +639,39 @@
       "name": "Marcar Ja Geocodificada",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [2340, -100],
+      "position": [
+        2340,
+        -100
+      ],
       "parameters": {
         "mode": "manual",
         "includeOtherFields": true,
         "assignments": {
           "assignments": [
-            { "id": "sem-geo", "name": "sem_geo", "value": false, "type": "boolean" },
-            { "id": "loja-id", "name": "loja_id", "value": "={{ $json.id }}", "type": "number" },
-            { "id": "promo", "name": "promo", "value": "={{ $('Normalizar Linhas').item.json.PROMO }}", "type": "string" },
-            { "id": "data-visita", "name": "data_visita", "value": "={{ $('Normalizar Linhas').item.json.data_normalizada }}", "type": "string" }
+            {
+              "id": "sem-geo",
+              "name": "sem_geo",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "loja-id",
+              "name": "loja_id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "promo",
+              "name": "promo",
+              "value": "={{ $('Normalizar Linhas').item.json.PROMO }}",
+              "type": "string"
+            },
+            {
+              "id": "data-visita",
+              "name": "data_visita",
+              "value": "={{ $('Normalizar Linhas').item.json.data_normalizada }}",
+              "type": "string"
+            }
           ]
         }
       }
@@ -369,7 +681,10 @@
       "name": "Ignorar (nao e documento)",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [780, 150],
+      "position": [
+        780,
+        150
+      ],
       "parameters": {}
     },
     {
@@ -377,7 +692,10 @@
       "name": "Prepare Agenda Item",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [3380, -250],
+      "position": [
+        3380,
+        -250
+      ],
       "parameters": {}
     },
     {
@@ -385,35 +703,72 @@
       "name": "Agregar Flags de Geolocalizacao",
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
-      "position": [3640, -350],
+      "position": [
+        3640,
+        -350
+      ],
       "parameters": {
         "aggregate": "aggregateIndividualFields",
-        "fieldsToAggregate": { "fieldToAggregate": [ { "fieldToAggregate": "sem_geo" } ] }
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "sem_geo"
+            },
+            {
+              "fieldToAggregate": "promo_nao_reconhecido"
+            }
+          ]
+        }
       }
     },
     {
       "id": "bd6bc5ff-01f3-487d-826a-c75a0aeedf75",
-      "name": "Buscar Usuario Promotor",
+      "name": "Resolver Responsavel (RPC)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [3640, -150],
+      "position": [
+        3640,
+        -150
+      ],
       "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?nome=ilike.*{{ encodeURIComponent($json.promo) }}*&select=*",
+        "method": "POST",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/rpc/resolver_usuario_por_nome",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [ { "name": "Accept-Profile", "value": "rotaviva" } ] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"p_nome\": $json.promo } }}"
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } }
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      }
     },
     {
       "id": "b2af1c41-12e7-47ee-853f-040ea8dfbf0a",
       "name": "Inserir Agenda Visita",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [3900, -150],
+      "position": [
+        3900,
+        -150
+      ],
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
@@ -423,27 +778,52 @@
         "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Profile", "value": "rotaviva" },
-            { "name": "Content-Type", "value": "application/json" },
-            { "name": "Prefer", "value": "return=representation" }
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"data\": $('Prepare Agenda Item').item.json.data_visita, \"usuario_id\": $json.id, \"loja_id\": $('Prepare Agenda Item').item.json.loja_id, \"origem\": \"rota\", \"status\": \"pendente\" } }}"
+        "jsonBody": "={{ { \"data\": $('Prepare Agenda Item').item.json.data_visita, \"usuario_id\": $json.usuario_id || null, \"loja_id\": $('Prepare Agenda Item').item.json.loja_id, \"origem\": \"rota\", \"status\": \"pendente\" } }}"
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } }
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CRED_SUPABASE_ROTAVIVA"
+        }
+      }
     },
     {
       "id": "3e81bdb4-2063-490b-84b0-4dbae645b2da",
       "name": "Agregar Linhas da Rota",
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
-      "position": [1820, 100],
+      "position": [
+        1820,
+        100
+      ],
       "parameters": {
         "aggregate": "aggregateIndividualFields",
-        "fieldsToAggregate": { "fieldToAggregate": [ { "fieldToAggregate": "PROMO" }, { "fieldToAggregate": "data_normalizada" } ] }
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "PROMO"
+            },
+            {
+              "fieldToAggregate": "data_normalizada"
+            }
+          ]
+        }
       }
     },
     {
@@ -451,19 +831,28 @@
       "name": "Combinar Agregados",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
-      "position": [3900, 100],
-      "parameters": { "mode": "combine", "combineBy": "combineByPosition" }
+      "position": [
+        3900,
+        100
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition"
+      }
     },
     {
       "id": "799bb6b8-b232-400c-afef-dfd9ed3c9088",
       "name": "Calcular Resumo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [4160, 100],
+      "position": [
+        4160,
+        100
+      ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const item = $json;\nconst promos = item.PROMO || [];\nconst dates = item.data_normalizada || [];\nconst semGeoFlags = item.sem_geo || [];\nconst n = promos.length;\nconst distinct = new Set(promos.filter((p) => p !== undefined && p !== null && p !== '')).size;\nconst k = semGeoFlags.filter((f) => f === true).length;\nconst isoDate = dates.length > 0 ? dates[0] : null;\nlet dataDisplay = '';\nif (isoDate) {\n  const d = new Date(isoDate + 'T00:00:00Z');\n  const dd = String(d.getUTCDate()).padStart(2, '0');\n  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');\n  const yyyy = d.getUTCFullYear();\n  dataDisplay = dd + '/' + mm + '/' + yyyy;\n}\nreturn {\n  json: {\n    n: n,\n    m: distinct,\n    k: k,\n    data: dataDisplay\n  }\n};"
+        "jsCode": "const item = $json;\nconst promos = item.PROMO || [];\nconst dates = item.data_normalizada || [];\nconst semGeoFlags = item.sem_geo || [];\nconst naoReconhecidosRaw = item.promo_nao_reconhecido || [];\nconst n = promos.length;\nconst distinct = new Set(promos.filter((p) => p !== undefined && p !== null && p !== '')).size;\nconst k = semGeoFlags.filter((f) => f === true).length;\n\n// linhas cujo nome na coluna PROMO nao casou com nenhum usuario que faz visitas:\n// foram importadas como pendentes sem responsavel e precisam ser corrigidas.\nconst naoReconhecidos = naoReconhecidosRaw.filter((p) => p !== undefined && p !== null && String(p).trim() !== '');\nconst nomesUnicos = Array.from(new Set(naoReconhecidos.map((p) => String(p).trim())));\nconst qtdNaoReconhecidas = naoReconhecidos.length;\nconst aviso = qtdNaoReconhecidas > 0\n  ? '\\n\\n' + qtdNaoReconhecidas + ' linha' + (qtdNaoReconhecidas > 1 ? 's' : '') +\n    ' com responsavel nao reconhecido: ' + nomesUnicos.join(', ') +\n    '\\nEssas visitas foram importadas sem responsavel.'\n  : '';\n\nconst isoDate = dates.length > 0 ? dates[0] : null;\nlet dataDisplay = '';\nif (isoDate) {\n  const d = new Date(isoDate + 'T00:00:00Z');\n  const dd = String(d.getUTCDate()).padStart(2, '0');\n  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');\n  const yyyy = d.getUTCFullYear();\n  dataDisplay = dd + '/' + mm + '/' + yyyy;\n}\nreturn {\n  json: {\n    n: n,\n    m: distinct,\n    k: k,\n    qtdNaoReconhecidas: qtdNaoReconhecidas,\n    nomesNaoReconhecidos: nomesUnicos,\n    aviso: aviso,\n    data: dataDisplay\n  }\n};"
       }
     },
     {
@@ -471,23 +860,33 @@
       "name": "Responder Coordenador",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
-      "position": [4420, 100],
+      "position": [
+        4420,
+        100
+      ],
       "parameters": {
         "resource": "message",
         "operation": "send",
         "phoneNumberId": "<__PLACEHOLDER_VALUE__WhatsApp Business Phone Number ID (WABA) do RotaViva__>",
         "recipientPhoneNumber": "={{ $('WhatsApp Trigger').first().json.messages[0].from }}",
         "messageType": "text",
-        "textBody": "=Rota de {{ $json.data }} recebida: {{ $json.n }} visitas para {{ $json.m }} promotores. {{ $json.k }} lojas sem geolocalizacao."
+        "textBody": "=Rota de {{ $json.data }} recebida: {{ $json.n }} visitas para {{ $json.m }} responsaveis. {{ $json.k }} lojas sem geolocalizacao.{{ $json.aviso }}"
       },
-      "credentials": { "whatsAppApi": { "name": "CRED_META_CLOUD" } }
+      "credentials": {
+        "whatsAppApi": {
+          "name": "CRED_META_CLOUD"
+        }
+      }
     },
     {
       "id": "8b013b8b-f404-4724-a444-48a4528a4103",
       "name": "Sticky Note 1e999c32",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [210, -50],
+      "position": [
+        210,
+        -50
+      ],
       "parameters": {
         "content": "## Guard + Deteccao\nVerifica coordenador ativo (0 resultados = encerra silenciosamente) e se a mensagem tem documento anexado.",
         "color": 4,
@@ -500,7 +899,10 @@
       "name": "Sticky Note a89866c3",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [730, -200],
+      "position": [
+        730,
+        -200
+      ],
       "parameters": {
         "content": "## Download e Extracao\nBaixa o xlsx via WhatsApp Media API e converte em itens JSON.",
         "color": 5,
@@ -513,7 +915,10 @@
       "name": "Sticky Note 8f6721a0",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [1770, -450],
+      "position": [
+        1770,
+        -450
+      ],
       "parameters": {
         "content": "## Upsert Loja + Geocodificacao\nUpsert por codcl. Geocodifica somente lojas sem lat/long. Falha de geocoding nao interrompe o fluxo (onError continueRegularOutput).",
         "color": 3,
@@ -526,13 +931,52 @@
       "name": "Sticky Note 97fc8518",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [1770, -400],
+      "position": [
+        1770,
+        -400
+      ],
       "parameters": {
         "content": "## Agenda de Visitas + Resumo\nPopula agenda_visitas por linha e agrega contadores para a mensagem final ao coordenador.",
         "color": 6,
         "width": 2900,
         "height": 650
       }
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "usuario-id",
+              "name": "usuario_id",
+              "type": "string",
+              "value": "={{ $json.usuario_id || '' }}"
+            },
+            {
+              "id": "sem-geo",
+              "name": "sem_geo",
+              "type": "boolean",
+              "value": "={{ $('Prepare Agenda Item').item.json.sem_geo }}"
+            },
+            {
+              "id": "promo-nr",
+              "name": "promo_nao_reconhecido",
+              "type": "string",
+              "value": "={{ $json.usuario_id ? '' : $('Prepare Agenda Item').item.json.promo }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3770,
+        20
+      ],
+      "id": "b1f0c2a4-rv06-4a11-9d33-marcarresp01",
+      "name": "Marcar Responsavel"
     }
   ]
 }
