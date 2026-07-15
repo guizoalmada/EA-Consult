@@ -105,6 +105,14 @@ Mitigação aplicada: `notes` em ambos os nodes. Ação humana antes do go-live:
 — e de todo node Telegram criado nas próximas fases (W2, e W1 se receber documento pelo Telegram).
 Auditar `autoAssignedCredentials` após cada criação/edição de workflow com node Telegram/WhatsApp.
 
+**✅ RESOLVIDO (Telegram) — 15 Jul 2026:** o Guilherme criou a credencial real
+`ROTA-VITA - Telegram - Morgana` (id `9B3nW4btlkMwlbYj`, tipo `telegramApi`). Ela foi vinculada via
+`setNodeCredential` a **todos os nós Telegram**: W0 (`Enviar Telegram`) e W2 (`Telegram Trigger`,
+`Pedir Contato (/start)`, `Confirmar Vinculacao`, `Orientar Nao Cadastrado`). Confirmado
+`autoAssignedCredentials: []` na aplicação. **Pendente ainda:** os nós **WhatsApp** dormentes
+(auto-associados à `ARMCOM - WhatsApp Cloud API`) — só relevantes se/quando o WhatsApp for reativado
+(produção futura); trocar para `CRED_META_CLOUD` real antes de qualquer ativação do ramo WhatsApp.
+
 ---
 
 ## B-02 — "Planilha Mestre" com aba Config e o W7 de sincronização não existem
