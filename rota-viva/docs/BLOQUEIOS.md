@@ -222,4 +222,25 @@ editar/validar workflows no n8n, nem criar/testar a planilha no Google.
 
 **O que foi entregue nesta sessão sem os MCPs:** arquivo de migration do outbox, e a documentação da
 nova arquitetura (D-13, este B-04/B-05, CREDENCIAIS com `CRED_GOOGLE_SHEETS`). Retomar o build assim
-que os MCPs reconectarem.
+que os MCPs reconectarem. **Atualização:** MCPs voltaram (n8n via servidor `claude.ai n8n`; Supabase);
+migration aplicada; W2 rebuild, W3/W4/W6→W0 e o workflow de setup da planilha construídos.
+
+---
+
+## B-06 — Credenciais criadas mas NÃO autorizadas / ausentes (bloqueia teste do pipeline) — 15 Jul 2026
+
+**Google Sheets/Drive OAuth não conectado:** a credencial `ROTA-VIVA - Google Sheets`
+(`V8yK9tJ9nbUTis15`) existe mas não tem access token — o node de criar a planilha falhou com
+`NodeApiError: Unable to sign without access token` (execução `2762`). É preciso abrir a credencial
+no n8n e concluir o fluxo OAuth do Google ("Connect my account" / "Sign in with Google"). O mesmo
+provavelmente vale para `ROTA-VIVA - Google Drive` (`xaChmTzpezR036yv`), usada pelo W8.
+
+**`CRED_SUPABASE_ROTAVIVA` (httpCustomAuth) ainda não existe:** todos os nós HTTP que falam com o
+Supabase nos workflows referenciam esse placeholder e estão **sem credencial** (fail closed). Criar
+como "HTTP Custom Auth" com headers `apikey: <service_role>` e `Authorization: Bearer <service_role>`
+(ver `CREDENCIAIS.md`). Sem ela nenhum workflow lê/grava no Supabase em runtime.
+
+**Impacto:** com as 3 credenciais acima OK (Telegram já está), o piloto fica testável ponta a ponta.
+Enquanto não: criar a planilha (Bloco G) e testar W5/W7/W8 fica bloqueado. O workflow
+`[RotaViva] Setup - Planilha Master` (`XJPy0wMAW6vB4H8z`) está pronto para re-executar assim que o
+OAuth do Google for concluído.
