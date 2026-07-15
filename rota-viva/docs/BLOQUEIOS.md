@@ -89,6 +89,22 @@ workflow, se algum node ficou apontando para uma credencial de outro projeto ant
 **Isso agora é bloqueante, não uma recomendação.** Nenhum workflow do Rota Viva pode ser ativado
 antes que a tabela acima esteja toda apontando para credenciais do Rota Viva.
 
+**Adendo (15 Jul 2026, v2 multicanal): o mesmo vale para o Telegram.** Existe exatamente **uma**
+credencial `telegramApi` na conta — `ARMCOM - Telegram Sarah Bot` (id `kNeRELzSDrJ5d3Eg`), de outro
+cliente. Ao criar o **W0** (`[RotaViva] W0 - Enviar Mensagem`, id `YnkTgdXycHXNBJci`), a ferramenta
+auto-associou:
+
+| Workflow | Node | Credencial auto-associada (TROCAR) |
+|---|---|---|
+| W0 | Enviar Telegram | `kNeRELzSDrJ5d3Eg` — ARMCOM - Telegram Sarah Bot |
+| W0 | Enviar WhatsApp (dormente) | `qxbrAen7zi4DhywY` — ARMCOM - WhatsApp Cloud API |
+
+Consequência: se o W0 fosse ativado hoje, o Telegram do Rota Viva **enviaria pelo bot da ARMCOM**.
+Mitigação aplicada: `notes` em ambos os nodes. Ação humana antes do go-live: criar
+`CRED_TELEGRAM_BOT` (BotFather do Rota Viva) e trocar a credencial do node "Enviar Telegram" do W0
+— e de todo node Telegram criado nas próximas fases (W2, e W1 se receber documento pelo Telegram).
+Auditar `autoAssignedCredentials` após cada criação/edição de workflow com node Telegram/WhatsApp.
+
 ---
 
 ## B-02 — "Planilha Mestre" com aba Config e o W7 de sincronização não existem
