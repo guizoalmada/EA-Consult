@@ -192,7 +192,7 @@
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=in.(meta_visitas_dia,meta_visitas_mes,sla_dias_padrao,emails_relatorio)&select=chave,valor",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -203,7 +203,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -218,7 +219,7 @@
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?faz_visitas=eq.true&ativo=eq.true&select=id,nome,papel,telefone,meta_visitas_dia",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -229,7 +230,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },
@@ -245,7 +247,7 @@
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=eq.gerente&ativo=eq.true&select=id,nome,telefone&limit=1",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -256,7 +258,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },
@@ -272,7 +275,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=eq.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,status,origem",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -283,7 +286,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },
@@ -299,7 +303,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=gte.{{ $today.startOf('month').toFormat('yyyy-MM-dd') }}&data=lte.{{ $today.toFormat('yyyy-MM-dd') }}&status=eq.realizada&select=id,usuario_id,data",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -310,7 +314,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },
@@ -326,7 +331,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?flag_suspeito=eq.true&checkin_at=gte.{{ $today.toISO() }}&checkin_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,usuario_id,loja_id,checkin_at",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -337,7 +342,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },
@@ -353,7 +359,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades?criado_em=gte.{{ $today.toISO() }}&criado_em=lt.{{ $today.plus(1,'days').toISO() }}&select=id,produto,loja_id,visita_id",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -364,7 +370,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },
@@ -380,7 +387,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?status_1=eq.sem_interesse&checkout_at=gte.{{ $today.toISO() }}&checkout_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,loja_id,usuario_id,motivo_nao_fechamento",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -391,7 +398,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },
@@ -407,7 +415,7 @@
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?etapa=not.in.(ativo,cancelado)&select=id,loja_id,produto,etapa,etapa_desde,numero_fluig",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -418,7 +426,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },
@@ -434,7 +443,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?origem=eq.retorno&status=eq.pendente&data=lt.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,data",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -445,7 +454,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "executeOnce": true
     },

@@ -3,6 +3,7 @@
   "name": "[RotaViva] W2 - Conversa Campo",
   "active": false,
   "isArchived": false,
+  "activeVersionId": null,
   "description": "Maquina de estados MULTICANAL (D-10): Telegram padrao com /start por contato; WhatsApp preservado dormente. Check-in, foto, checkout (decisor/produto/observacao; audio via Whisper+Haiku) e comandos de texto.",
   "settings": {
     "executionOrder": "v1",
@@ -977,7 +978,7 @@
       "parameters": {
         "method": "GET",
         "url": "={{ $json.urlUsuario }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -988,7 +989,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1111,7 +1113,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?codcl=eq.{{ $json.comandoCodcl }}&select=*",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1122,7 +1124,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1152,7 +1155,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?loja_id=eq.{{ $json.lojaId }}&etapa=in.(docs_enviados,processamento_matriz)&order=criado_em.desc&limit=1&select=*",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1163,7 +1166,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1193,7 +1197,7 @@
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?id=eq.{{ $json.contratoId }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1216,7 +1220,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"etapa\": \"assinatura_cliente\", \"etapa_desde\": $today.toISODate(), \"atualizado_por\": $json.usuarioId, \"atualizado_em\": $now.toISO() } }}"
+        "jsonBody": "={{ { \"etapa\": \"assinatura_cliente\", \"etapa_desde\": $today.toISODate(), \"atualizado_por\": $json.usuarioId, \"atualizado_em\": $now.toISO() } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1251,7 +1256,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?codcl=eq.{{ $json.comandoCodcl }}&select=*",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1262,7 +1267,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1292,7 +1298,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?loja_id=eq.{{ $json.lojaId }}&order=criado_em.desc&limit=1&select=*",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1303,7 +1309,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1333,7 +1340,7 @@
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?id=eq.{{ $json.contratoId }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1356,7 +1363,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ $json.patchBody }}"
+        "jsonBody": "={{ $json.patchBody }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1402,7 +1410,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?telefone=eq.{{ $json.telefone }}&select=*",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1413,7 +1421,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1557,7 +1566,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?usuario_id=eq.{{ $json.usuarioId }}&data=eq.{{ $today.toISODate() }}&status=eq.pendente&select=*,lojas(*)",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1568,7 +1577,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1648,7 +1658,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=eq.raio_checkin_m&select=valor",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1659,7 +1669,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1719,7 +1730,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=in.(coordenador,gerente)&ativo=eq.true&select=*",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1730,7 +1741,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1821,7 +1833,7 @@
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1844,7 +1856,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"telefone\": $json.telefone, \"estado\": \"aguardando_foto\", \"contexto\": { \"agenda_id\": $json.agendaId, \"loja_id\": $json.lojaId, \"checkin_lat\": $json.checkinLat, \"checkin_long\": $json.checkinLong, \"distancia_m\": $json.distanciaM, \"flag_suspeito\": $json.flagSuspeito === \"true\" }, \"atualizado_em\": $now.toISO() } }}"
+        "jsonBody": "={{ { \"telefone\": $json.telefone, \"estado\": \"aguardando_foto\", \"contexto\": { \"agenda_id\": $json.agendaId, \"loja_id\": $json.lojaId, \"checkin_lat\": $json.checkinLat, \"checkin_long\": $json.checkinLong, \"distancia_m\": $json.distanciaM, \"flag_suspeito\": $json.flagSuspeito === \"true\" }, \"atualizado_em\": $now.toISO() } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1962,7 +1975,7 @@
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/storage/v1/object/rotaviva-fotos/{{ $(\"Normalizar Estado\").item.json.contexto.agenda_id }}.jpg",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1980,7 +1993,8 @@
         },
         "sendBody": true,
         "contentType": "binaryData",
-        "inputDataFieldName": "data"
+        "inputDataFieldName": "data",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -2010,7 +2024,7 @@
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -2033,7 +2047,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"agenda_id\": $json.contexto.agenda_id, \"usuario_id\": $json.usuarioId, \"loja_id\": $json.contexto.loja_id, \"checkin_at\": $now.toISO(), \"checkin_lat\": $json.contexto.checkin_lat, \"checkin_long\": $json.contexto.checkin_long, \"distancia_m\": $json.contexto.distancia_m, \"foto_url\": $json.fotoUrl, \"flag_suspeito\": $json.contexto.flag_suspeito } }}"
+        "jsonBody": "={{ { \"agenda_id\": $json.contexto.agenda_id, \"usuario_id\": $json.usuarioId, \"loja_id\": $json.contexto.loja_id, \"checkin_at\": $now.toISO(), \"checkin_lat\": $json.contexto.checkin_lat, \"checkin_long\": $json.contexto.checkin_long, \"distancia_m\": $json.contexto.distancia_m, \"foto_url\": $json.fotoUrl, \"flag_suspeito\": $json.contexto.flag_suspeito } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -2063,7 +2078,7 @@
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -2086,7 +2101,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"telefone\": $json.telefone, \"estado\": \"checkout\", \"contexto\": { ...$json.contexto, \"visita_id\": $json.visitaId, \"etapa_checkout\": \"decisor\" }, \"atualizado_em\": $now.toISO() } }}"
+        "jsonBody": "={{ { \"telefone\": $json.telefone, \"estado\": \"checkout\", \"contexto\": { ...$json.contexto, \"visita_id\": $json.visitaId, \"etapa_checkout\": \"decisor\" }, \"atualizado_em\": $now.toISO() } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -2349,7 +2365,7 @@
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?id=eq.{{ $(\"Motor de Checkout\").item.json.visitaId }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -2372,7 +2388,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.visitaUpdates }}"
+        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.visitaUpdates }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -2450,7 +2467,7 @@
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -2473,7 +2490,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosAgendaReagendada }}"
+        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosAgendaReagendada }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -2518,7 +2536,7 @@
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?id=eq.{{ $(\"Motor de Checkout\").item.json.agendaIdParaRealizar }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -2537,7 +2555,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"status\": \"realizada\" } }}"
+        "jsonBody": "={{ { \"status\": \"realizada\" } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -2552,7 +2571,7 @@
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -2575,7 +2594,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"telefone\": $(\"Motor de Checkout\").item.json.telefone, \"estado\": $(\"Motor de Checkout\").item.json.novoEstado, \"contexto\": $(\"Motor de Checkout\").item.json.novoContexto, \"atualizado_em\": $now.toISO() } }}"
+        "jsonBody": "={{ { \"telefone\": $(\"Motor de Checkout\").item.json.telefone, \"estado\": $(\"Motor de Checkout\").item.json.novoEstado, \"contexto\": $(\"Motor de Checkout\").item.json.novoContexto, \"atualizado_em\": $now.toISO() } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -2778,7 +2798,7 @@
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -2801,7 +2821,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosOportunidade }}"
+        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosOportunidade }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -2816,7 +2837,7 @@
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -2839,7 +2860,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { ...$(\"Motor de Checkout\").item.json.dadosContrato, \"oportunidade_id\": $json[0].id } }}"
+        "jsonBody": "={{ { ...$(\"Motor de Checkout\").item.json.dadosContrato, \"oportunidade_id\": $json[0].id } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {

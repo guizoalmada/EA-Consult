@@ -4,7 +4,7 @@
   "active": false,
   "isArchived": false,
   "activeVersionId": null,
-  "description": null,
+  "description": "Recebe a planilha de rota (XLSX) do coordenador via Telegram (documento), faz upsert de lojas, geocodifica enderecos novos, popula agenda_visitas e confirma via W0. WhatsApp preservado dormente.",
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": true
@@ -345,7 +345,7 @@
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?telefone=eq.{{ $json.messages[0].from }}&papel=eq.coordenador&ativo=eq.true&select=*",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -356,7 +356,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "disabled": true
     },
@@ -460,7 +461,7 @@
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?on_conflict=codcl",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -483,7 +484,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"codcl\": $json.CODCL, \"cnpj\": $json.CNPJ, \"nome\": $json.NOME_CLIENTE, \"endereco\": $json.ENDERECO, \"bairro\": $json.BAIRRO, \"cidade\": $json.CIDADE, \"telefones\": $json.telefones, \"contato\": $json.CONTATO, \"caracteristica\": $json.CARACTERISTICA, \"vendedor_dpk\": $json.VEND } }}"
+        "jsonBody": "={{ { \"codcl\": $json.CODCL, \"cnpj\": $json.CNPJ, \"nome\": $json.NOME_CLIENTE, \"endereco\": $json.ENDERECO, \"bairro\": $json.BAIRRO, \"cidade\": $json.CIDADE, \"telefones\": $json.telefones, \"contato\": $json.CONTATO, \"caracteristica\": $json.CARACTERISTICA, \"vendedor_dpk\": $json.VEND } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -570,7 +572,7 @@
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?id=eq.{{ $json.id }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -593,7 +595,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"lat\": $json.lat, \"long\": $json.long } }}"
+        "jsonBody": "={{ { \"lat\": $json.lat, \"long\": $json.long } }}",
+        "nodeCredentialType": "supabaseApi"
       },
       "onError": "continueRegularOutput"
     },
@@ -738,7 +741,7 @@
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/rpc/resolver_usuario_por_nome",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -757,7 +760,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"p_nome\": $json.promo } }}"
+        "jsonBody": "={{ { \"p_nome\": $json.promo } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -772,7 +776,7 @@
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -795,7 +799,8 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"data\": $('Prepare Agenda Item').item.json.data_visita, \"usuario_id\": $json.usuario_id || null, \"loja_id\": $('Prepare Agenda Item').item.json.loja_id, \"origem\": \"rota\", \"status\": \"pendente\" } }}"
+        "jsonBody": "={{ { \"data\": $('Prepare Agenda Item').item.json.data_visita, \"usuario_id\": $json.usuario_id || null, \"loja_id\": $('Prepare Agenda Item').item.json.loja_id, \"origem\": \"rota\", \"status\": \"pendente\" } }}",
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -1048,7 +1053,7 @@
       "parameters": {
         "method": "GET",
         "url": "={{ $json.urlGuard }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -1059,7 +1064,8 @@
               "value": "rotaviva"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {

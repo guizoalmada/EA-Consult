@@ -183,7 +183,7 @@
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -212,7 +212,8 @@
               "value": "id,nome,telefone,papel,meta_visitas_dia"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {
@@ -227,7 +228,7 @@
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -260,7 +261,8 @@
               "value": "*,lojas(nome,bairro,contato,telefones)"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       },
       "alwaysOutputData": true
     },
@@ -366,7 +368,7 @@
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -395,7 +397,8 @@
               "value": "*"
             }
           ]
-        }
+        },
+        "nodeCredentialType": "supabaseApi"
       }
     },
     {

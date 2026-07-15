@@ -11,31 +11,101 @@
   },
   "connections": {
     "Chamada (Execute Workflow)": {
-      "main": [[{ "node": "Preparar Contexto", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar Contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar Contexto": {
-      "main": [[{ "node": "Buscar Usuário", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Usuário": {
-      "main": [[{ "node": "Montar Mensagem", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Montar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Montar Mensagem": {
-      "main": [[{ "node": "Rotear por Canal", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Rotear por Canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Rotear por Canal": {
       "main": [
-        [{ "node": "Enviar Telegram", "type": "main", "index": 0 }],
-        [{ "node": "Buscar Flag WhatsApp", "type": "main", "index": 0 }],
-        [{ "node": "Registrar Sem Canal / Erro", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Enviar Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Flag WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar Sem Canal / Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Buscar Flag WhatsApp": {
-      "main": [[{ "node": "WhatsApp Habilitado?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "WhatsApp Habilitado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "WhatsApp Habilitado?": {
       "main": [
-        [{ "node": "Enviar WhatsApp (dormente)", "type": "main", "index": 0 }],
-        [{ "node": "WhatsApp Desabilitado", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Enviar WhatsApp (dormente)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WhatsApp Desabilitado",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -45,15 +115,23 @@
       "name": "Chamada (Execute Workflow)",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.2,
-      "position": [0, 192],
-      "parameters": { "inputSource": "passthrough" }
+      "position": [
+        0,
+        192
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
     },
     {
       "id": "7253ee86-bde3-40db-b463-f7abb4bbdd0d",
       "name": "Preparar Contexto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [224, 192],
+      "position": [
+        224,
+        192
+      ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
@@ -65,25 +143,38 @@
       "name": "Buscar Usuário",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [448, 192],
-      "alwaysOutputData": true,
+      "position": [
+        448,
+        192
+      ],
       "parameters": {
         "method": "GET",
         "url": "={{ $json.urlUsuario }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        },
+        "nodeCredentialType": "supabaseApi"
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } }
+      "alwaysOutputData": true
     },
     {
       "id": "877096a7-0b8c-4aec-a309-4312637dcd42",
       "name": "Montar Mensagem",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [672, 192],
+      "position": [
+        672,
+        192
+      ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
@@ -95,7 +186,10 @@
       "name": "Rotear por Canal",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
-      "position": [896, 176],
+      "position": [
+        896,
+        176
+      ],
       "parameters": {
         "rules": {
           "values": [
@@ -103,8 +197,21 @@
               "renameOutput": true,
               "outputKey": "telegram",
               "conditions": {
-                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
-                "conditions": [{ "leftValue": "={{ $json.canal }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "telegram" }],
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "telegram"
+                  }
+                ],
                 "combinator": "and"
               }
             },
@@ -112,14 +219,30 @@
               "renameOutput": true,
               "outputKey": "whatsapp",
               "conditions": {
-                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
-                "conditions": [{ "leftValue": "={{ $json.canal }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "whatsapp" }],
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "whatsapp"
+                  }
+                ],
                 "combinator": "and"
               }
             }
           ]
         },
-        "options": { "fallbackOutput": "extra", "renameFallbackOutput": "Sem Canal / Erro" }
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Sem Canal / Erro"
+        }
       }
     },
     {
@@ -127,7 +250,10 @@
       "name": "Enviar Telegram",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1120, 0],
+      "position": [
+        1120,
+        0
+      ],
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
@@ -135,39 +261,67 @@
         "text": "={{ $json.text }}",
         "replyMarkup": "={{ $json.temBotoes ? 'inlineKeyboard' : 'none' }}",
         "inlineKeyboard": "={{ $json.inlineKeyboard }}",
-        "additionalFields": { "appendAttribution": false }
+        "additionalFields": {
+          "appendAttribution": false
+        }
       },
-      "credentials": { "telegramApi": { "name": "CRED_TELEGRAM_BOT" } },
-      "notes": "B-01: unico telegramApi na conta e o da ARMCOM (kNeRELzSDrJ5d3Eg). Trocar para CRED_TELEGRAM_BOT real do Rota Viva antes do go-live."
+      "notes": "B-01: unico telegramApi na conta e o da ARMCOM. Trocar para CRED_TELEGRAM_BOT real do Rota Viva antes do go-live.",
+      "webhookId": "f96e0b5e-d277-442c-9c72-152aafb30acc"
     },
     {
       "id": "2f9ff127-b7c5-42c7-bb58-a5984b4d2a90",
       "name": "Buscar Flag WhatsApp",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [1120, 192],
-      "alwaysOutputData": true,
+      "position": [
+        1120,
+        192
+      ],
       "parameters": {
         "method": "GET",
         "url": "={{ $('Preparar Contexto').first().json.urlConfigWpp }}",
-        "authentication": "genericCredentialType",
+        "authentication": "predefinedCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
-        "headerParameters": { "parameters": [{ "name": "Accept-Profile", "value": "rotaviva" }] }
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        },
+        "nodeCredentialType": "supabaseApi"
       },
-      "credentials": { "httpCustomAuth": { "name": "CRED_SUPABASE_ROTAVIVA" } }
+      "alwaysOutputData": true
     },
     {
       "id": "f75f8d4a-761e-4652-9e1f-495a31fa113c",
       "name": "WhatsApp Habilitado?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1344, 192],
+      "position": [
+        1344,
+        192
+      ],
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
-          "conditions": [{ "leftValue": "={{ $json.valor }}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "true" }],
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.valor }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "true"
+            }
+          ],
           "combinator": "and"
         }
       }
@@ -177,7 +331,10 @@
       "name": "Enviar WhatsApp (dormente)",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
-      "position": [1568, 96],
+      "position": [
+        1568,
+        96
+      ],
       "parameters": {
         "resource": "message",
         "operation": "sendTemplate",
@@ -185,18 +342,28 @@
         "recipientPhoneNumber": "={{ $('Montar Mensagem').first().json.telefone }}",
         "template": "={{ $('Montar Mensagem').first().json.wa_template }}",
         "components": {
-          "component": [{ "type": "body", "bodyParameters": { "parameter": "={{ $('Montar Mensagem').first().json.wa_params }}" } }]
+          "component": [
+            {
+              "type": "body",
+              "bodyParameters": {
+                "parameter": "={{ $('Montar Mensagem').first().json.wa_params }}"
+              }
+            }
+          ]
         }
       },
-      "credentials": { "whatsAppApi": { "name": "CRED_META_CLOUD" } },
-      "notes": "Canal WhatsApp DORMENTE (D-10). So executa se config.whatsapp_habilitado=true. B-01: trocar credencial para a CRED_META_CLOUD real do Rota Viva antes de qualquer ativacao."
+      "notes": "Canal WhatsApp DORMENTE (D-10). So executa se config.whatsapp_habilitado=true. B-01: trocar credencial para a CRED_META_CLOUD real do Rota Viva antes de qualquer ativacao.",
+      "webhookId": "b1092456-ac32-4cb4-922b-7aa5bdb4c410"
     },
     {
       "id": "973458c7-28c3-4743-afa4-0476cdb5d485",
       "name": "WhatsApp Desabilitado",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1568, 288],
+      "position": [
+        1568,
+        288
+      ],
       "parameters": {
         "mode": "raw",
         "jsonOutput": "={{ { \"ok\": true, \"canal\": \"whatsapp\", \"enviado\": false, \"motivo\": \"whatsapp_habilitado=false\" } }}"
@@ -207,7 +374,10 @@
       "name": "Registrar Sem Canal / Erro",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1120, 384],
+      "position": [
+        1120,
+        384
+      ],
       "parameters": {
         "mode": "raw",
         "jsonOutput": "={{ { \"ok\": false, \"erro\": ($json.erro || \"canal_desconhecido\"), \"canal\": $json.canal } }}"
