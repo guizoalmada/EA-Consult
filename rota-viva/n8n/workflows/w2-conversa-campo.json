@@ -3,11 +3,7 @@
   "name": "[RotaViva] W2 - Conversa Campo",
   "active": false,
   "isArchived": false,
-  "versionId": "c65dd90f-9f64-4903-849f-33698c807e1c",
-  "activeVersionId": null,
-  "triggerCount": 0,
-  "createdAt": "2026-07-10T02:22:43.110Z",
-  "updatedAt": "2026-07-10T02:22:43.110Z",
+  "description": "Maquina de estados MULTICANAL (D-10): Telegram padrao com /start por contato; WhatsApp preservado dormente. Check-in, foto, checkout (decisor/produto/observacao; audio via Whisper+Haiku) e comandos de texto.",
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": true
@@ -28,7 +24,7 @@
       "main": [
         [
           {
-            "node": "Buscar Usuario Ativo",
+            "node": "Entrada Normalizada",
             "type": "main",
             "index": 0
           }
@@ -148,7 +144,7 @@
       "main": [
         [
           {
-            "node": "Confirmar Contrato Assinado",
+            "node": "Confirmar Contrato Assinado (TG)",
             "type": "main",
             "index": 0
           }
@@ -203,7 +199,7 @@
       "main": [
         [
           {
-            "node": "Confirmar Maquininha Ativada",
+            "node": "Confirmar Maquininha Ativada (TG)",
             "type": "main",
             "index": 0
           }
@@ -308,7 +304,7 @@
       "main": [
         [
           {
-            "node": "Avisar Sem Visita Pendente",
+            "node": "Avisar Sem Visita Pendente (TG)",
             "type": "main",
             "index": 0
           }
@@ -362,11 +358,33 @@
         ]
       ]
     },
-    "Enviar Template Checkin Suspeito": {
+    "Buscar Destinatarios Alerta": {
       "main": [
         [
           {
-            "node": "Consolidar Alerta Destinatarios",
+            "node": "Mapear Destinatarios Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Destinatarios Alerta": {
+      "main": [
+        [
+          {
+            "node": "Enviar Alerta Checkin (TG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Alerta Destinatarios": {
+      "main": [
+        [
+          {
+            "node": "Upsert Estado Aguardando Foto",
             "type": "main",
             "index": 0
           }
@@ -377,7 +395,7 @@
       "main": [
         [
           {
-            "node": "Pedir Foto Fachada",
+            "node": "Pedir Foto Fachada (TG)",
             "type": "main",
             "index": 0
           }
@@ -388,7 +406,7 @@
       "main": [
         [
           {
-            "node": "Buscar URL Midia Foto",
+            "node": "Baixar Foto (Telegram)",
             "type": "main",
             "index": 0
           }
@@ -396,28 +414,6 @@
         [
           {
             "node": "Aguardando Foto - Nao E Imagem - Ignorar",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar URL Midia Foto": {
-      "main": [
-        [
-          {
-            "node": "Baixar Foto",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Baixar Foto": {
-      "main": [
-        [
-          {
-            "node": "Upload Foto Storage",
             "type": "main",
             "index": 0
           }
@@ -472,7 +468,7 @@
       "main": [
         [
           {
-            "node": "Enviar Pergunta Decisor",
+            "node": "Enviar Pergunta Decisor (TG)",
             "type": "main",
             "index": 0
           }
@@ -483,7 +479,7 @@
       "main": [
         [
           {
-            "node": "Buscar URL Midia Audio",
+            "node": "Baixar Audio (Telegram)",
             "type": "main",
             "index": 0
           }
@@ -491,28 +487,6 @@
         [
           {
             "node": "Preparar Resultado Texto",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar URL Midia Audio": {
-      "main": [
-        [
-          {
-            "node": "Baixar Audio",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Baixar Audio": {
-      "main": [
-        [
-          {
-            "node": "Transcrever Audio",
             "type": "main",
             "index": 0
           }
@@ -694,21 +668,21 @@
       "main": [
         [
           {
-            "node": "Enviar Texto Checkout",
+            "node": "Enviar Texto Checkout (TG)",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Enviar Lista Checkout",
+            "node": "Enviar Interativo Checkout (TG)",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Enviar Botoes Checkout",
+            "node": "Enviar Interativo Checkout (TG)",
             "type": "main",
             "index": 0
           }
@@ -788,33 +762,169 @@
         ]
       ]
     },
-    "Buscar Destinatarios Alerta": {
+    "Telegram Trigger": {
       "main": [
         [
           {
-            "node": "Mapear Destinatarios Alerta",
+            "node": "Normalizar Telegram",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Mapear Destinatarios Alerta": {
+    "Normalizar Telegram": {
       "main": [
         [
           {
-            "node": "Enviar Template Checkin Suspeito",
+            "node": "Roteia Start/Contato?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "É Callback?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Consolidar Alerta Destinatarios": {
+    "Roteia Start/Contato?": {
       "main": [
         [
           {
-            "node": "Upsert Estado Aguardando Foto",
+            "node": "É Contato?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Entrada Normalizada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Contato?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuarios p/ Vincular",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pedir Contato (/start)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuarios p/ Vincular": {
+      "main": [
+        [
+          {
+            "node": "Casar Telefone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Casar Telefone": {
+      "main": [
+        [
+          {
+            "node": "Achou Usuario?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Achou Usuario?": {
+      "main": [
+        [
+          {
+            "node": "Vincular telegram_chat_id",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Orientar Nao Cadastrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vincular telegram_chat_id": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Vinculacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entrada Normalizada": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuario Ativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Foto (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "Upload Foto Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Audio (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "Transcrever Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Alerta Checkin (TG)": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Alerta Destinatarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Callback?": {
+      "main": [
+        [
+          {
+            "node": "Answer Callback Query",
             "type": "main",
             "index": 0
           }
@@ -837,7 +947,8 @@
           "messages"
         ]
       },
-      "webhookId": "d7c0db11-473c-42b8-9413-4af895b7b53c"
+      "webhookId": "d7c0db11-473c-42b8-9413-4af895b7b53c",
+      "disabled": true
     },
     {
       "id": "3d8303e3-8111-4225-b5b6-3e95e4c0ac95",
@@ -865,7 +976,7 @@
       ],
       "parameters": {
         "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?telefone=eq.{{ $json.telefone }}&ativo=eq.true&select=*",
+        "url": "={{ $json.urlUsuario }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
@@ -892,7 +1003,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) {\n  return [];\n}\nconst usuario = rows[0];\nconst msg = $('Normalizar Mensagem').first().json;\nreturn [{\n  json: Object.assign({}, msg, {\n    usuarioId: usuario.id,\n    papel: usuario.papel,\n    nomeUsuario: usuario.nome\n  })\n}];\n"
+        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) {\n  return [];\n}\nconst usuario = rows[0];\nconst msg = $('Entrada Normalizada').first().json;\nreturn [{\n  json: Object.assign({}, msg, {\n    usuarioId: usuario.id,\n    papel: usuario.papel,\n    nomeUsuario: usuario.nome\n  })\n}];"
       }
     },
     {
@@ -1125,7 +1236,8 @@
         "messageType": "text",
         "textBody": "=Contrato da loja {{ $(\"Extrair Contrato Atual Assinatura\").item.json.lojaNome }} atualizado: assinatura do cliente confirmada. Obrigado!"
       },
-      "webhookId": "ad143cb0-5b31-4b14-a740-bcbae6b89568"
+      "webhookId": "ad143cb0-5b31-4b14-a740-bcbae6b89568",
+      "disabled": true
     },
     {
       "id": "bd6992fb-1a32-46c2-b76e-1583516ee011",
@@ -1264,7 +1376,8 @@
         "messageType": "text",
         "textBody": "=Maquininha da loja {{ $(\"Extrair Contrato Maquininha\").item.json.lojaNome }} marcada como ativa. Obrigado!"
       },
-      "webhookId": "37cea68c-105e-40e3-97f7-c02282a9e2a4"
+      "webhookId": "37cea68c-105e-40e3-97f7-c02282a9e2a4",
+      "disabled": true
     },
     {
       "id": "3241efd6-a89d-4cd2-9a50-9164665f9122",
@@ -1520,7 +1633,8 @@
         "messageType": "text",
         "textBody": "Nao encontrei nenhuma visita pendente para hoje na sua rota."
       },
-      "webhookId": "72e61a7d-925b-40da-9537-fce6e5c20833"
+      "webhookId": "72e61a7d-925b-40da-9537-fce6e5c20833",
+      "disabled": true
     },
     {
       "id": "43e97754-b53f-47de-a103-28f7f6c89fa1",
@@ -1631,7 +1745,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Avaliar Suspeita').first().json;\nconst papelUsuario = $('Validar Usuario Ativo').first().json.papel;\n\n// Escalonamento: se quem fez o check-in suspeito e o proprio coordenador,\n// o alerta sobe para o gerente. Nos demais casos vai para o coordenador.\nconst papelDestino = papelUsuario === 'coordenador' ? 'gerente' : 'coordenador';\nconst destinatarios = rows.filter((u) => u.papel === papelDestino && u.telefone);\n\nreturn destinatarios.map((c) => ({\n  json: {\n    destinatarioTelefone: c.telefone,\n    destinatarioPapel: c.papel,\n    nomeUsuario: ctx.nomeUsuario,\n    lojaNome: ctx.lojaNome,\n    distanciaM: ctx.distanciaM,\n    raioCheckinM: ctx.raioCheckinM\n  }\n}));\n"
+        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Avaliar Suspeita').first().json;\nconst papelUsuario = $('Validar Usuario Ativo').first().json.papel;\n// Escalonamento (D-06): check-in suspeito do proprio coordenador sobe ao gerente.\nconst papelDestino = papelUsuario === 'coordenador' ? 'gerente' : 'coordenador';\nconst destinatarios = rows.filter((u) => u.papel === papelDestino && u.telegram_chat_id);\nreturn destinatarios.map((c) => ({\n  json: {\n    destinatarioChatId: c.telegram_chat_id,\n    destinatarioTelefone: c.telefone,\n    destinatarioPapel: c.papel,\n    nomeUsuario: ctx.nomeUsuario,\n    lojaNome: ctx.lojaNome,\n    distanciaM: ctx.distanciaM,\n    raioCheckinM: ctx.raioCheckinM\n  }\n}));"
       }
     },
     {
@@ -1677,7 +1791,8 @@
           ]
         }
       },
-      "webhookId": "43b9ce4e-40b1-4db7-a6b6-8fec3bb26bc5"
+      "webhookId": "43b9ce4e-40b1-4db7-a6b6-8fec3bb26bc5",
+      "disabled": true
     },
     {
       "id": "fa902efa-3614-4202-a6de-2469749d5429",
@@ -1749,7 +1864,8 @@
         "messageType": "text",
         "textBody": "=Check-in confirmado. Envie uma foto da fachada da loja {{ $(\"Avaliar Suspeita\").item.json.lojaNome }} para continuar."
       },
-      "webhookId": "87992c05-3468-4477-a017-cd7b342777ea"
+      "webhookId": "87992c05-3468-4477-a017-cd7b342777ea",
+      "disabled": true
     },
     {
       "id": "e9b13e5a-36bf-431f-b5bf-a85494d7b01c",
@@ -1806,7 +1922,8 @@
         "operation": "mediaUrlGet",
         "mediaGetId": "={{ $json.mediaId }}"
       },
-      "webhookId": "d27db361-95ee-4523-8084-49f5a6888727"
+      "webhookId": "d27db361-95ee-4523-8084-49f5a6888727",
+      "disabled": true
     },
     {
       "id": "2bbc151e-f690-4879-bd63-cfc35a891c2c",
@@ -1830,7 +1947,8 @@
             }
           }
         }
-      }
+      },
+      "disabled": true
     },
     {
       "id": "f10002d1-1786-4078-a001-7c6e91433d57",
@@ -1999,7 +2117,8 @@
         "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $json[0].telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"list\", \"body\": { \"text\": \"Falou com o decisor da loja?\" }, \"action\": { \"button\": \"Selecionar\", \"sections\": [ { \"title\": \"Opcoes\", \"rows\": [ { \"id\": \"decisor_sim\", \"title\": \"Sim\" }, { \"id\": \"decisor_nao\", \"title\": \"Nao\" }, { \"id\": \"decisor_loja_fechada\", \"title\": \"Loja fechada\" }, { \"id\": \"decisor_contato_ausente\", \"title\": \"Contato ausente\" } ] } ] } } } }}"
-      }
+      },
+      "disabled": true
     },
     {
       "id": "f82328f4-e0d2-4d8a-ae8f-eb1b5af2a9f9",
@@ -2064,7 +2183,8 @@
         "operation": "mediaUrlGet",
         "mediaGetId": "={{ $json.mediaId }}"
       },
-      "webhookId": "005131ef-f789-4acb-a03e-8dbcd3b2484f"
+      "webhookId": "005131ef-f789-4acb-a03e-8dbcd3b2484f",
+      "disabled": true
     },
     {
       "id": "42170ff6-b61c-4df8-a13b-f3342b23b693",
@@ -2088,7 +2208,8 @@
             }
           }
         }
-      }
+      },
+      "disabled": true
     },
     {
       "id": "8cfffa9e-bb95-40da-82de-22d199ef4218",
@@ -2558,7 +2679,8 @@
         "messageType": "text",
         "textBody": "={{ $(\"Motor de Checkout\").item.json.mensagemSaida.texto }}"
       },
-      "webhookId": "6d03c2b4-9244-4f85-bb88-72ed8ee73a67"
+      "webhookId": "6d03c2b4-9244-4f85-bb88-72ed8ee73a67",
+      "disabled": true
     },
     {
       "id": "2a841aeb-f4ba-4242-963d-42ce9f35e702",
@@ -2588,7 +2710,8 @@
         "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $(\"Motor de Checkout\").item.json.telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"list\", \"body\": { \"text\": $(\"Motor de Checkout\").item.json.mensagemSaida.texto }, \"action\": { \"button\": \"Selecionar\", \"sections\": [ { \"title\": \"Opcoes\", \"rows\": $(\"Motor de Checkout\").item.json.mensagemSaida.opcoes.map(o => ({ id: o.id, title: o.titulo })) } ] } } } }}"
-      }
+      },
+      "disabled": true
     },
     {
       "id": "91104968-13e7-46ac-a56f-3b24efb70ee2",
@@ -2618,7 +2741,8 @@
         "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $(\"Motor de Checkout\").item.json.telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"button\", \"body\": { \"text\": $(\"Motor de Checkout\").item.json.mensagemSaida.texto }, \"action\": { \"buttons\": $(\"Motor de Checkout\").item.json.mensagemSaida.opcoes.map(o => ({ type: \"reply\", reply: { id: o.id, title: o.titulo } })) } } } }}"
-      }
+      },
+      "disabled": true
     },
     {
       "id": "8167e1f8-859f-4aa9-98d9-247ae5a105cc",
@@ -2813,34 +2937,614 @@
         "width": 700,
         "height": 200
       }
+    },
+    {
+      "id": "cdb48274-8098-4fea-bdda-d307472b5335",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        760
+      ],
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "notes": "B-01: unico telegramApi na conta e o da ARMCOM. Trocar para CRED_TELEGRAM_BOT real antes do go-live.",
+      "webhookId": "e567ce03-aa3b-4271-859e-717b18a59c27"
+    },
+    {
+      "id": "ab5008e1-d9af-48f9-ab53-51bfdc05400f",
+      "name": "Normalizar Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        760
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "const u = $json;\nconst cq = u.callback_query || null;\nconst msg = cq ? (cq.message || {}) : (u.message || u.edited_message || {});\nconst chatId = String((cq ? (cq.from && cq.from.id) : (msg.chat && msg.chat.id)) || (msg.chat && msg.chat.id) || '');\nlet tipoMensagem = 'desconhecido';\nlet texto = '';\nlet respostaId = '';\nlet lat = null, long = null, mediaId = null, contactPhone = '';\nlet isStart = false;\nif (cq) {\n  tipoMensagem = 'interactive';\n  respostaId = cq.data || '';\n} else if (u.message) {\n  const m = u.message;\n  if (m.text != null) {\n    texto = String(m.text).trim();\n    tipoMensagem = 'text';\n    if (texto.toLowerCase() === '/start') isStart = true;\n  } else if (m.location) {\n    tipoMensagem = 'location'; lat = m.location.latitude; long = m.location.longitude;\n  } else if (m.photo && m.photo.length) {\n    tipoMensagem = 'image'; mediaId = m.photo[m.photo.length - 1].file_id;\n  } else if (m.voice) {\n    tipoMensagem = 'audio'; mediaId = m.voice.file_id;\n  } else if (m.audio) {\n    tipoMensagem = 'audio'; mediaId = m.audio.file_id;\n  } else if (m.contact) {\n    tipoMensagem = 'contact'; contactPhone = m.contact.phone_number || '';\n  }\n}\nconst mC = texto.match(/^contrato\\s+(\\S+)\\s+assinado$/i);\nconst mM = texto.match(/^maquininha\\s+(\\S+)\\s+ativada$/i);\nlet comandoTipo = '', comandoCodcl = '';\nif (mC) { comandoTipo = 'contrato_assinado'; comandoCodcl = mC[1]; }\nelse if (mM) { comandoTipo = 'maquininha_ativada'; comandoCodcl = mM[1]; }\nconst SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\nconst urlUsuario = SUPA + '/usuarios?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&ativo=eq.true&select=*';\nreturn { json: { canal: 'telegram', identidade: 'tg:' + chatId, chatId, telefone: '', tipoMensagem, texto, respostaId, lat, long, mediaId, waMessageId: null, comandoTipo, comandoCodcl, contactPhone, isStart, callbackQueryId: cq ? cq.id : '', urlUsuario } };"
+      }
+    },
+    {
+      "id": "ee14dfb0-4ba5-4d47-88ce-1e24c3c07b07",
+      "name": "Roteia Start/Contato?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        760
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isStart }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "leftValue": "={{ $json.tipoMensagem }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "contact"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "54c6f40f-3567-42b3-a554-7bd06604a38d",
+      "name": "É Contato?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        700
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.tipoMensagem }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "contact"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "f691cc45-c166-405e-ba7c-aa0bed798719",
+      "name": "Pedir Contato (/start)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        800
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chatId }}",
+        "text": "Bem-vindo ao Rota Viva! Toque no botão abaixo para compartilhar seu contato e vincular seu acesso.",
+        "replyMarkup": "replyKeyboard",
+        "replyKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "📱 Compartilhar meu contato",
+                    "additionalFields": {
+                      "request_contact": true
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "replyKeyboardOptions": {
+          "resize_keyboard": true,
+          "one_time_keyboard": true
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live.",
+      "webhookId": "36c97780-5322-408a-9805-51d7c5ba6503"
+    },
+    {
+      "id": "e81632aa-441c-47b5-95cf-a485f4e20c11",
+      "name": "Buscar Usuarios p/ Vincular",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        880,
+        640
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?ativo=eq.true&select=id,nome,telefone",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "07765f89-3dc7-453d-a2e6-c89f405aba11",
+      "name": "Casar Telefone",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        640
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const ctx = $('Normalizar Telegram').first().json;\nconst chatId = ctx.chatId;\nfunction canon(s){ let d = String(s || '').replace(/\\D/g, ''); if (d.startsWith('55') && d.length > 11) d = d.slice(2); if (d.length === 11) d = d.slice(0, 2) + d.slice(3); return d; }\nconst alvo = canon(ctx.contactPhone);\nconst users = $input.all().map(i => i.json);\nlet found = null;\nfor (const usr of users) { if (alvo && canon(usr.telefone) === alvo) { found = usr; break; } }\nif (found) return [{ json: { match: true, usuarioId: found.id, nome: found.nome, chatId } }];\nreturn [{ json: { match: false, chatId } }];"
+      }
+    },
+    {
+      "id": "164ae138-5f4f-45d1-aed7-3fdf250c57bd",
+      "name": "Achou Usuario?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1320,
+        640
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.match }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "7ac33978-a249-49fc-a3ac-c447ceb8cdd3",
+      "name": "Vincular telegram_chat_id",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1540,
+        580
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?id=eq.{{ $json.usuarioId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"telegram_chat_id\": $json.chatId } }}"
+      }
+    },
+    {
+      "id": "315e9cfd-9481-49c1-9f15-1c6b3b2c4925",
+      "name": "Confirmar Vinculacao",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        580
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Casar Telefone').first().json.chatId }}",
+        "text": "=Vinculado, {{ $('Casar Telefone').first().json.nome }}! Seu acesso ao Rota Viva está pronto.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live.",
+      "webhookId": "ece1506e-cd65-4737-8298-5c5715903897"
+    },
+    {
+      "id": "35d96f31-605f-4cbd-8de7-4fcf245c9371",
+      "name": "Orientar Nao Cadastrado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1540,
+        720
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Casar Telefone').first().json.chatId }}",
+        "text": "Não encontrei seu telefone no cadastro do Rota Viva. Fale com seu coordenador para ser incluído.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live.",
+      "webhookId": "102fe020-00dc-4166-b507-2d363c393d1c"
+    },
+    {
+      "id": "a8906881-cdfb-4a9c-8a3e-aa1cb3fabd25",
+      "name": "Entrada Normalizada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "const j = $json;\nif (!j.urlUsuario) {\n  const SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\n  j.canal = j.canal || 'whatsapp';\n  j.chatId = j.chatId || '';\n  j.isStart = j.isStart || false;\n  j.contactPhone = j.contactPhone || '';\n  j.urlUsuario = SUPA + '/usuarios?telefone=eq.' + encodeURIComponent(j.telefone || '') + '&ativo=eq.true&select=*';\n}\nreturn { json: j };"
+      }
+    },
+    {
+      "id": "c78e4c8e-635e-4737-8c81-fee21fd53faf",
+      "name": "Baixar Foto (Telegram)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1900,
+        150
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $json.mediaId }}",
+        "download": true,
+        "additionalFields": {}
+      },
+      "webhookId": "e5c929d8-ce94-4c6c-8905-e3edd211992e"
+    },
+    {
+      "id": "871ed917-b143-4893-998f-43075f7786c9",
+      "name": "Baixar Audio (Telegram)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1900,
+        400
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $json.mediaId }}",
+        "download": true,
+        "additionalFields": {}
+      },
+      "webhookId": "2405d969-ec6e-4bd6-ae4e-f735030ba201"
+    },
+    {
+      "id": "d41580ba-c562-401b-8943-b06bc157d80a",
+      "name": "Enviar Texto Checkout (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5050,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
+        "text": "={{ $('Motor de Checkout').item.json.mensagemSaida.texto }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "b769ea18-cd82-4f97-aaff-f34bfc244fa8"
+    },
+    {
+      "id": "d86f7834-e267-4fb0-b0f9-4d1f116b223a",
+      "name": "Enviar Interativo Checkout (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5050,
+        500
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
+        "text": "={{ $('Motor de Checkout').item.json.mensagemSaida.texto }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": "={{ { rows: $('Motor de Checkout').item.json.mensagemSaida.opcoes.map(o => ({ row: { buttons: [ { text: o.titulo, additionalFields: { callback_data: o.id } } ] } })) } }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "bfef44de-689e-4942-9b38-93e937d3a7cb"
+    },
+    {
+      "id": "58d6829c-179c-4201-b7d2-ff40b52203f5",
+      "name": "Enviar Pergunta Decisor (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3400,
+        150
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
+        "text": "Falou com o decisor da loja?",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Sim",
+                    "additionalFields": {
+                      "callback_data": "decisor_sim"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Não",
+                    "additionalFields": {
+                      "callback_data": "decisor_nao"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Loja fechada",
+                    "additionalFields": {
+                      "callback_data": "decisor_loja_fechada"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Contato ausente",
+                    "additionalFields": {
+                      "callback_data": "decisor_contato_ausente"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "8d7464e2-ca37-475c-bd74-fecbf3761397"
+    },
+    {
+      "id": "a0f8a433-a55c-48a8-973a-754c3d0c8e53",
+      "name": "Pedir Foto Fachada (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4200,
+        -50
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
+        "text": "=Check-in confirmado. Envie uma foto da fachada da loja {{ $('Avaliar Suspeita').item.json.lojaNome }} para continuar.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "f6571e30-707f-451f-893a-fd59277a4731"
+    },
+    {
+      "id": "e6adc3d6-4acf-4994-898d-77b500f89b3a",
+      "name": "Avisar Sem Visita Pendente (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2400,
+        -150
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
+        "text": "Não encontrei nenhuma visita pendente para hoje na sua rota.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "9ba3854c-71ee-4479-8a2e-8d1810b3275d"
+    },
+    {
+      "id": "f1fe0093-1da8-403f-996e-6746ab4a62ac",
+      "name": "Confirmar Contrato Assinado (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2200,
+        -420
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
+        "text": "=Contrato da loja {{ $('Extrair Contrato Atual Assinatura').item.json.lojaNome }} atualizado: assinatura do cliente confirmada. Obrigado!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "5ee20ed1-3b75-4e5b-a1d7-4104eb1eab97"
+    },
+    {
+      "id": "6e3e1f13-22c3-40d5-9014-c495ffc81fa4",
+      "name": "Confirmar Maquininha Ativada (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2200,
+        -250
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
+        "text": "=Maquininha da loja {{ $('Extrair Contrato Maquininha').item.json.lojaNome }} marcada como ativa. Obrigado!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "096d1e39-69d8-4ac7-a503-5b97debe4c33"
+    },
+    {
+      "id": "732b6c9e-3c8b-4dc3-a984-d8a19eaaec33",
+      "name": "Enviar Alerta Checkin (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3400,
+        -150
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.destinatarioChatId }}",
+        "text": "=Alerta: check-in de {{ $json.nomeUsuario }} na loja {{ $json.lojaNome }} foi registrado a {{ $json.distanciaM }}m de distância (acima do limite de {{ $json.raioCheckinM }}m). Verifique.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "webhookId": "fcf50e47-4880-44ff-b112-102088e10d35"
+    },
+    {
+      "id": "2e16722e-1237-4a89-a083-c570998e08a9",
+      "name": "É Callback?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        920
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.callbackQueryId }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              },
+              "rightValue": ""
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "88e0ffcd-21ef-43dd-b415-a58ebb54c91e",
+      "name": "Answer Callback Query",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        920
+      ],
+      "parameters": {
+        "resource": "callback",
+        "operation": "answerQuery",
+        "queryId": "={{ $json.callbackQueryId }}",
+        "additionalFields": {}
+      },
+      "webhookId": "e0733b7d-8648-4ee3-a109-92edd30ef388"
     }
-  ],
-  "activeVersion": null,
-  "tags": [],
-  "meta": {
-    "aiBuilderAssisted": true,
-    "builderVariant": "mcp"
-  },
-  "parentFolderId": null,
-  "description": "Maquina de estados da conversa de campo via WhatsApp (check-in, foto, checkout com decisor/produto/observacao, e comandos de texto livre) com IA apenas para transcrever/estruturar observacoes em audio.",
-  "scopes": [
-    "execution:reveal",
-    "workflow:create",
-    "workflow:delete",
-    "workflow:disableRedaction",
-    "workflow:enableRedaction",
-    "workflow:execute",
-    "workflow:execute-chat",
-    "workflow:export",
-    "workflow:import",
-    "workflow:list",
-    "workflow:move",
-    "workflow:publish",
-    "workflow:read",
-    "workflow:share",
-    "workflow:unpublish",
-    "workflow:unshare",
-    "workflow:update"
-  ],
-  "canExecute": true
+  ]
 }
