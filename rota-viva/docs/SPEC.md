@@ -72,13 +72,20 @@ Máquina de estados por telefone (`estado_conversa`):
 
 - **W3 — Rota diária (07:30, seg–sáb):** envia a cada usuário ativo com `faz_visitas=true` e visitas pendentes hoje (incluindo retornos criados pelo W6) a lista de visitas do dia + retornos agendados. Alerta o coordenador quando um promotor ou consultor fica sem rota no dia (coordenador e gerente sem rota não geram alerta — ver D-06).
 - **W4 — Relatório diário (18:00, seg–sáb):** agrega visitas realizadas vs. planejadas, ranking do dia (todos os usuários com visitas no período, qualquer papel), % contra a meta efetiva de cada um, acumulado mensal, check-ins suspeitos, oportunidades novas, perdas do dia, contratos parados além do SLA e retornos vencidos. Envia por WhatsApp ao gerente e por e-mail aos 3 destinatários configurados.
-- **W5 — Espelho Excel (21:00):** sincroniza incrementalmente `visitas`, `oportunidades`, `contratos` para uma pasta de trabalho do Excel 365 no OneDrive (somente leitura). Ver D-07.
+- **W5 — Sync to Sheets (push do W2 + cron de resgate 5 min):** replica cada evento (`visitas`, `oportunidades`, `contratos`, `agenda_visitas`) para a planilha **Google Sheets "RotaViva Master"** via node nativo (Append or Update Row, chave = `id` do Supabase). O Google Sheets é a **fonte de verdade** dos dados de negócio; o Supabase atua como outbox durável (`sincronizado`/`sheets_synced_at`). Ver **D-13** (supera D-04/D-07).
 - **W6 — Lembrete de retorno (08:00):** avisa o usuário responsável sobre retornos agendados para o dia e os inclui na rota do dia (origem `retorno`). A lógica é toda por `usuario_id`, nunca por papel.
+- **W7 — Sync de Entradas (06:00 e 20:30):** lê as abas editáveis **⚙ Config** e **➕ Agenda Manual** da planilha via Google Sheets API e aplica no Supabase (config, `meta_visitas_dia`, visitas manuais). Idempotente por `status_importacao`. Ver D-13.
+- **W8 — Export .xlsx de conveniência (21:30):** exporta uma cópia `.xlsx` da planilha via `files.export` do Google Drive para a pasta do projeto (sem parsing/exceljs). Para quem preferir abrir no Excel local.
+- **W0 — Enviar Mensagem (roteador):** sub-workflow chamado por todos os demais para enviar por Telegram (padrão) ou WhatsApp (dormente). Ver **D-10**. Dashboard e Ranking vivem na planilha como fórmulas nativas (QUERY/COUNTIFS/SPARKLINE), não são calculados pelo n8n.
 
 ## 5. Dados
 
 Ver `supabase/migrations/` para o DDL completo. Resumo das entidades: `usuarios`, `lojas`, `agenda_visitas`, `visitas`, `oportunidades`, `contratos`, `faturamento_pos` (Fase 3, já criada), `config`, `estado_conversa`.
 
+**Arquitetura de dados (D-13):** a partir da v2, a **fonte de verdade dos dados de negócio é a planilha Google Sheets**, não o Supabase. O Supabase (`rotaviva`) mantém `estado_conversa` (latência do bot durante a conversa) e atua como **outbox/auditoria durável**: `visitas`, `oportunidades`, `contratos` e `agenda_visitas` ganham `sincronizado`/`sheets_synced_at`; cada evento é gravado primeiro no Supabase e depois replicado ao Sheets pelo W5. Trade-off consciente (abre mão de ACID no dado de negócio por simplicidade no piloto) — reavaliar se virar produto multi-tenant.
+
+**Canal (D-10):** a comunicação é **multicanal via roteador W0**, com Telegram como padrão do piloto e WhatsApp dormente. `usuarios.canal`, `usuarios.telegram_chat_id`; `estado_conversa` chaveado por `identidade` (`tg:<chat_id>` | `wa:<telefone>`).
+
 ## 6. Piloto
 
-Número de teste da Meta Cloud API, com os 5 destinatários (equipe listada acima) verificados manualmente — ver D-05 e `GO-LIVE.md`.
+Piloto 100% **Telegram** (D-10): cada usuário faz `/start` no bot do Rota Viva e compartilha o contato para vincular o `telegram_chat_id`. Sem burocracia Meta. WhatsApp permanece dormente. Ver `GO-LIVE.md`.

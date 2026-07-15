@@ -3,6 +3,15 @@
 Runbook com todos os passos manuais restantes para colocar o Rota Viva no ar. A infraestrutura
 (schema Supabase, workflows n8n salvos inativos, documentação) já está pronta. Siga a ordem abaixo.
 
+> **⚠ Atualização v2 (D-10 / D-13):** o **piloto roda 100% no Telegram** (canal padrão via roteador
+> W0) e a **planilha é Google Sheets** (fonte de verdade — ver seção 7). As **seções 1–4 abaixo
+> (app Meta, templates, webhook WhatsApp) são "produção futura" e ficam DORMENTES** — não execute no
+> piloto. O onboarding Telegram (criar bot no @BotFather → `CRED_TELEGRAM_BOT`; cada usuário faz
+> `/start` e compartilha o contato para vincular `telegram_chat_id`) é finalizado junto com o rebuild
+> do W2. Os passos de credenciais/Supabase (seções 5–6), a planilha (seção 7), a ativação (seção 8) e
+> o teste (seção 9) já refletem a arquitetura v2. **Pendências de build por queda de MCP nesta
+> sessão: ver `BLOQUEIOS.md` B-05.**
+
 ## 1. Criar app Meta + WABA, obter token e phone_number_id
 
 1. Acesse https://developers.facebook.com/ e crie um App tipo "Business".
@@ -139,40 +148,46 @@ update rotaviva.usuarios set telefone = '+55XXXXXXXXXXX' where nome = 'Anderson 
 select nome, telefone, papel from rotaviva.usuarios order by nome;
 ```
 
-## 7. Criar a pasta de trabalho Excel do espelho
+## 7. Criar a planilha Google Sheets "RotaViva Master" (D-13)
 
-Já existe um modelo pronto em
-`Morgana Ops\Produtos Próprios\Rota Viva\Espelho_Rota_Viva_MODELO.xlsx`, com as 3 abas
-(`visitas`, `oportunidades`, `contratos`), os cabeçalhos corretos e um LEIA-ME. Copie-o para o
-local definitivo no OneDrive e renomeie como quiser.
+O espelho Excel/OneDrive foi substituído: a planilha **Google Sheets é a fonte de verdade** dos
+dados de negócio. Crie (uma vez) a planilha **"RotaViva Master"** na pasta do Drive
+`1f30JmulRQ0deksfTYtMregOop8zKVWQk`, com **7 abas nesta ordem**:
 
-Se preferir criar do zero: as 3 abas precisam ter, na primeira linha, os nomes exatos das colunas da
-tabela correspondente (ver `supabase/migrations/`). O node do n8n faz upsert casando pela coluna
-`id`, então `id` precisa existir em todas as três.
+1. **📊 Dashboard** — só fórmulas (QUERY/COUNTIFS/SPARKLINE) sobre Visitas/Oportunidades/Contratos.
+2. **Visitas** — dados (escrita pelo W5). Linha 1 banner "⚠ Gerada automaticamente"; cabeçalho congelado; aba protegida. Inclua a coluna auxiliar `id` (chave de upsert do Supabase).
+3. **Oportunidades** — dados (W5), mesma proteção e coluna `id`.
+4. **Contratos** — dados (W5), mesma proteção e coluna `id`.
+5. **Ranking** — só fórmulas (QUERY/COUNTIFS sobre Visitas).
+6. **⚙ Config** — editável (lida pelo W7). Colunas: `chave`, `valor`, `descricao`. Inclua linhas `meta_visitas_dia:<nome>` por usuário.
+7. **➕ Agenda Manual** — editável (lida pelo W7). Colunas: `data`, `cod_loja`, `responsavel`, `status_importacao`, `observacao_erro`.
 
-Pegue o **driveItem id** do arquivo (o `id` que o Microsoft Graph usa, não o nome nem o caminho) e
-grave em `config`:
+Pegue o **spreadsheetId** (o id na URL da planilha) e grave em `config`:
 
 ```sql
-update rotaviva.config set valor = '<DRIVEITEM_ID_DO_XLSX>' where chave = 'excel_workbook_id';
+update rotaviva.config set valor = '<SPREADSHEET_ID>' where chave = 'google_sheets_id';
 ```
 
-Enquanto essa chave estiver vazia, o W5 termina no branch "Aguardar Go-Live" sem escrever nada.
+Enquanto essa chave estiver vazia, o W5/W7 encerram sem escrever/ler nada. **Não há mais node
+Microsoft/Excel nem geração de `.xlsx` via código** — o W8 apenas exporta uma cópia `.xlsx` da
+própria planilha via Google Drive (`files.export`), para quem preferir Excel local.
 
 ## 8. Ativar os workflows na ordem
 
-No n8n, ative (toggle "Active") os workflows importados de `n8n/workflows/` nesta ordem:
+Garanta que o sub-workflow **`[RotaViva] W0 - Enviar Mensagem`** exista (é chamado por todos; não tem
+trigger para ativar). Depois ative (toggle "Active") nesta ordem:
 
 1. `[RotaViva] W2 - Conversa Campo`
 2. `[RotaViva] W1 - Ingestão Rota`
 3. `[RotaViva] W3 - Rota Diária`
 4. `[RotaViva] W6 - Lembrete Retorno`
 5. `[RotaViva] W4 - Relatório Diário`
-6. `[RotaViva] W5 - Espelho Excel`
+6. `[RotaViva] W5 - Sync to Sheets`
+7. `[RotaViva] W7 - Sync de Entradas`
+8. `[RotaViva] W8 - Export XLSX`
 
-(W2 primeiro porque W1 depende do mesmo número/webhook já estar recebendo mensagens; os workflows
-agendados por último para dar tempo de revisar os dois primeiros em produção antes de ligar os
-cron jobs.)
+(W2 primeiro porque recebe as mensagens do bot; os agendados por último para revisar os interativos
+em produção antes de ligar os cron jobs.)
 
 ## 9. Teste ponta-a-ponta
 
@@ -194,7 +209,14 @@ Checklist de 13 itens antes de considerar o piloto no ar:
       dia (W6 + W3).
 - [ ] 8. Relatório diário chega por WhatsApp ao gerente às 18h (W4).
 - [ ] 9. Relatório diário chega por e-mail aos 3 destinatários da config às 18h (W4).
-- [ ] 10. Espelho no Excel (OneDrive) é atualizado às 21h com os dados do dia (W5).
+- [ ] 10. Uma visita finalizada aparece na aba **Visitas** do Google Sheets em poucos minutos (W5, push do W2); o **Dashboard** recalcula sozinho (fórmulas).
+
+Itens de D-13 (Google Sheets fonte de verdade + outbox):
+
+- [ ] 14. Editar uma linha na aba **⚙ Config** (ex.: `meta_visitas_dia:<nome>`) → o W7 aplica no Supabase na próxima execução (06:00/20:30); valor inválido não é aplicado e vira aviso no relatório 18h.
+- [ ] 15. Preencher uma linha na aba **➕ Agenda Manual** (data ≥ hoje, cod_loja válido, responsável ativo) → vira visita agendada (`origem='manual'`) e a célula `status_importacao` recebe "✔ importada …"; linha inválida recebe "✖ erro" + motivo.
+- [ ] 16. Forçar `sincronizado=false` num registro já sincronizado → o **cron de resgate do W5 (5 min)** o replica de novo ao Sheets e volta a marcar `sincronizado=true`.
+- [ ] 17. Vinculação Telegram: cada usuário faz `/start` no bot e compartilha o contato → `telegram_chat_id` gravado; telefone não cadastrado é orientado a procurar o coordenador (não cria usuário). (D-10)
 
 Itens de D-06 (todos os usuários fazem visitas):
 
