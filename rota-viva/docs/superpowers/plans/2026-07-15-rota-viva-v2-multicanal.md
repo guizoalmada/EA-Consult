@@ -99,6 +99,49 @@ Sub-workflow chamado por Execute Workflow.
 
 **Aceite:** trigger Telegram + normalizador + /start com vinculação por contato; estado por identidade; WhatsApp preservado.
 
+### Sub-plano detalhado do W2 (contrato extraído do workflow vivo, 15 Jul 2026)
+
+**Decisão de arquitetura:** W2 vira **Telegram-primário**. Os nós WhatsApp existentes (trigger + I/O)
+ficam no canvas **desabilitados** (dormentes, não apagados — regra do spec). Menos risco que plumbing
+duplo em todo I/O.
+
+**Contrato do payload unificado** (o que `Normalizar Mensagem` já emite, por item):
+`{ telefone, tipoMensagem, texto, respostaId, lat, long, mediaId, waMessageId, comandoTipo, comandoCodcl }`
+- `Validar Usuario Ativo` referencia `$('Normalizar Mensagem').first().json` e adiciona `usuarioId, papel, nomeUsuario`.
+- `Buscar Usuario Ativo` hoje: `usuarios?telefone=eq.{{telefone}}&ativo=eq.true`.
+
+**Mudanças:**
+1. Novo `Telegram Trigger` → novo Code `Normalizar Telegram` emitindo o MESMO shape. Mapear:
+   - texto → `texto`/`comandoTipo`/`comandoCodcl` (mesmas regex de `contrato X assinado`/`maquininha X ativada`).
+   - `callback_query` → `respostaId` (= callback_data) e `tipoMensagem='interactive'`.
+   - `location` → `lat`/`long`, `tipoMensagem='location'` (equivalente ao WhatsApp `location`).
+   - foto/áudio → `mediaId` = `file_id` do Telegram, `tipoMensagem='image'|'audio'`.
+   - Sempre: `canal='telegram'`, `identidade='tg:'+chat_id`, `chatId=chat_id`. Sem `telefone` (resolve por chat_id).
+2. `Buscar Usuario Ativo`: URL montada no normalizador (`urlUsuario`) — Telegram busca por `telegram_chat_id`, WhatsApp por `telefone`. Node passa a usar `{{ $json.urlUsuario }}`.
+   `Validar Usuario Ativo` também expõe `canal, chatId, telefone` do registro para os sends.
+3. `estado_conversa` chaveado por `identidade` (migration já feita). Os nós `Buscar/Upsert Estado`
+   passam a filtrar/gravar `identidade` no lugar de `telefone`.
+4. **Mídia (Telegram getFile):** substituir `Buscar URL Midia Foto`/`Buscar URL Midia Audio`
+   (whatsApp mediaUrlGet) por HTTP `getFile` (`https://api.telegram.org/bot<token>/getFile?file_id=`)
+   + download `https://api.telegram.org/file/bot<token>/<file_path>`. Token via credencial Telegram.
+   Foto → Storage `rotaviva-fotos` (nó de upload já existe). Áudio → Whisper→Haiku (já existe).
+5. **Sends → Telegram:** trocar por node Telegram sendMessage (texto) ou inline keyboard:
+   - `Pedir Foto Fachada`, `Avisar Sem Visita Pendente`, `Confirmar Contrato Assinado`,
+     `Confirmar Maquininha Ativada`, `Enviar Texto Checkout` → Telegram sendMessage.
+   - `Enviar Pergunta Decisor`, `Enviar Botoes Checkout`, `Enviar Lista Checkout` (interativos Graph)
+     → Telegram sendMessage com `inline_keyboard` (callback_data = id das opções).
+   - `Enviar Template Checkin Suspeito` (alerta coordenador) → chamar **W0** (tipo `alerta_checkin_suspeito`).
+6. **/start:** ramo no `Normalizar Telegram`/Switch para `text='/start'` → responder com botão nativo
+   `request_contact`; ao receber `contact`, casar `phone_number` (E.164, tolerar ±55 e 9º dígito) com
+   `usuarios.telefone`, gravar `telegram_chat_id`, confirmar. Não encontrado → orientar coordenador, não criar usuário.
+7. **allowlist:** `Validar Usuario Ativo` já retorna `[]` (ignora) quando não acha usuário — manter.
+8. **answerCallbackQuery:** após tratar `callback_query`, chamar `answerCallbackQuery` (HTTP Telegram) para destravar o cliente.
+
+**Nós WhatsApp a DESABILITAR (dormentes):** WhatsApp Trigger, Buscar URL Midia Foto/Audio, Pedir Foto
+Fachada, Avisar Sem Visita Pendente, Confirmar Contrato Assinado, Confirmar Maquininha Ativada,
+Enviar Texto Checkout, Enviar Pergunta Decisor, Enviar Lista/Botoes Checkout, Enviar Template Checkin
+Suspeito. Preservados no canvas.
+
 ---
 
 ## Fase 4 — W1, W3, W4, W6 via W0 (Bloco 4)
