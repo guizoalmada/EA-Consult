@@ -3,11 +3,12 @@
   "name": "[RotaViva] W1 - Ingestão Rota",
   "active": false,
   "isArchived": false,
+  "activeVersionId": null,
+  "description": null,
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": true
   },
-  "description": "Recebe a planilha de rota do coordenador via WhatsApp, faz upsert de lojas, geocodifica endereços novos, popula agenda_visitas e responde com um resumo.",
   "connections": {
     "Guard Coordenador Ativo": {
       "main": [
@@ -230,7 +231,7 @@
       "main": [
         [
           {
-            "node": "Responder Coordenador",
+            "node": "Montar Confirmacao (W0)",
             "type": "main",
             "index": 0
           }
@@ -263,29 +264,75 @@
           }
         ]
       ]
+    },
+    "Telegram Trigger (W1)": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Telegram (W1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Telegram (W1)": {
+      "main": [
+        [
+          {
+            "node": "Guard Coordenador (TG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guard Coordenador (TG)": {
+      "main": [
+        [
+          {
+            "node": "Validar Entrada TG (W1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Entrada TG (W1)": {
+      "main": [
+        [
+          {
+            "node": "Baixar Doc (TG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Doc (TG)": {
+      "main": [
+        [
+          {
+            "node": "Extrair Planilha da Rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Confirmacao (W0)": {
+      "main": [
+        [
+          {
+            "node": "Chamar W0 (Confirmacao)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "nodes": [
-    {
-      "id": "0ae47114-9c13-49bd-b265-90902fa6f37b",
-      "name": "WhatsApp Trigger",
-      "type": "n8n-nodes-base.whatsAppTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ],
-      "parameters": {
-        "updates": [
-          "messages"
-        ]
-      },
-      "credentials": {
-        "whatsAppTriggerApi": {
-          "name": "CRED_META_CLOUD"
-        }
-      }
-    },
     {
       "id": "c8db4b91-187f-4d47-b72d-d910e51ba26e",
       "name": "Guard Coordenador Ativo",
@@ -311,11 +358,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      }
+      "disabled": true
     },
     {
       "id": "99703d3f-9fa5-4c56-8125-9c118a14c103",
@@ -345,27 +388,8 @@
             }
           ]
         }
-      }
-    },
-    {
-      "id": "7a806626-82f7-4539-981a-23c5f199c398",
-      "name": "Obter URL do Media",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        780,
-        -150
-      ],
-      "parameters": {
-        "resource": "media",
-        "operation": "mediaUrlGet",
-        "mediaGetId": "={{ $('WhatsApp Trigger').item.json.messages[0].document.id }}"
       },
-      "credentials": {
-        "whatsAppApi": {
-          "name": "CRED_META_CLOUD"
-        }
-      }
+      "disabled": true
     },
     {
       "id": "20f1f3e9-d217-439c-949e-cc70fbd4445e",
@@ -390,11 +414,7 @@
           }
         }
       },
-      "credentials": {
-        "whatsAppApi": {
-          "name": "CRED_META_CLOUD"
-        }
-      }
+      "disabled": true
     },
     {
       "id": "938f499d-f347-465e-a0bb-e393710b2a67",
@@ -464,11 +484,6 @@
         "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"codcl\": $json.CODCL, \"cnpj\": $json.CNPJ, \"nome\": $json.NOME_CLIENTE, \"endereco\": $json.ENDERECO, \"bairro\": $json.BAIRRO, \"cidade\": $json.CIDADE, \"telefones\": $json.telefones, \"contato\": $json.CONTATO, \"caracteristica\": $json.CARACTERISTICA, \"vendedor_dpk\": $json.VEND } }}"
-      },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
       }
     },
     {
@@ -510,7 +525,6 @@
         2340,
         -400
       ],
-      "onError": "continueRegularOutput",
       "parameters": {
         "method": "GET",
         "url": "<__PLACEHOLDER_VALUE__URL base do servico de geocodificacao (ex.: https://maps.googleapis.com/maps/api/geocode/json)__>",
@@ -527,11 +541,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpQueryAuth": {
-          "name": "CRED_GEOCODING"
-        }
-      }
+      "onError": "continueRegularOutput"
     },
     {
       "id": "fe5e3c6f-1c03-4aa1-bce0-4e2efbe8e052",
@@ -557,7 +567,6 @@
         2860,
         -400
       ],
-      "onError": "continueRegularOutput",
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?id=eq.{{ $json.id }}",
@@ -586,11 +595,7 @@
         "specifyBody": "json",
         "jsonBody": "={{ { \"lat\": $json.lat, \"long\": $json.long } }}"
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      }
+      "onError": "continueRegularOutput"
     },
     {
       "id": "2da52c98-fb9e-4cc2-b0b3-de954578169a",
@@ -753,11 +758,6 @@
         "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"p_nome\": $json.promo } }}"
-      },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
       }
     },
     {
@@ -796,11 +796,6 @@
         "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"data\": $('Prepare Agenda Item').item.json.data_visita, \"usuario_id\": $json.usuario_id || null, \"loja_id\": $('Prepare Agenda Item').item.json.loja_id, \"origem\": \"rota\", \"status\": \"pendente\" } }}"
-      },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
       }
     },
     {
@@ -853,29 +848,6 @@
         "mode": "runOnceForAllItems",
         "language": "javaScript",
         "jsCode": "const item = $json;\nconst promos = item.PROMO || [];\nconst dates = item.data_normalizada || [];\nconst semGeoFlags = item.sem_geo || [];\nconst naoReconhecidosRaw = item.promo_nao_reconhecido || [];\nconst n = promos.length;\nconst distinct = new Set(promos.filter((p) => p !== undefined && p !== null && p !== '')).size;\nconst k = semGeoFlags.filter((f) => f === true).length;\n\n// linhas cujo nome na coluna PROMO nao casou com nenhum usuario que faz visitas:\n// foram importadas como pendentes sem responsavel e precisam ser corrigidas.\nconst naoReconhecidos = naoReconhecidosRaw.filter((p) => p !== undefined && p !== null && String(p).trim() !== '');\nconst nomesUnicos = Array.from(new Set(naoReconhecidos.map((p) => String(p).trim())));\nconst qtdNaoReconhecidas = naoReconhecidos.length;\nconst aviso = qtdNaoReconhecidas > 0\n  ? '\\n\\n' + qtdNaoReconhecidas + ' linha' + (qtdNaoReconhecidas > 1 ? 's' : '') +\n    ' com responsavel nao reconhecido: ' + nomesUnicos.join(', ') +\n    '\\nEssas visitas foram importadas sem responsavel.'\n  : '';\n\nconst isoDate = dates.length > 0 ? dates[0] : null;\nlet dataDisplay = '';\nif (isoDate) {\n  const d = new Date(isoDate + 'T00:00:00Z');\n  const dd = String(d.getUTCDate()).padStart(2, '0');\n  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');\n  const yyyy = d.getUTCFullYear();\n  dataDisplay = dd + '/' + mm + '/' + yyyy;\n}\nreturn {\n  json: {\n    n: n,\n    m: distinct,\n    k: k,\n    qtdNaoReconhecidas: qtdNaoReconhecidas,\n    nomesNaoReconhecidos: nomesUnicos,\n    aviso: aviso,\n    data: dataDisplay\n  }\n};"
-      }
-    },
-    {
-      "id": "09f0e714-75bc-4be9-9516-54357860f779",
-      "name": "Responder Coordenador",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        4420,
-        100
-      ],
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "phoneNumberId": "<__PLACEHOLDER_VALUE__WhatsApp Business Phone Number ID (WABA) do RotaViva__>",
-        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').first().json.messages[0].from }}",
-        "messageType": "text",
-        "textBody": "=Rota de {{ $json.data }} recebida: {{ $json.n }} visitas para {{ $json.m }} responsaveis. {{ $json.k }} lojas sem geolocalizacao.{{ $json.aviso }}"
-      },
-      "credentials": {
-        "whatsAppApi": {
-          "name": "CRED_META_CLOUD"
-        }
       }
     },
     {
@@ -943,6 +915,68 @@
       }
     },
     {
+      "id": "0ae47114-9c13-49bd-b265-90902fa6f37b",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "updates": [
+          "messages"
+        ]
+      },
+      "webhookId": "6d869352-5d62-4c5e-b816-25f8f400756f",
+      "disabled": true
+    },
+    {
+      "id": "7a806626-82f7-4539-981a-23c5f199c398",
+      "name": "Obter URL do Media",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        780,
+        -150
+      ],
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $('WhatsApp Trigger').item.json.messages[0].document.id }}"
+      },
+      "webhookId": "bddefd2d-0d23-466a-bccf-f685cfa00207",
+      "disabled": true
+    },
+    {
+      "id": "09f0e714-75bc-4be9-9516-54357860f779",
+      "name": "Responder Coordenador",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        4420,
+        100
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__WhatsApp Business Phone Number ID (WABA) do RotaViva__>",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').first().json.messages[0].from }}",
+        "messageType": "text",
+        "textBody": "=Rota de {{ $json.data }} recebida: {{ $json.n }} visitas para {{ $json.m }} responsaveis. {{ $json.k }} lojas sem geolocalizacao.{{ $json.aviso }}"
+      },
+      "webhookId": "c5b7d86c-acf0-464f-bf88-84832ae29e5c",
+      "disabled": true
+    },
+    {
+      "id": "4f41cbd8-1d9f-4273-8e54-bb2db9aed7c0",
+      "name": "Marcar Responsavel",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3770,
+        20
+      ],
       "parameters": {
         "mode": "manual",
         "includeOtherFields": false,
@@ -968,15 +1002,136 @@
             }
           ]
         }
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      }
+    },
+    {
+      "id": "4a74f9c1-d0b8-417b-bf70-28f935893042",
+      "name": "Telegram Trigger (W1)",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
       "position": [
-        3770,
-        20
+        0,
+        600
       ],
-      "id": "b1f0c2a4-rv06-4a11-9d33-marcarresp01",
-      "name": "Marcar Responsavel"
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "webhookId": "0d5cecca-ac62-4d94-809a-8e5fd2991a9c"
+    },
+    {
+      "id": "b6901881-e4e8-4516-b03c-cad269c6fc21",
+      "name": "Normalizar Telegram (W1)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        600
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "const u = $json;\nconst m = u.message || {};\nconst chatId = String((m.chat && m.chat.id) || (m.from && m.from.id) || '');\nconst doc = m.document || null;\nconst temDocumento = !!(doc && doc.file_id);\nconst documentFileId = doc ? doc.file_id : '';\nconst SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\nconst urlGuard = SUPA + '/usuarios?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&papel=eq.coordenador&ativo=eq.true&select=*';\nreturn { json: { canal: 'telegram', chatId, temDocumento, documentFileId, urlGuard } };"
+      }
+    },
+    {
+      "id": "8b1742eb-f51b-43d5-a47e-36431057b0b6",
+      "name": "Guard Coordenador (TG)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        520,
+        600
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.urlGuard }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bc3e632f-6588-44d1-8490-046870bacee8",
+      "name": "Validar Entrada TG (W1)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        600
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Normalizar Telegram (W1)').first().json;\n// nao e coordenador ativo, ou nao veio documento -> ignora silenciosamente\nif (!Array.isArray(rows) || rows.length === 0) return [];\nif (!ctx.temDocumento) return [];\nreturn [{ json: { chatId: ctx.chatId, documentFileId: ctx.documentFileId, coordenador_id: rows[0].id, coordenador_nome: rows[0].nome } }];"
+      }
+    },
+    {
+      "id": "b20346a0-3be4-4f57-acc0-8f9c4d5071c2",
+      "name": "Baixar Doc (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        600
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $json.documentFileId }}",
+        "download": true,
+        "additionalFields": {}
+      },
+      "webhookId": "90b722e1-a537-40c6-ad51-f2457395c231"
+    },
+    {
+      "id": "81f3c4ef-effa-4041-9f00-ab5030b61f9b",
+      "name": "Montar Confirmacao (W0)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4420,
+        260
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "const j = $json;\nconst chatId = $('Normalizar Telegram (W1)').first().json.chatId;\nconst texto = 'Rota de ' + j.data + ' recebida: ' + j.n + ' visitas para ' + j.m + ' responsaveis. ' + j.k + ' lojas sem geolocalizacao.' + (j.aviso || '');\nreturn { json: { identidade: 'tg:' + chatId, tipo: 'texto_livre', variaveis: { texto: texto } } };"
+      }
+    },
+    {
+      "id": "f8e8fb96-438e-4d61-bd26-7bf5f0cae91d",
+      "name": "Chamar W0 (Confirmacao)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4680,
+        260
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YnkTgdXycHXNBJci",
+          "cachedResultName": "[RotaViva] W0 - Enviar Mensagem"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
     }
   ]
 }
