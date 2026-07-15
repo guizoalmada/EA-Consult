@@ -133,3 +133,38 @@ efetiva de cada um, no corpo do e-mail diário. O objeto `ranking` também é ex
 node `Consolidar Metricas`, pronto para ser consumido caso a aba venha a existir.
 
 **Decisão pendente do Guilherme:** criar ou não uma 4ª aba `Ranking` no espelho Excel do W5.
+
+---
+
+## B-04 — Code node do n8n não permite `exceljs` nem `xlsx` (bloqueia o W5 v2)
+
+**Onde ocorre:** o spec v2 (Bloco 5) manda gerar `RotaViva_Master.xlsx` num node Code usando
+ExcelJS (preferido) ou SheetJS. A instância `n8n.guizoalmada.com.br` **não** libera essas libs.
+
+**Evidência (gate técnico, 15 Jul 2026):** workflow descartável com Manual Trigger → Code
+`require('exceljs')` / `require('xlsx')`, executado em modo manual (execução `2734`), retornou:
+
+```json
+{ "exceljs": "ERRO: Module 'exceljs' is disallowed", "xlsx": "ERRO: Module 'xlsx' is disallowed" }
+```
+
+Ou seja, `NODE_FUNCTION_ALLOW_EXTERNAL` não inclui nenhuma das duas, e o task runner do n8n
+(externo) roda com globais restritos (`process` também indisponível). Gerar o xlsx dentro do Code
+node é **impossível** sem mudança de infra no servidor.
+
+**Opções (decisão do Guilherme — ele controla o servidor n8n):**
+
+1. **Liberar a lib no n8n** (mais fiel ao spec): no container do n8n, `NODE_FUNCTION_ALLOW_EXTERNAL=exceljs`
+   + garantir `exceljs` instalado. Tudo continua dentro do n8n como o spec desenhou. Exige acesso
+   shell ao host do n8n (não disponível nesta sessão).
+2. **Supabase Edge Function gera o xlsx** (dentro do stack já usado): o W5 chama uma Edge Function
+   por HTTP passando os dados; a função (Deno) monta o `.xlsx` e devolve os bytes; o W5 sobe no
+   Drive. Mantém proteção de aba/formatação se usar `npm:exceljs` no Deno. Não exige mexer no host
+   do n8n; passa a existir um novo componente (Edge Function) a versionar/deployar.
+3. **Serviço externo de render** (HTTP a um endpoint que gera xlsx). Mais dependência externa.
+
+**Impacto:** bloqueia **W5** (Fase 5) e, por consequência, **W7** (Fase 6, depende do arquivo
+existir). Todas as demais fases (migrations, W0, W2, W1/W3/W4/W6, docs) seguem sem depender disto.
+
+**Status:** aguardando escolha do Guilherme entre 1/2/3. Recomendação: opção 2 (Edge Function),
+por não exigir acesso ao host e manter formatação/proteção via `npm:exceljs`.
