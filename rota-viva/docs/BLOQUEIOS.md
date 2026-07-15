@@ -166,5 +166,21 @@ node é **impossível** sem mudança de infra no servidor.
 **Impacto:** bloqueia **W5** (Fase 5) e, por consequência, **W7** (Fase 6, depende do arquivo
 existir). Todas as demais fases (migrations, W0, W2, W1/W3/W4/W6, docs) seguem sem depender disto.
 
-**Status:** aguardando escolha do Guilherme entre 1/2/3. Recomendação: opção 2 (Edge Function),
-por não exigir acesso ao host e manter formatação/proteção via `npm:exceljs`.
+**Decisão do Guilherme (15 Jul 2026): opção 1 — liberar `exceljs` no n8n.** O W5 continua gerando
+o xlsx dentro de um Code node (`require('exceljs')`), como o spec desenhou. Falta apenas a
+habilitação de infra no host do n8n (ação do Guilherme antes do go-live do W5).
+
+**Passos de infra (host do n8n) — ATENÇÃO ao task runner externo:** o stack trace do gate mostra
+que esta instância usa o **task runner externo** (`@n8n/task-runner`). Logo, não basta setar a
+variável no container principal; o módulo precisa estar resolvível **pelo runner** e a allowlist
+precisa valer para ele.
+
+1. Instalar `exceljs` onde o runner resolve módulos (imagem custom do n8n/runner com
+   `npm install exceljs`, ou volume em `node_modules`, ou `NODE_PATH` apontando para a pasta).
+2. Definir `NODE_FUNCTION_ALLOW_EXTERNAL=exceljs` no ambiente do n8n **e** do task runner.
+3. Reiniciar. Revalidar com o mesmo probe do gate (`require('exceljs')` deve retornar a versão).
+
+Enquanto isso não estiver feito, **W5 (Fase 5) e W7 (Fase 6) ficam bloqueados**. As demais fases
+(migrations, W0, W2, W1/W3/W4/W6, docs) não dependem disto e seguem normalmente. O código do Code
+node do W5 será entregue já usando `exceljs`; só não poderá ser executado/validado até o passo
+acima. Passo espelhado em `GO-LIVE.md` e `CREDENCIAIS.md`.
