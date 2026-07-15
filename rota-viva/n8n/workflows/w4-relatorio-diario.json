@@ -3,11 +3,12 @@
   "name": "[RotaViva] W4 - Relatório Diário",
   "active": false,
   "isArchived": false,
+  "activeVersionId": null,
+  "description": "Relatório diário (seg-sáb 18h) com visitas, metas, oportunidades, perdas, contratos parados e retornos vencidos, enviado por WhatsApp ao gerente e por e-mail à lista de destinatários.",
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": true
   },
-  "description": "Relatório diário (seg-sáb 18h) com visitas, metas, oportunidades, perdas, contratos parados e retornos vencidos, enviado por WhatsApp ao gerente e por e-mail à lista de destinatários.",
   "connections": {
     "Gatilho 18h Seg-Sab": {
       "main": [
@@ -139,7 +140,18 @@
             "index": 0
           },
           {
-            "node": "Enviar WhatsApp Gerente",
+            "node": "Montar Envio Relatorio (W0)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Envio Relatorio (W0)": {
+      "main": [
+        [
+          {
+            "node": "Chamar W0 (Relatorio)",
             "type": "main",
             "index": 0
           }
@@ -192,13 +204,7 @@
             }
           ]
         }
-      },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      }
     },
     {
       "id": "051502ba-50fb-49ec-939a-3a0f0d63b695",
@@ -209,7 +215,6 @@
         680,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?faz_visitas=eq.true&ativo=eq.true&select=id,nome,papel,telefone,meta_visitas_dia",
@@ -226,12 +231,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "5e2b76ca-fc82-41c1-a576-3e3f95923c00",
@@ -242,7 +242,6 @@
         900,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=eq.gerente&ativo=eq.true&select=id,nome,telefone&limit=1",
@@ -259,12 +258,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "f5756ee0-027c-4bc7-bcaa-02b864856b49",
@@ -275,7 +269,6 @@
         1120,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=eq.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,status,origem",
@@ -292,12 +285,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "550429a3-6718-4a9d-abcc-2955c1bfa8eb",
@@ -308,7 +296,6 @@
         1340,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=gte.{{ $today.startOf('month').toFormat('yyyy-MM-dd') }}&data=lte.{{ $today.toFormat('yyyy-MM-dd') }}&status=eq.realizada&select=id,usuario_id,data",
@@ -325,12 +312,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "b5aeab5f-e6e6-48dc-a136-77dc1570c2f0",
@@ -341,7 +323,6 @@
         1560,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?flag_suspeito=eq.true&checkin_at=gte.{{ $today.toISO() }}&checkin_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,usuario_id,loja_id,checkin_at",
@@ -358,12 +339,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "773befb6-e0fa-4f19-a889-3c2f33fbd2cb",
@@ -374,7 +350,6 @@
         1780,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades?criado_em=gte.{{ $today.toISO() }}&criado_em=lt.{{ $today.plus(1,'days').toISO() }}&select=id,produto,loja_id,visita_id",
@@ -391,12 +366,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "ca145c2b-bfa4-4e21-bd88-1e65c575fb8c",
@@ -407,7 +377,6 @@
         2000,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?status_1=eq.sem_interesse&checkout_at=gte.{{ $today.toISO() }}&checkout_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,loja_id,usuario_id,motivo_nao_fechamento",
@@ -424,12 +393,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "bdf04151-5d8e-4c9d-ae63-4e2a882508b3",
@@ -440,7 +404,6 @@
         2220,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?etapa=not.in.(ativo,cancelado)&select=id,loja_id,produto,etapa,etapa_desde,numero_fluig",
@@ -457,12 +420,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "7cff77d3-b23f-4cc6-b291-717630202efb",
@@ -473,7 +431,6 @@
         2440,
         380
       ],
-      "executeOnce": true,
       "parameters": {
         "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?origem=eq.retorno&status=eq.pendente&data=lt.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,data",
@@ -490,12 +447,7 @@
           ]
         }
       },
-      "credentials": {
-        "httpCustomAuth": {
-          "name": "CRED_SUPABASE_ROTAVIVA"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_SUPABASE_ROTAVIVA (httpCustomAuth) após o go-live."
+      "executeOnce": true
     },
     {
       "id": "49846187-4eb9-4cb1-b83b-433939cb0bb2",
@@ -529,12 +481,7 @@
         "emailType": "html",
         "message": "={{ $json.htmlBody }}"
       },
-      "credentials": {
-        "gmailOAuth2": {
-          "name": "CRED_GMAIL_RELATORIO"
-        }
-      },
-      "notes": "PLACEHOLDER: credencial não configurada no n8n. Atribuir manualmente CRED_GMAIL_RELATORIO (gmailOAuth2) após o go-live."
+      "webhookId": "ce75b26c-d333-4ffb-be47-6f2d544f6cc0"
     },
     {
       "id": "ba4e768a-a32a-4ae7-8e13-6742babf9675",
@@ -595,12 +542,46 @@
           ]
         }
       },
-      "credentials": {
-        "whatsAppApi": {
-          "name": "ARMCOM - WhatsApp Cloud API"
+      "webhookId": "43490af2-5b4f-44f2-99c1-9b05121a4e1e",
+      "disabled": true
+    },
+    {
+      "id": "9ca6cc76-bdbd-4e64-bcbb-9d6735319a64",
+      "name": "Montar Envio Relatorio (W0)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3160,
+        220
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "const j = $json;\nreturn { json: { identidade: 'wa:' + (j.gerenteTelefone || ''), tipo: 'relatorio_diario', variaveis: { data: j.dataFormatada, realizadas: j.visitasRealizadas, planejadas: j.visitasPlanejadas, pct_meta: j.pctMetaDia, acumulado_mes: j.acumuladoMes, checkins_suspeitos: j.suspeitosCount, oportunidades_novas: j.oportunidadesCount, contratos_sla: j.contratosAtrasadosCount } } };"
+      }
+    },
+    {
+      "id": "4f4eca0e-db12-43d9-af69-395744fe4d65",
+      "name": "Chamar W0 (Relatorio)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3360,
+        220
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YnkTgdXycHXNBJci",
+          "cachedResultName": "[RotaViva] W0 - Enviar Mensagem"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
         }
-      },
-      "notes": "BLOQUEIO: o n8n auto-atribuiu a credencial REAL existente 'ARMCOM - WhatsApp Cloud API' (id qxbrAen7zi4DhywY, tipo whatsAppApi) a este node em 3 tentativas distintas (criação inicial via newCredential('CRED_META_CLOUD'), remoção+recriação sem campo credentials, remoção+recriação com credentials.name='CRED_META_CLOUD' e sem id). Isso ocorre porque essa é a única credencial do tipo whatsAppApi existente na conta e o servidor n8n auto-resolve/anexa credenciais reais para nodes de tipo predefinedCredentialType quando há exatamente uma correspondência, mesmo que o nome do placeholder não exista. Não foi encontrada nenhuma forma programática de deixar este campo vazio ou apontando só para o placeholder. AÇÃO MANUAL NECESSÁRIA antes de qualquer ativação: abrir este node no n8n e trocar a credencial para uma nova credencial CRED_META_CLOUD (ou desvincular), garantindo que a credencial real ARMCOM não seja usada indevidamente por este workflow."
+      }
     }
   ]
 }
