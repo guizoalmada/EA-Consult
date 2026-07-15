@@ -182,21 +182,36 @@ node é **impossível** sem mudança de infra no servidor.
 **Impacto:** bloqueia **W5** (Fase 5) e, por consequência, **W7** (Fase 6, depende do arquivo
 existir). Todas as demais fases (migrations, W0, W2, W1/W3/W4/W6, docs) seguem sem depender disto.
 
-**Decisão do Guilherme (15 Jul 2026): opção 1 — liberar `exceljs` no n8n.** O W5 continua gerando
-o xlsx dentro de um Code node (`require('exceljs')`), como o spec desenhou. Falta apenas a
-habilitação de infra no host do n8n (ação do Guilherme antes do go-live do W5).
+### RESOLVIDO POR MUDANÇA DE ARQUITETURA (15 Jul 2026)
 
-**Passos de infra (host do n8n) — ATENÇÃO ao task runner externo:** o stack trace do gate mostra
-que esta instância usa o **task runner externo** (`@n8n/task-runner`). Logo, não basta setar a
-variável no container principal; o módulo precisa estar resolvível **pelo runner** e a allowlist
-precisa valer para ele.
+Não foi necessário liberar `exceljs` no servidor. O Guilherme decidiu **trocar o motor da planilha
+para o node nativo Google Sheets** (ver **D-13**): o Google Sheets passa a ser a fonte de verdade
+dos dados de negócio, escrito célula a célula pelo W5 (sem gerar arquivo), com Dashboard/Ranking em
+fórmulas nativas. Também foram avaliados e descartados o Excel Online/Microsoft Graph (exigiria
+consentimento OAuth do tenant Microsoft da DPK — mesmo risco de bloqueio corporativo) e a Edge
+Function.
 
-1. Instalar `exceljs` onde o runner resolve módulos (imagem custom do n8n/runner com
-   `npm install exceljs`, ou volume em `node_modules`, ou `NODE_PATH` apontando para a pasta).
-2. Definir `NODE_FUNCTION_ALLOW_EXTERNAL=exceljs` no ambiente do n8n **e** do task runner.
-3. Reiniciar. Revalidar com o mesmo probe do gate (`require('exceljs')` deve retornar a versão).
+**Consequência:** o gate do `exceljs` deixou de ser relevante — nenhum ponto do projeto usa mais
+`exceljs`/`xlsx` nem node Microsoft. A opção de infra (liberar `NODE_FUNCTION_ALLOW_EXTERNAL`) fica
+**arquivada como não necessária**. W5/W7 são refeitos sobre Google Sheets (ver plano e D-13).
 
-Enquanto isso não estiver feito, **W5 (Fase 5) e W7 (Fase 6) ficam bloqueados**. As demais fases
-(migrations, W0, W2, W1/W3/W4/W6, docs) não dependem disto e seguem normalmente. O código do Code
-node do W5 será entregue já usando `exceljs`; só não poderá ser executado/validado até o passo
-acima. Passo espelhado em `GO-LIVE.md` e `CREDENCIAIS.md`.
+---
+
+## B-05 — Sessão sem acesso aos MCPs de execução (Supabase, n8n, Google) — 15 Jul 2026
+
+**Onde ocorre:** durante a rodada da nova arquitetura (Google Sheets), os MCPs `claude.ai Supabase`,
+`claude.ai n8n` e o segundo servidor n8n (`mcp__n8n__`, `NO_RESPONSE`) e Google Drive/Gmail
+**desconectaram** na sessão. Sem eles não é possível aplicar/verificar migrations no Supabase, criar/
+editar/validar workflows no n8n, nem criar/testar a planilha no Google.
+
+**Impacto e o que ficou pendente de reconexão:**
+
+- **Migration do outbox** (`20260715160000_rotaviva_outbox_sheets.sql`) foi **escrita no repo mas NÃO
+  aplicada** — aplicar via `apply_migration` e conferir no schema vivo quando o Supabase voltar.
+- **W2 (rebuild multicanal), W5 (Sync to Sheets), W7 (Sync de Entradas), W8 (export .xlsx)** e a
+  migração dos envios de W1/W3/W4/W6 para o W0 ficam **pendentes** de o n8n voltar.
+- **Planilha "RotaViva Master"** (7 abas + fórmulas) não pôde ser criada — depende do Google.
+
+**O que foi entregue nesta sessão sem os MCPs:** arquivo de migration do outbox, e a documentação da
+nova arquitetura (D-13, este B-04/B-05, CREDENCIAIS com `CRED_GOOGLE_SHEETS`). Retomar o build assim
+que os MCPs reconectarem.

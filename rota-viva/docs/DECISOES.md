@@ -99,3 +99,55 @@ uma segunda superfície para o cliente e para nós.
 - O W5 depende de um app registrado no Azure com `Files.ReadWrite`; ver `CREDENCIAIS.md`.
 - O arquivo `.xlsx` precisa ter as 3 abas com cabeçalho, incluindo a coluna `id` (chave do upsert),
   antes da primeira execução. O node não cria a aba nem o cabeçalho.
+
+## D-10 — Arquitetura multicanal com roteador W0; piloto 100% Telegram; WhatsApp dormente
+
+**Contexto:** o piloto precisava ir ao ar sem a burocracia/custo da Meta (app, WABA, verificação de
+número, submissão de templates — D-02/D-05). O Telegram é gratuito e imediato.
+
+**Decisão:**
+
+1. Todo envio de mensagem passa por um sub-workflow roteador **W0 "Enviar Mensagem"** (chamado por
+   Execute Workflow), com contrato `{ usuario_id|identidade, tipo, variaveis, botoes? }`. O W0 resolve
+   o `canal` do usuário e envia por Telegram (padrão) ou WhatsApp (dormente).
+2. `usuarios.canal` (default `telegram`) decide o caminho; `usuarios.telegram_chat_id` é gravado no
+   `/start` (vinculação por contato no W2). `estado_conversa` é re-chaveado por `identidade`
+   (`tg:<chat_id>` | `wa:<telefone>`).
+3. Os nodes WhatsApp existentes **não são apagados** — ficam no canvas, dormentes, gated por
+   `config.whatsapp_habilitado=false`. Nada é criado ou alterado na Meta.
+
+**Consequência:** supera D-02 e D-05 (Meta oficial no piloto). O cliente pode permanecer no Telegram
+em produção. Risco operacional registrado: só existe uma credencial `telegramApi` na conta n8n (de
+outro cliente), e ela é auto-associada aos nodes Telegram — ver B-01. Trocar antes do go-live.
+
+## D-13 — Google Sheets é a fonte de verdade dos dados de negócio; Supabase vira outbox/auditoria
+
+**Contexto:** as tentativas anteriores de "planilha" esbarraram em fricção de ferramenta: o node
+Microsoft Excel 365/OneDrive (D-07) reintroduzia dependência do tenant Microsoft da DPK; gerar
+`.xlsx` via ExcelJS dentro do Code node é impossível no n8n atual (B-04 — `exceljs`/`xlsx` bloqueados);
+e o Excel Online via Microsoft Graph exigiria consentimento OAuth do tenant (mesmo risco de bloqueio
+corporativo, não testado). O cliente quer um dashboard interativo e uma superfície editável simples.
+
+**Decisão:**
+
+1. A planilha **"RotaViva Master" no Google Sheets** passa a ser a **fonte de verdade dos dados de
+   negócio** (visitas, oportunidades, contratos, ranking, dashboard, config, agenda manual) — não
+   mais um espelho read-only do Supabase. Isso **supera D-04** (Supabase como fonte única / planilha
+   read-only) e **D-07** (Excel 365), e substitui o desenho intermediário de `.xlsx` no Drive (planejado
+   como D-11/D-12, nunca implementado).
+2. O **Supabase (`rotaviva`)** muda de papel: continua guardando `estado_conversa` (necessário por
+   latência durante a conversa do bot) e passa a servir como **outbox/log de auditoria durável** —
+   todo evento é gravado lá primeiro (`sincronizado=false`) e depois replicado ao Sheets pelo W5
+   (push imediato do W2 + cron de resgate a cada 5 min). Garante contra falha de rede na escrita do Sheets.
+3. **Dashboard e Ranking não são calculados pelo n8n** — são abas de **fórmulas nativas do Google
+   Sheets** (QUERY, COUNTIFS, SPARKLINE/REPT) sobre as abas de dados. Atualizam sozinhas a cada escrita.
+4. O W5 escreve célula a célula via node nativo **Google Sheets** ("Append or Update Row", chave de
+   upsert = `id` do Supabase numa coluna auxiliar), nunca regenera o arquivo. O W7 lê Config/Agenda
+   Manual via Google Sheets API. Um W8 opcional exporta um `.xlsx` de conveniência via `files.export`
+   do Drive (sem parsing, sem exceljs) para quem preferir Excel local.
+
+**Consequência:** abre-se mão de ACID/constraints no dado de negócio em troca de simplicidade e menor
+custo — **decisão consciente do cliente, aceitável no piloto**. Reavaliação registrada como decisão
+adiada caso o projeto vire produto multi-tenant. B-04 fica **resolvido por mudança de arquitetura**
+(não foi preciso liberar `exceljs` no servidor). Proibido, daqui em diante, node Microsoft Excel/OneDrive
+e Code node com libs externas de planilha em qualquer ponto do projeto.
