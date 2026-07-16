@@ -1,0 +1,869 @@
+{
+  "id": "glhIILgp63T8aQ48",
+  "name": "[RotaViva] W7 - Sync de Entradas",
+  "active": false,
+  "isArchived": false,
+  "activeVersionId": null,
+  "description": null,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "connections": {
+    "Cron 06:00 e 20:30": {
+      "main": [
+        [
+          {
+            "node": "Buscar Sheet ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Sheet ID": {
+      "main": [
+        [
+          {
+            "node": "Extrair Sheet ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Sheet ID": {
+      "main": [
+        [
+          {
+            "node": "Tem Sheet ID?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Sheet ID?": {
+      "main": [
+        [
+          {
+            "node": "Distribuir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Distribuir": {
+      "main": [
+        [
+          {
+            "node": "Buscar DB Config",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Lojas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar DB Config": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuarios (config)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuarios (config)": {
+      "main": [
+        [
+          {
+            "node": "Ler Aba Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Aba Config": {
+      "main": [
+        [
+          {
+            "node": "Aplicar Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aplicar Config": {
+      "main": [
+        [
+          {
+            "node": "Rotear Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotear Config": {
+      "main": [
+        [
+          {
+            "node": "Upsert Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Patch Meta Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Avisos Config (log)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Lojas": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuarios (agenda)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Usuarios (agenda)": {
+      "main": [
+        [
+          {
+            "node": "Ler Aba Agenda Manual",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Aba Agenda Manual": {
+      "main": [
+        [
+          {
+            "node": "Validar Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Agenda": {
+      "main": [
+        [
+          {
+            "node": "Rotear Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotear Agenda": {
+      "main": [
+        [
+          {
+            "node": "Inserir Agenda Visita",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar Linha (erro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inserir Agenda Visita": {
+      "main": [
+        [
+          {
+            "node": "Marcar Linha (ok)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "88c056ae-a243-49a3-9188-f44894de8ac2",
+      "name": "Cron 06:00 e 20:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        480
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 6 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 30 20 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "21eb48fd-10e3-4144-b7aa-e799ee10d206",
+      "name": "Buscar Sheet ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        480
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=eq.google_sheets_id&select=valor",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c7add3c3-c71e-41bb-b5d1-9261fb785ebf",
+      "name": "Extrair Sheet ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        480
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const r = $input.first() ? $input.first().json : null;\nconst sheetId = Array.isArray(r) ? (r[0] && r[0].valor) : (r && r.valor);\nreturn [{ json: { sheetId: sheetId || '' } }];"
+      }
+    },
+    {
+      "id": "39f02cb0-a9aa-436d-b26a-2a764f8eb258",
+      "name": "Tem Sheet ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        480
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.sheetId }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1db0efa9-a4a0-4458-93d8-5c82b7a47438",
+      "name": "Distribuir",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        896,
+        480
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c1899cc9-79a3-47b7-a4aa-d8996280592b",
+      "name": "Buscar DB Config",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        192
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?select=chave,valor",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2c3337d5-671f-45d7-86c4-05888c292e25",
+      "name": "Buscar Usuarios (config)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        192
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?ativo=eq.true&select=id,nome,meta_visitas_dia",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "341b16bf-14f3-42e7-b097-238ccbba999f",
+      "name": "Ler Aba Config",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        192
+      ],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "⚙ Config"
+        },
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "c7b66baa-9cbe-417f-8c80-c50925319d3f",
+      "name": "Aplicar Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        192
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const prot = ['google_sheets_id','emails_relatorio'];\nconst numKeys = ['meta_visitas_dia','meta_visitas_mes','sla_dias_padrao','raio_checkin_m'];\nconst horaKeys = ['hora_envio_rota','hora_relatorio'];\nconst dbc = {}; $('Buscar DB Config').all().forEach(i => { dbc[i.json.chave] = i.json.valor; });\nconst users = $('Buscar Usuarios (config)').all().map(i => i.json);\nfunction norm(s){ return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,''); }\nconst out = [];\nfor (const it of $input.all()) {\n  const chave = String(it.json.chave || '').trim();\n  const valor = (it.json.valor === undefined || it.json.valor === null) ? '' : String(it.json.valor).trim();\n  if (!chave || prot.indexOf(chave) >= 0) continue;\n  if (chave.indexOf('meta_visitas_dia:') === 0) {\n    const nome = chave.slice(17).trim();\n    const u = users.find(x => norm(x.nome) === norm(nome));\n    if (!u) { out.push({ json: { tipo:'aviso', msg:'meta: usuario nao encontrado - '+nome } }); continue; }\n    if (valor !== '' && !/^\\d+$/.test(valor)) { out.push({ json: { tipo:'aviso', msg:'meta invalida p/ '+nome+': '+valor } }); continue; }\n    out.push({ json: { tipo:'meta', usuario_id: u.id, valor: valor === '' ? null : parseInt(valor,10) } });\n    continue;\n  }\n  if (numKeys.indexOf(chave) >= 0 && !/^\\d+(\\.\\d+)?$/.test(valor)) { out.push({ json: { tipo:'aviso', msg:'numerico invalido p/ '+chave+': '+valor } }); continue; }\n  if (horaKeys.indexOf(chave) >= 0 && !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(valor)) { out.push({ json: { tipo:'aviso', msg:'horario invalido p/ '+chave+': '+valor } }); continue; }\n  if (dbc[chave] === valor) continue;\n  out.push({ json: { tipo:'config', chave: chave, valor: valor } });\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "73f90872-2d5e-4eff-97ea-dbe2d2c1107a",
+      "name": "Rotear Config",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2016,
+        176
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "renameOutput": true,
+              "outputKey": "config",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "config"
+                  }
+                ]
+              }
+            },
+            {
+              "renameOutput": true,
+              "outputKey": "meta",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "meta"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Avisos"
+        }
+      }
+    },
+    {
+      "id": "096eaf35-0b5f-4ae7-8e61-98321d508a1a",
+      "name": "Upsert Config",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2240,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?on_conflict=chave",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"chave\": $json.chave, \"valor\": $json.valor } }}"
+      }
+    },
+    {
+      "id": "2a82577d-a317-4133-9b1c-9cf1fcf1f64d",
+      "name": "Patch Meta Usuario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2240,
+        192
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?id=eq.{{ $json.usuario_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"meta_visitas_dia\": $json.valor } }}"
+      }
+    },
+    {
+      "id": "f952b8d8-4632-4a76-8c9a-a1ecfd46b351",
+      "name": "Avisos Config (log)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        384
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "f56bb6a7-887d-4a5e-a999-12f11ee10dcd",
+      "name": "Buscar Lojas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        672
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?select=id,codcl",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ac778841-76d6-4784-bcd7-6120277f7775",
+      "name": "Buscar Usuarios (agenda)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        672
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?ativo=eq.true&faz_visitas=eq.true&select=id,nome",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "fb2010e0-c300-43fc-b014-63676830888b",
+      "name": "Ler Aba Agenda Manual",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        672
+      ],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "➕ Agenda Manual"
+        },
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "cc680a60-8d80-4d7d-8926-2e70db302fe3",
+      "name": "Validar Agenda",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        672
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const hoje = $today.toISODate();\nconst lojas = {}; $('Buscar Lojas').all().forEach(i => { lojas[String(i.json.codcl).trim()] = i.json.id; });\nconst users = $('Buscar Usuarios (agenda)').all().map(i => i.json);\nfunction norm(s){ return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,''); }\nconst out = [];\nfor (const it of $input.all()) {\n  const r = it.json;\n  if (String(r.status_importacao || '').trim() !== '') continue;\n  const rowNum = r.row_number;\n  const dataStr = String(r.data || '').trim();\n  const cod = String(r.cod_loja || '').trim();\n  const resp = String(r.responsavel || '').trim();\n  const erros = [];\n  let dataIso = null;\n  const m = dataStr.match(/^(\\d{2})\\/(\\d{2})\\/(\\d{4})$/);\n  if (!m) erros.push('data invalida (dd/mm/aaaa)');\n  else { dataIso = m[3]+'-'+m[2]+'-'+m[1]; if (dataIso < hoje) erros.push('data no passado'); }\n  const lojaId = lojas[cod];\n  if (!lojaId) erros.push('cod_loja nao encontrado');\n  const u = users.find(x => norm(x.nome) === norm(resp));\n  if (!u) erros.push('responsavel nao e usuario ativo que faz visitas');\n  if (erros.length) out.push({ json: { tipo:'erro', row_number: rowNum, status_importacao:'✖ erro', observacao_erro: erros.join('; ') } });\n  else out.push({ json: { tipo:'ok', row_number: rowNum, data: dataIso, usuario_id: u.id, loja_id: lojaId, status_importacao: '✔ importada ' + $now.toFormat('dd/LL HH:mm'), observacao_erro: '' } });\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "4f591cb3-5e85-4ebc-8304-8e2434c347ba",
+      "name": "Rotear Agenda",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2016,
+        672
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "renameOutput": true,
+              "outputKey": "ok",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "ok"
+                  }
+                ]
+              }
+            },
+            {
+              "renameOutput": true,
+              "outputKey": "erro",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "erro"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      }
+    },
+    {
+      "id": "0e0a2c6f-2b60-48a3-8993-1db206ff9986",
+      "name": "Inserir Agenda Visita",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2240,
+        576
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"data\": $json.data, \"usuario_id\": $json.usuario_id, \"loja_id\": $json.loja_id, \"origem\": \"manual\", \"status\": \"pendente\" } }}"
+      }
+    },
+    {
+      "id": "f89b66c8-7427-417e-83b1-acd84324b6d8",
+      "name": "Marcar Linha (ok)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2464,
+        576
+      ],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "➕ Agenda Manual"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "value": {
+            "row_number": "={{ $('Validar Agenda').item.json.row_number }}",
+            "status_importacao": "={{ $('Validar Agenda').item.json.status_importacao }}",
+            "observacao_erro": "={{ $('Validar Agenda').item.json.observacao_erro }}"
+          },
+          "schema": [
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "status_importacao",
+              "displayName": "status_importacao",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "observacao_erro",
+              "displayName": "observacao_erro",
+              "type": "string",
+              "display": true
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "c901ee48-836e-4895-808b-9cb1fe9184de",
+      "name": "Marcar Linha (erro)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2240,
+        768
+      ],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "➕ Agenda Manual"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "status_importacao": "={{ $json.status_importacao }}",
+            "observacao_erro": "={{ $json.observacao_erro }}"
+          },
+          "schema": [
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "status_importacao",
+              "displayName": "status_importacao",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "observacao_erro",
+              "displayName": "observacao_erro",
+              "type": "string",
+              "display": true
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ]
+}
