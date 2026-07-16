@@ -7,7 +7,8 @@
   "description": "Sincroniza visitas/oportunidades/contratos nao-sincronizados do Supabase para a planilha Google Sheets (D-13). Gatilho duplo: cron 5min (resgate) + Execute Workflow (push do W2). Upsert por id; marca sincronizado=true.",
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "connections": {
     "Cron 5min (resgate)": {
@@ -188,14 +189,6 @@
   },
   "nodes": [
     {
-      "id": "cff695ed-c21c-4d44-8a44-ef860e2e8ac5",
-      "name": "Cron 5min (resgate)",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        0,
-        96
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -205,24 +198,22 @@
             }
           ]
         }
-      }
+      },
+      "id": "cff695ed-c21c-4d44-8a44-ef860e2e8ac5",
+      "name": "Cron 5min (resgate)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        96
+      ]
     },
     {
-      "id": "f60da30f-d06f-4a7c-ad95-a90b4b12c981",
-      "name": "Buscar Sheet ID",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        224,
-        192
-      ],
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=eq.google_sheets_id&select=valor",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -230,10 +221,22 @@
               "value": "rotaviva"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "f60da30f-d06f-4a7c-ad95-a90b4b12c981",
+      "name": "Buscar Sheet ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        192
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const r = $input.first() ? $input.first().json : null;\nconst sheetId = Array.isArray(r) ? (r[0] && r[0].valor) : (r && r.valor);\nreturn [{ json: { sheetId: sheetId || '' } }];"
+      },
       "id": "f141fe41-8370-4691-93b8-acba4f9f40c5",
       "name": "Extrair Sheet ID",
       "type": "n8n-nodes-base.code",
@@ -241,28 +244,16 @@
       "position": [
         448,
         192
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const r = $input.first() ? $input.first().json : null;\nconst sheetId = Array.isArray(r) ? (r[0] && r[0].valor) : (r && r.valor);\nreturn [{ json: { sheetId: sheetId || '' } }];"
-      }
+      ]
     },
     {
-      "id": "9702aa55-ec9f-4b5d-bee4-5f0dc30a541b",
-      "name": "Tem Sheet ID?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        672,
-        192
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "loose",
+            "version": 1
           },
           "combinator": "and",
           "conditions": [
@@ -274,10 +265,20 @@
               }
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "9702aa55-ec9f-4b5d-bee4-5f0dc30a541b",
+      "name": "Tem Sheet ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        192
+      ]
     },
     {
+      "parameters": {},
       "id": "fdf52862-541e-4c8a-9e34-0b04581dc46c",
       "name": "Distribuir",
       "type": "n8n-nodes-base.noOp",
@@ -285,10 +286,12 @@
       "position": [
         896,
         192
-      ],
-      "parameters": {}
+      ]
     },
     {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
       "id": "642e573f-2f7e-4bdf-83af-f5b13cd7118c",
       "name": "Chamado pelo W2",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
@@ -296,27 +299,14 @@
       "position": [
         0,
         288
-      ],
-      "parameters": {
-        "inputSource": "passthrough"
-      }
+      ]
     },
     {
-      "id": "1d9f0aa7-6c0f-4931-b37d-fedc22ee290b",
-      "name": "Buscar Visitas nao sync",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1120,
-        0
-      ],
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?sincronizado=eq.false&select=id,checkin_at,distancia_m,flag_suspeito,falou_decisor,resultado,produto_interesse,status_1,data_retorno,motivo_nao_fechamento,obs_texto,obs_audio_transcrito,usuarios(nome),lojas(nome,codcl)",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -324,10 +314,22 @@
               "value": "rotaviva"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "1d9f0aa7-6c0f-4931-b37d-fedc22ee290b",
+      "name": "Buscar Visitas nao sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        0
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "return $input.all().map(i => { const v = i.json; return { json: {\n  id: v.id,\n  data: v.checkin_at ? String(v.checkin_at).slice(0,10) : '',\n  usuario: v.usuarios ? v.usuarios.nome : '',\n  loja: v.lojas ? v.lojas.nome : '',\n  codcl: v.lojas ? v.lojas.codcl : '',\n  distancia_m: v.distancia_m,\n  suspeito: v.flag_suspeito,\n  falou_decisor: v.falou_decisor,\n  resultado: v.resultado,\n  produto: v.produto_interesse,\n  status: v.status_1,\n  data_retorno: v.data_retorno,\n  motivo: v.motivo_nao_fechamento,\n  obs: v.obs_texto || v.obs_audio_transcrito || ''\n} }; });"
+      },
       "id": "229bd9f2-28fb-4153-8cd9-e94325748148",
       "name": "Transformar Visitas",
       "type": "n8n-nodes-base.code",
@@ -335,24 +337,10 @@
       "position": [
         1344,
         0
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "return $input.all().map(i => { const v = i.json; return { json: {\n  id: v.id,\n  data: v.checkin_at ? String(v.checkin_at).slice(0,10) : '',\n  usuario: v.usuarios ? v.usuarios.nome : '',\n  loja: v.lojas ? v.lojas.nome : '',\n  codcl: v.lojas ? v.lojas.codcl : '',\n  distancia_m: v.distancia_m,\n  suspeito: v.flag_suspeito,\n  falou_decisor: v.falou_decisor,\n  resultado: v.resultado,\n  produto: v.produto_interesse,\n  status: v.status_1,\n  data_retorno: v.data_retorno,\n  motivo: v.motivo_nao_fechamento,\n  obs: v.obs_texto || v.obs_audio_transcrito || ''\n} }; });"
-      }
+      ]
     },
     {
-      "id": "77110185-e1eb-480d-b7e1-075639773c4d",
-      "name": "Upsert Aba Visitas",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        1568,
-        0
-      ],
       "parameters": {
-        "resource": "sheet",
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
@@ -372,25 +360,26 @@
           ],
           "schema": []
         },
-        "options": {}
-      }
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "77110185-e1eb-480d-b7e1-075639773c4d",
+      "name": "Upsert Aba Visitas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        0
+      ]
     },
     {
-      "id": "d7b2d06b-23a8-40c2-b413-281619278b1f",
-      "name": "Marcar Visitas sync",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1792,
-        0
-      ],
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?id=in.({{ $('Transformar Visitas').all().map(i => i.json.id).join(',') }})",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -404,28 +393,26 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"sincronizado\": true, \"sheets_synced_at\": $now.toISO() } }}"
+        "jsonBody": "={{ { \"sincronizado\": true, \"sheets_synced_at\": $now.toISO() } }}",
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
-      "id": "83314418-9894-4593-ad46-29563cf78090",
-      "name": "Buscar Oport nao sync",
+      "id": "d7b2d06b-23a8-40c2-b413-281619278b1f",
+      "name": "Marcar Visitas sync",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1120,
-        192
+        1792,
+        0
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades?sincronizado=eq.false&select=id,criado_em,produto,status,lojas(nome,codcl)",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -433,10 +420,22 @@
               "value": "rotaviva"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "83314418-9894-4593-ad46-29563cf78090",
+      "name": "Buscar Oport nao sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        192
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "return $input.all().map(i => { const o = i.json; return { json: {\n  id: o.id,\n  criado_em: o.criado_em ? String(o.criado_em).slice(0,10) : '',\n  loja: o.lojas ? o.lojas.nome : '',\n  codcl: o.lojas ? o.lojas.codcl : '',\n  produto: o.produto,\n  status: o.status\n} }; });"
+      },
       "id": "dadb07bf-08bc-4938-b8d6-3d80e60f75ee",
       "name": "Transformar Oport",
       "type": "n8n-nodes-base.code",
@@ -444,24 +443,10 @@
       "position": [
         1344,
         192
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "return $input.all().map(i => { const o = i.json; return { json: {\n  id: o.id,\n  criado_em: o.criado_em ? String(o.criado_em).slice(0,10) : '',\n  loja: o.lojas ? o.lojas.nome : '',\n  codcl: o.lojas ? o.lojas.codcl : '',\n  produto: o.produto,\n  status: o.status\n} }; });"
-      }
+      ]
     },
     {
-      "id": "5e685c04-94fc-4402-ad86-72ee9202b7c0",
-      "name": "Upsert Aba Oport",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        1568,
-        192
-      ],
       "parameters": {
-        "resource": "sheet",
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
@@ -481,25 +466,26 @@
           ],
           "schema": []
         },
-        "options": {}
-      }
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "5e685c04-94fc-4402-ad86-72ee9202b7c0",
+      "name": "Upsert Aba Oport",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        192
+      ]
     },
     {
-      "id": "5c339317-8e4b-4485-959f-4635c488d243",
-      "name": "Marcar Oport sync",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1792,
-        192
-      ],
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades?id=in.({{ $('Transformar Oport').all().map(i => i.json.id).join(',') }})",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -513,28 +499,26 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"sincronizado\": true, \"sheets_synced_at\": $now.toISO() } }}"
+        "jsonBody": "={{ { \"sincronizado\": true, \"sheets_synced_at\": $now.toISO() } }}",
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
-      "id": "54239883-2fde-4a7a-92fe-f2d3944f713a",
-      "name": "Buscar Contratos nao sync",
+      "id": "5c339317-8e4b-4485-959f-4635c488d243",
+      "name": "Marcar Oport sync",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1120,
-        384
+        1792,
+        192
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?sincronizado=eq.false&select=id,produto,etapa,etapa_desde,numero_fluig,atualizado_em,lojas(nome,codcl)",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -542,10 +526,22 @@
               "value": "rotaviva"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "54239883-2fde-4a7a-92fe-f2d3944f713a",
+      "name": "Buscar Contratos nao sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        384
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "return $input.all().map(i => { const c = i.json; return { json: {\n  id: c.id,\n  loja: c.lojas ? c.lojas.nome : '',\n  codcl: c.lojas ? c.lojas.codcl : '',\n  produto: c.produto,\n  etapa: c.etapa,\n  etapa_desde: c.etapa_desde,\n  numero_fluig: c.numero_fluig,\n  atualizado_em: c.atualizado_em ? String(c.atualizado_em).slice(0,10) : ''\n} }; });"
+      },
       "id": "cbabf956-c770-4987-a9b1-d054ad91840e",
       "name": "Transformar Contratos",
       "type": "n8n-nodes-base.code",
@@ -553,24 +549,10 @@
       "position": [
         1344,
         384
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "return $input.all().map(i => { const c = i.json; return { json: {\n  id: c.id,\n  loja: c.lojas ? c.lojas.nome : '',\n  codcl: c.lojas ? c.lojas.codcl : '',\n  produto: c.produto,\n  etapa: c.etapa,\n  etapa_desde: c.etapa_desde,\n  numero_fluig: c.numero_fluig,\n  atualizado_em: c.atualizado_em ? String(c.atualizado_em).slice(0,10) : ''\n} }; });"
-      }
+      ]
     },
     {
-      "id": "4302d533-7c09-467f-be3f-f2ff425af5b6",
-      "name": "Upsert Aba Contratos",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        1568,
-        384
-      ],
       "parameters": {
-        "resource": "sheet",
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
@@ -590,25 +572,26 @@
           ],
           "schema": []
         },
-        "options": {}
-      }
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "4302d533-7c09-467f-be3f-f2ff425af5b6",
+      "name": "Upsert Aba Contratos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        384
+      ]
     },
     {
-      "id": "49cfaa41-d8b4-4936-9cdb-961594575eb2",
-      "name": "Marcar Contratos sync",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1792,
-        384
-      ],
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?id=in.({{ $('Transformar Contratos').all().map(i => i.json.id).join(',') }})",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -622,10 +605,18 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"sincronizado\": true, \"sheets_synced_at\": $now.toISO() } }}"
+        "jsonBody": "={{ { \"sincronizado\": true, \"sheets_synced_at\": $now.toISO() } }}",
+        "options": {}
       },
+      "id": "49cfaa41-d8b4-4936-9cdb-961594575eb2",
+      "name": "Marcar Contratos sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1792,
+        384
+      ],
       "executeOnce": true
     }
   ]
