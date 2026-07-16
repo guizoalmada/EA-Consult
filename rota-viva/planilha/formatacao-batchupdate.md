@@ -1,8 +1,24 @@
 # Formatação da planilha "RotaViva Master" (identidade visual)
 
-Aplicada em 16 Jul 2026 via Google Sheets API `batchUpdate` (workflow descartável
-`TMP — Formatar Planilha`, arquivado no n8n — restaurável para reaplicar).
+Aplicada em 16 Jul 2026 via Google Sheets API `batchUpdate`.
 Planilha: `1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc`.
+
+> **v3 (16 Jul 2026): Dashboard em layout largo (A–S, ~1780px, sem rolagem).** A aba
+> `📊 Dashboard` foi recriada (sheetId novo `700000001`) com 3 painéis lado a lado e filtros:
+> - **Filtros**: `D2` = mês de referência (dropdown; `(atual)` acompanha o mês corrente; `E2`
+>   resolve o valor usado pelas fórmulas) e `P16` = etapa da esteira (dropdown `(todas)` + 7 etapas).
+> - **Esquerda (A–F)**: KPIs de visitas + barra de progresso, equipe (top 5 c/ ritmo), funil, retornos.
+> - **Centro (H–M)**: ⚠ check-ins suspeitos (8 linhas) e ✔ pipeline análise/fechadas (10 linhas) —
+>   loja, contato, telefone, promotor/situação, data/retorno, dist/produto.
+> - **Direita (O–S)**: esteira por etapa + parados > SLA, e ➤ clientes por etapa (10 linhas,
+>   filtrável) — loja, contato, telefone, etapa, dias.
+> - Listas via `INDEX(QUERY(...))` escalar (sem spill), mês por `starts with`; para isso o **W5
+>   grava contato/telefone** das lojas nas abas Visitas (cols O,P) e Contratos (cols I,J).
+> - **Motor permanente**: workflow `[RotaViva] Motor Sheets API (manual)` (`MWnQRgwIsMfxpoVk`,
+>   exportado em `n8n/workflows/motor-sheets-api.json`) com a credencial já vinculada no nó HTTP —
+>   para reformatar, editar o Code node "Montar Requests" e executar. O jsCode atual contém a
+>   FASE 2 (formatação completa do layout v3).
+> - Validado com dados reais (visita suspeita + contrato > SLA) e limpo em seguida.
 
 ## Paleta (tema claro, marca "Rota Viva")
 

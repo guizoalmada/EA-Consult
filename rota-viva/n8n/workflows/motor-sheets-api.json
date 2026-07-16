@@ -1,0 +1,84 @@
+{
+  "id": "MWnQRgwIsMfxpoVk",
+  "name": "[RotaViva] Motor Sheets API (manual)",
+  "active": false,
+  "isArchived": false,
+  "activeVersionId": null,
+  "description": "Motor reutilizavel de batchUpdate na planilha RotaViva Master. O Code node define as requests de cada fase; o no HTTP (credencial fixa) aplica. Rodar manualmente sob demanda.",
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "connections": {
+    "Executar": {
+      "main": [
+        [
+          {
+            "node": "Montar Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Requests": {
+      "main": [
+        [
+          {
+            "node": "Aplicar (Sheets API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "752c4fd8-3483-4d5a-a6b2-bb79336597c1",
+      "name": "Executar",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// FASE 2: formatacao do layout largo v3\nconst D = 700000001;\nfunction hex(h){ return { red: parseInt(h.slice(0,2),16)/255, green: parseInt(h.slice(2,4),16)/255, blue: parseInt(h.slice(4,6),16)/255 }; }\nconst petrol = hex('0E3A34'), paper = hex('F2F8F6'), mist = hex('E2EFEA'), teal = hex('0C7C66'), muted = hex('5C6F6B');\nconst band1 = hex('FAFDFC'), band2 = hex('F1F7F5'), line = hex('C9DED8');\nconst redBg = hex('FCE8E6'), red = hex('C5221F'), ambBg = hex('FEF3E0'), amb = hex('B26A00'), green = hex('1E8E3E'), ambHdr = hex('FBF0DA');\nfunction rng(r1,r2,c1,c2){ return { sheetId: D, startRowIndex: r1, endRowIndex: r2, startColumnIndex: c1, endColumnIndex: c2 }; }\nfunction fmt(range, format, fields){ return { repeatCell: { range: range, cell: { userEnteredFormat: format }, fields: 'userEnteredFormat(' + fields + ')' } }; }\nfunction merge(r){ return { mergeCells: { range: r, mergeType: 'MERGE_ALL' } }; }\nfunction colw(i, px){ return { updateDimensionProperties: { range: { sheetId: D, dimension: 'COLUMNS', startIndex: i, endIndex: i + 1 }, properties: { pixelSize: px }, fields: 'pixelSize' } }; }\nfunction band(r){ return { addBanding: { bandedRange: { range: r, rowProperties: { firstBandColor: band1, secondBandColor: band2 } } } }; }\nfunction cond(ranges, type, val, format, i){ return { addConditionalFormatRule: { rule: { ranges: ranges, booleanRule: { condition: { type: type, values: [{ userEnteredValue: val }] }, format: format } }, index: i } }; }\nconst q = [];\n// titulo\nq.push(merge(rng(0,1,0,19)));\nq.push(fmt(rng(0,1,0,19), { backgroundColor: petrol, verticalAlignment: 'MIDDLE', textFormat: { foregroundColor: paper, bold: true, fontSize: 15 } }, 'backgroundColor,verticalAlignment,textFormat'));\nq.push({ updateDimensionProperties: { range: { sheetId: D, dimension: 'ROWS', startIndex: 0, endIndex: 1 }, properties: { pixelSize: 46 }, fields: 'pixelSize' } });\n// linha 2 filtros\nq.push(fmt(rng(1,2,0,3), { textFormat: { foregroundColor: muted, fontSize: 9 } }, 'textFormat'));\nq.push(fmt(rng(1,2,3,4), { backgroundColor: ambHdr, textFormat: { foregroundColor: petrol, bold: true, fontSize: 10 }, horizontalAlignment: 'CENTER' }, 'backgroundColor,textFormat,horizontalAlignment'));\nq.push(fmt(rng(1,2,4,5), { textFormat: { foregroundColor: teal, bold: true, fontSize: 10 } }, 'textFormat'));\n// secoes (merge + estilo)\nconst secs = [rng(3,4,0,6), rng(3,4,7,13), rng(3,4,14,19), rng(8,9,0,6), rng(14,15,7,13), rng(14,15,14,19), rng(16,17,0,6), rng(22,23,0,6)];\nfor (const s of secs) { q.push(merge(s)); q.push(fmt(s, { backgroundColor: mist, textFormat: { foregroundColor: petrol, bold: true, fontSize: 10 } }, 'backgroundColor,textFormat')); }\n// headers de lista\nconst hdrs = [rng(4,5,7,13), rng(4,5,14,16), rng(9,10,0,4), rng(15,16,7,13), rng(16,17,14,19)];\nfor (const h of hdrs) { q.push(fmt(h, { textFormat: { foregroundColor: petrol, bold: true, fontSize: 9 } }, 'textFormat')); q.push({ updateBorders: { range: h, bottom: { style: 'SOLID', color: line } } }); }\n// KPIs\nq.push(fmt(rng(4,5,1,2), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 16 } }, 'textFormat'));\nq.push(fmt(rng(4,5,3,4), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 12 } }, 'textFormat'));\nq.push(fmt(rng(4,5,5,6), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 12 } }, 'textFormat'));\nq.push(fmt(rng(6,7,1,2), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 12 } }, 'textFormat'));\nq.push(fmt(rng(6,7,3,4), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 12 } }, 'textFormat'));\n// barra progresso\nq.push(merge(rng(5,6,1,6)));\nq.push(fmt(rng(5,6,1,6), { textFormat: { foregroundColor: teal, fontSize: 12, fontFamily: 'Roboto Mono' } }, 'textFormat'));\n// equipe ritmo + listas 9pt\nq.push(fmt(rng(10,15,3,4), { textFormat: { foregroundColor: teal, fontSize: 9, fontFamily: 'Roboto Mono' } }, 'textFormat'));\nq.push(fmt(rng(5,13,7,13), { textFormat: { fontSize: 9 } }, 'textFormat.fontSize'));\nq.push(fmt(rng(16,26,7,13), { textFormat: { fontSize: 9 } }, 'textFormat.fontSize'));\nq.push(fmt(rng(17,27,14,19), { textFormat: { fontSize: 9 } }, 'textFormat.fontSize'));\nq.push(fmt(rng(4,5,7,13), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 9 } }, 'textFormat'));\n// esteira valores bold\nq.push(fmt(rng(5,13,15,16), { textFormat: { foregroundColor: petrol, bold: true } }, 'textFormat'));\n// funil e retornos\nq.push(fmt(rng(17,21,1,2), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 11 } }, 'textFormat'));\nq.push(fmt(rng(18,21,3,4), { textFormat: { foregroundColor: muted } }, 'textFormat'));\nq.push(fmt(rng(23,24,1,2), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 11 } }, 'textFormat'));\nq.push(fmt(rng(23,24,3,4), { textFormat: { foregroundColor: petrol, bold: true, fontSize: 11 } }, 'textFormat'));\n// filtro etapa P16 destaque\nq.push(fmt(rng(15,16,15,16), { backgroundColor: ambHdr, textFormat: { foregroundColor: petrol, bold: true }, horizontalAlignment: 'CENTER' }, 'backgroundColor,textFormat,horizontalAlignment'));\n// banding\nq.push(band(rng(10,15,0,6)));\nq.push(band(rng(5,13,7,13)));\nq.push(band(rng(16,26,7,13)));\nq.push(band(rng(17,27,14,19)));\n// condicionais\nconst st = [rng(6,7,5,6), rng(23,24,5,6)];\nq.push(cond(st, 'TEXT_CONTAINS', '✖', { backgroundColor: redBg, textFormat: { foregroundColor: red, bold: true } }, 0));\nq.push(cond(st, 'TEXT_CONTAINS', '⚠', { backgroundColor: ambBg, textFormat: { foregroundColor: amb, bold: true } }, 1));\nq.push(cond(st, 'TEXT_CONTAINS', '✔', { textFormat: { foregroundColor: green, bold: true } }, 2));\nq.push(cond([rng(12,13,15,16)], 'NUMBER_GREATER', '0', { textFormat: { foregroundColor: red, bold: true } }, 3));\nq.push(cond([rng(16,26,10,11)], 'TEXT_CONTAINS', 'fechou', { textFormat: { foregroundColor: green, bold: true } }, 4));\nq.push(cond([rng(16,26,10,11)], 'TEXT_CONTAINS', 'analisar', { textFormat: { foregroundColor: amb, bold: true } }, 5));\n// larguras\nconst w = [140,75,130,70,80,80,18,160,120,105,85,80,70,18,135,145,115,105,55];\nfor (let i = 0; i < w.length; i++) q.push(colw(i, w[i]));\n// validations (dropdowns)\nconst meses = [{ userEnteredValue: '(atual)' }];\nfor (let y = 2026; y <= 2027; y++) for (let m = 1; m <= 12; m++) { if (y === 2026 && m < 7) continue; meses.push({ userEnteredValue: y + '-' + String(m).padStart(2,'0') }); }\nq.push({ setDataValidation: { range: rng(1,2,3,4), rule: { condition: { type: 'ONE_OF_LIST', values: meses }, showCustomUi: true, strict: true } } });\nconst etapas = ['(todas)','docs_enviados','processamento_matriz','assinatura_cliente','assinatura_diretoria','aguardando_ativacao','ativo','cancelado'].map(function(e){ return { userEnteredValue: e }; });\nq.push({ setDataValidation: { range: rng(15,16,15,16), rule: { condition: { type: 'ONE_OF_LIST', values: etapas }, showCustomUi: true, strict: true } } });\n// protecao\nq.push({ addProtectedRange: { protectedRange: { range: { sheetId: D }, warningOnly: true, description: 'Painel gerado por formulas. Use apenas os dois filtros (Mes e Etapa).' } } });\nreturn [{ json: { requests: q } }];"
+      },
+      "id": "16ddac9f-e01a-4573-8efc-a26fd46a939f",
+      "name": "Montar Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"requests\": $json.requests } }}",
+        "options": {}
+      },
+      "id": "560a9aed-8ad7-4aa7-a056-c5a05908e517",
+      "name": "Aplicar (Sheets API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        0
+      ],
+      "notes": "Vincular ROTA-VIVA - Google Sheets (1x). O Code node muda a cada fase; este no permanece."
+    }
+  ]
+}

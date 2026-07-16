@@ -303,7 +303,7 @@
     },
     {
       "parameters": {
-        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?sincronizado=eq.false&select=id,checkin_at,distancia_m,flag_suspeito,falou_decisor,resultado,produto_interesse,status_1,data_retorno,motivo_nao_fechamento,obs_texto,obs_audio_transcrito,usuarios(nome),lojas(nome,codcl)",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?sincronizado=eq.false&select=id,checkin_at,distancia_m,flag_suspeito,falou_decisor,resultado,produto_interesse,status_1,data_retorno,motivo_nao_fechamento,obs_texto,obs_audio_transcrito,usuarios(nome),lojas(nome,codcl,contato,telefones)",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
@@ -328,7 +328,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map(i => { const v = i.json; return { json: {\n  id: v.id,\n  data: v.checkin_at ? String(v.checkin_at).slice(0,10) : '',\n  usuario: v.usuarios ? v.usuarios.nome : '',\n  loja: v.lojas ? v.lojas.nome : '',\n  codcl: v.lojas ? v.lojas.codcl : '',\n  distancia_m: v.distancia_m,\n  suspeito: v.flag_suspeito,\n  falou_decisor: v.falou_decisor,\n  resultado: v.resultado,\n  produto: v.produto_interesse,\n  status: v.status_1,\n  data_retorno: v.data_retorno,\n  motivo: v.motivo_nao_fechamento,\n  obs: v.obs_texto || v.obs_audio_transcrito || ''\n} }; });"
+        "jsCode": "return $input.all().map(i => { const v = i.json; const l = v.lojas || {}; return { json: {\n  id: v.id,\n  data: v.checkin_at ? String(v.checkin_at).slice(0,10) : '',\n  usuario: v.usuarios ? v.usuarios.nome : '',\n  loja: l.nome || '',\n  codcl: l.codcl || '',\n  distancia_m: v.distancia_m,\n  suspeito: v.flag_suspeito,\n  falou_decisor: v.falou_decisor,\n  resultado: v.resultado,\n  produto: v.produto_interesse,\n  status: v.status_1,\n  data_retorno: v.data_retorno,\n  motivo: v.motivo_nao_fechamento,\n  obs: v.obs_texto || v.obs_audio_transcrito || '',\n  contato: l.contato || '',\n  telefone: (Array.isArray(l.telefones) && l.telefones.length) ? l.telefones[0] : ''\n} }; });"
       },
       "id": "229bd9f2-28fb-4153-8cd9-e94325748148",
       "name": "Transformar Visitas",
@@ -515,7 +515,7 @@
     },
     {
       "parameters": {
-        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?sincronizado=eq.false&select=id,produto,etapa,etapa_desde,numero_fluig,atualizado_em,lojas(nome,codcl)",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?sincronizado=eq.false&select=id,produto,etapa,etapa_desde,numero_fluig,atualizado_em,lojas(nome,codcl,contato,telefones)",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
@@ -540,7 +540,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map(i => { const c = i.json; return { json: {\n  id: c.id,\n  loja: c.lojas ? c.lojas.nome : '',\n  codcl: c.lojas ? c.lojas.codcl : '',\n  produto: c.produto,\n  etapa: c.etapa,\n  etapa_desde: c.etapa_desde,\n  numero_fluig: c.numero_fluig,\n  atualizado_em: c.atualizado_em ? String(c.atualizado_em).slice(0,10) : ''\n} }; });"
+        "jsCode": "return $input.all().map(i => { const c = i.json; const l = c.lojas || {}; return { json: {\n  id: c.id,\n  loja: l.nome || '',\n  codcl: l.codcl || '',\n  produto: c.produto,\n  etapa: c.etapa,\n  etapa_desde: c.etapa_desde,\n  numero_fluig: c.numero_fluig,\n  atualizado_em: c.atualizado_em ? String(c.atualizado_em).slice(0,10) : '',\n  contato: l.contato || '',\n  telefone: (Array.isArray(l.telefones) && l.telefones.length) ? l.telefones[0] : ''\n} }; });"
       },
       "id": "cbabf956-c770-4987-a9b1-d054ad91840e",
       "name": "Transformar Contratos",
