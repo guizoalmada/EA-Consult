@@ -148,11 +148,21 @@ update rotaviva.usuarios set telefone = '+55XXXXXXXXXXX' where nome = 'Anderson 
 select nome, telefone, papel from rotaviva.usuarios order by nome;
 ```
 
-## 7. Criar a planilha Google Sheets "RotaViva Master" (D-13)
+## 7. Planilha Google Sheets "RotaViva Master" (D-13)
 
-O espelho Excel/OneDrive foi substituído: a planilha **Google Sheets é a fonte de verdade** dos
-dados de negócio. Crie (uma vez) a planilha **"RotaViva Master"** na pasta do Drive
-`1f30JmulRQ0deksfTYtMregOop8zKVWQk`, com **7 abas nesta ordem**:
+> **✅ JÁ CRIADA (16 Jul 2026).** `spreadsheetId` = `1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc`
+> (https://docs.google.com/spreadsheets/d/1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc/edit).
+> As 7 abas existem; `config.google_sheets_id` já está gravado; as abas ⚙ Config e ➕ Agenda Manual
+> já foram semeadas (baseline + `meta_visitas_dia:<nome>` por usuário). Falta apenas: mover a planilha
+> para a pasta do Jansen (`1f30JmulRQ0deksfTYtMregOop8zKVWQk`) e compartilhar com ele; apagar as
+> linhas de teste da aba Visitas; e (opcional) polir o visual do Dashboard.
+>
+> **Pré-requisitos que o teste do W5 revelou (ver `CREDENCIAIS.md`):** (a) `CRED_SUPABASE_ROTAVIVA`
+> com o wrapper `{ "headers": { "apikey": ..., "Authorization": "Bearer ..." } }`; (b) grants de
+> `service_role` no schema (migration `20260716000000`, já aplicada); (c) OAuth Google conectado.
+
+Estrutura de referência (caso precise recriar do zero — pasta `1f30JmulRQ0deksfTYtMregOop8zKVWQk`),
+**7 abas nesta ordem**:
 
 1. **📊 Dashboard** — só fórmulas (QUERY/COUNTIFS/SPARKLINE) sobre Visitas/Oportunidades/Contratos.
 2. **Visitas** — dados (escrita pelo W5). Linha 1 banner "⚠ Gerada automaticamente"; cabeçalho congelado; aba protegida. Inclua a coluna auxiliar `id` (chave de upsert do Supabase).

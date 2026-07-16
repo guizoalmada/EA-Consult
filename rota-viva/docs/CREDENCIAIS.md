@@ -32,3 +32,28 @@ abaixo e a associe ao node.
   "Exposed schemas" do PostgREST (Supabase Dashboard → Project Settings → API → Data API Settings →
   adicionar `rotaviva` em "Exposed schemas") — sem isso a API REST retorna 404 para qualquer tabela
   do schema, mesmo com a credencial correta. Este passo está no `GO-LIVE.md`.
+
+### ⚠ Dois detalhes que travaram o piloto (aprendidos no teste do W5, 16 Jul 2026)
+
+1. **Formato do JSON da credencial `HTTP Custom Auth`.** O campo JSON exige um wrapper `headers`
+   (não os headers soltos). Sem o wrapper, os headers **não são injetados** e o Supabase responde
+   `401 "No API key found in request"`. Formato correto:
+   ```json
+   { "headers": { "apikey": "<service_role secret>", "Authorization": "Bearer <service_role secret>" } }
+   ```
+   Use a **`service_role secret`** (não a anon/publishable — RLS barra as públicas). A mesma chave vai
+   nos dois campos.
+
+2. **GRANTs de `service_role` no schema `rotaviva`.** O `service_role` ignora RLS mas ainda precisa de
+   `USAGE` no schema + privilégios de tabela; sem isso o PostgREST responde
+   `403 "permission denied for schema rotaviva"` (código 42501). Resolvido pela migration
+   `20260716000000_rotaviva_grants_service_role.sql` (aplicada). Se recriar o schema do zero, reaplicar.
+
+3. **Binding de credencial em nó HTTP é sempre manual na UI.** A API/MCP do n8n recusa vincular
+   credencial em nós `httpRequest` (de qualquer tipo). Ao importar/criar workflows, abrir cada nó
+   Supabase e selecionar `CRED_SUPABASE_ROTAVIVA`. Os nós **nativos** (Telegram, Google Sheets, Gmail)
+   auto-vinculam a única credencial do tipo.
+- `CRED_GOOGLE_SHEETS` na prática foi criada como **`ROTA-VIVA - Google Sheets`** (OAuth2, escopos
+  sheets+drive.file) e `ROTA-VIVA - Google Drive` (Drive). Precisam do **"Connect / Sign in with
+  Google"** concluído (não basta salvar client id/secret) — senão o node falha com
+  `Unable to sign without access token`.
