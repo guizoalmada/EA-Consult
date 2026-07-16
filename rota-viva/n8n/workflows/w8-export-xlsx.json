@@ -1,0 +1,112 @@
+{
+  "id": "SYksHDrIQxRTkzOz",
+  "name": "[RotaViva] W8 - Export XLSX",
+  "active": false,
+  "isArchived": false,
+  "activeVersionId": null,
+  "description": "Cron 21:30: exporta a planilha RotaViva Master como .xlsx (via Google Drive) para a pasta do projeto. Conveniencia p/ quem prefere Excel local (D-13, Bloco F).",
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "connections": {
+    "Cron 21:30": {
+      "main": [
+        [
+          {
+            "node": "Baixar Planilha como XLSX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Planilha como XLSX": {
+      "main": [
+        [
+          {
+            "node": "Subir XLSX na Pasta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "358cc90d-16f4-483a-9f1c-e102d6ee986f",
+      "name": "Cron 21:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 30 21 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "7b701839-db0b-404a-a947-6db4ea4129df",
+      "name": "Baixar Planilha como XLSX",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1yv3EYq4lxg-CPsulD80HlLAy5Mh_kIOcyAdUoqXBooc"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "googleFileConversion": {
+            "conversion": {
+              "sheetsToFormat": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "f1a49397-08fe-4943-96de-a20a50a98a19",
+      "name": "Subir XLSX na Pasta",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "inputDataFieldName": "data",
+        "name": "=RotaViva_Master_{{ $now.toFormat(\"yyyy-LL-dd\") }}.xlsx",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1f30JmulRQ0deksfTYtMregOop8zKVWQk"
+        },
+        "options": {}
+      }
+    }
+  ]
+}
