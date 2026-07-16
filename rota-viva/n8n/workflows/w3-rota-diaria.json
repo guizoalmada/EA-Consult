@@ -7,7 +7,8 @@
   "description": "Envia diariamente (seg-sáb, 07:30) a rota de visitas do dia por WhatsApp a cada promotor/consultor ativo com visitas pendentes, e alerta o(s) coordenador(es) quando algum promotor/consultor fica sem rota.",
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "connections": {
     "Trigger Diário 07:30 Seg-Sáb": {
@@ -152,14 +153,6 @@
   },
   "nodes": [
     {
-      "id": "21cac749-5965-4845-9190-8544c11464d9",
-      "name": "Trigger Diário 07:30 Seg-Sáb",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        0,
-        0
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -169,34 +162,22 @@
             }
           ]
         }
-      }
+      },
+      "id": "21cac749-5965-4845-9190-8544c11464d9",
+      "name": "Trigger Diário 07:30 Seg-Sáb",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ]
     },
     {
-      "id": "de5c3b8c-ce24-49ea-89e3-281d7fe8f205",
-      "name": "Buscar Usuários que Fazem Visitas",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        300,
-        -150
-      ],
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Accept-Profile",
-              "value": "rotaviva"
-            }
-          ]
-        },
         "sendQuery": true,
-        "specifyQuery": "keypair",
         "queryParameters": {
           "parameters": [
             {
@@ -213,25 +194,7 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "6875e587-f2e0-4cc3-b724-d289166a9b52",
-      "name": "Buscar Visitas Pendentes do Dia",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        900,
-        -250
-      ],
-      "parameters": {
-        "method": "GET",
-        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
-        "authentication": "predefinedCredentialType",
-        "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -240,8 +203,23 @@
             }
           ]
         },
+        "options": {}
+      },
+      "id": "de5c3b8c-ce24-49ea-89e3-281d7fe8f205",
+      "name": "Buscar Usuários que Fazem Visitas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        304,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
         "sendQuery": true,
-        "specifyQuery": "keypair",
         "queryParameters": {
           "parameters": [
             {
@@ -262,40 +240,48 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        },
+        "options": {}
       },
+      "id": "6875e587-f2e0-4cc3-b724-d289166a9b52",
+      "name": "Buscar Visitas Pendentes do Dia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        912,
+        -256
+      ],
       "alwaysOutputData": true
     },
     {
+      "parameters": {
+        "jsCode": "const usuario = $('Loop Usuários').first().json;\nconst rawItems = $input.all().map(function (item) { return item.json; });\nconst visitas = rawItems.filter(function (v) { return v && v.id; });\nconst retornos = visitas.filter(function (v) { return v.origem === 'retorno'; });\n\nfunction formatVisita(v, idx) {\n  const loja = v.lojas || {};\n  const nome = loja.nome || 'Loja sem nome';\n  const bairro = loja.bairro || '-';\n  const contato = loja.contato || '-';\n  const telefonesRaw = loja.telefones;\n  const telefones = Array.isArray(telefonesRaw) ? telefonesRaw.join(', ') : (telefonesRaw || '-');\n  return (idx + 1) + '. ' + nome + ' - ' + bairro + ' - ' + contato + ' - ' + telefones;\n}\n\nconst listaVisitasTexto = visitas.length > 0\n  ? visitas.map(function (v, idx) { return formatVisita(v, idx); }).join('\\n')\n  : 'Nenhuma visita.';\n\nconst listaRetornosTexto = retornos.length > 0\n  ? retornos.map(function (v, idx) { return formatVisita(v, idx); }).join('\\n')\n  : 'nenhum';\n\nreturn [{\n  json: {\n    usuario_id: usuario.id,\n    nome: usuario.nome,\n    papel: usuario.papel,\n    telefone: usuario.telefone,\n    hasVisits: visitas.length > 0,\n    qtdVisitas: visitas.length,\n    listaVisitasTexto: listaVisitasTexto,\n    listaRetornosTexto: listaRetornosTexto,\n    dataFormatada: $now.toFormat('dd/LL')\n  }\n}];\n"
+      },
       "id": "8ace8d60-4d3e-4bac-b912-7f2edffa3741",
       "name": "Montar Dados da Rota",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1150,
-        -250
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const usuario = $('Loop Usuários').first().json;\nconst rawItems = $input.all().map(function (item) { return item.json; });\nconst visitas = rawItems.filter(function (v) { return v && v.id; });\nconst retornos = visitas.filter(function (v) { return v.origem === 'retorno'; });\n\nfunction formatVisita(v, idx) {\n  const loja = v.lojas || {};\n  const nome = loja.nome || 'Loja sem nome';\n  const bairro = loja.bairro || '-';\n  const contato = loja.contato || '-';\n  const telefonesRaw = loja.telefones;\n  const telefones = Array.isArray(telefonesRaw) ? telefonesRaw.join(', ') : (telefonesRaw || '-');\n  return (idx + 1) + '. ' + nome + ' - ' + bairro + ' - ' + contato + ' - ' + telefones;\n}\n\nconst listaVisitasTexto = visitas.length > 0\n  ? visitas.map(function (v, idx) { return formatVisita(v, idx); }).join('\\n')\n  : 'Nenhuma visita.';\n\nconst listaRetornosTexto = retornos.length > 0\n  ? retornos.map(function (v, idx) { return formatVisita(v, idx); }).join('\\n')\n  : 'nenhum';\n\nreturn [{\n  json: {\n    usuario_id: usuario.id,\n    nome: usuario.nome,\n    papel: usuario.papel,\n    telefone: usuario.telefone,\n    hasVisits: visitas.length > 0,\n    qtdVisitas: visitas.length,\n    listaVisitasTexto: listaVisitasTexto,\n    listaRetornosTexto: listaRetornosTexto,\n    dataFormatada: $now.toFormat('dd/LL')\n  }\n}];\n"
-      }
+        1152,
+        -256
+      ]
     },
     {
-      "id": "5891e4d2-75c9-49bd-b6c4-a92614429c42",
-      "name": "Usuário Tem Visitas Hoje?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1400,
-        -250
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -308,80 +294,67 @@
             }
           ],
           "combinator": "and"
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "5891e4d2-75c9-49bd-b6c4-a92614429c42",
+      "name": "Usuário Tem Visitas Hoje?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1408,
+        -256
+      ]
     },
     {
+      "parameters": {
+        "options": {}
+      },
       "id": "6a27f577-3e53-4411-84e5-03ba22724067",
       "name": "Loop Usuários",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        600,
-        -150
-      ],
-      "parameters": {
-        "batchSize": 1
-      }
+        608,
+        -144
+      ]
     },
     {
+      "parameters": {
+        "assignments": {
+          "assignments": []
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
       "id": "04b971ac-ffc3-4380-9416-955465700b4c",
       "name": "Marcar Usuário Sem Rota",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1700,
-        -50
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": true,
-        "assignments": {
-          "assignments": []
-        }
-      }
+        1712,
+        -48
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const usuario = $input.first().json;\n\n// O alerta serve para o coordenador saber que alguem de campo ficou sem rota.\n// Coordenador e gerente tambem fazem visitas (D-06), mas nem sempre tem rota no dia:\n// a ausencia de rota deles e normal e nao deve virar alerta diario.\nif (usuario.papel === 'coordenador' || usuario.papel === 'gerente') {\n  return [];\n}\n\nconst coordenadores = $('Buscar Coordenadores Ativos').all().map(function (item) { return item.json; });\n\nreturn coordenadores.map(function (c) {\n  return {\n    json: {\n      coordenador_nome: c.nome,\n      coordenador_telefone: c.telefone,\n      usuario_nome: usuario.nome,\n      data: usuario.dataFormatada\n    }\n  };\n});\n"
+      },
       "id": "44d575e6-53e8-4686-8fbf-10c9fe8e7e92",
       "name": "Montar Alertas de Rota Vazia",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1950,
-        100
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const usuario = $input.first().json;\n\n// O alerta serve para o coordenador saber que alguem de campo ficou sem rota.\n// Coordenador e gerente tambem fazem visitas (D-06), mas nem sempre tem rota no dia:\n// a ausencia de rota deles e normal e nao deve virar alerta diario.\nif (usuario.papel === 'coordenador' || usuario.papel === 'gerente') {\n  return [];\n}\n\nconst coordenadores = $('Buscar Coordenadores Ativos').all().map(function (item) { return item.json; });\n\nreturn coordenadores.map(function (c) {\n  return {\n    json: {\n      coordenador_nome: c.nome,\n      coordenador_telefone: c.telefone,\n      usuario_nome: usuario.nome,\n      data: usuario.dataFormatada\n    }\n  };\n});\n"
-      }
+        1952,
+        112
+      ]
     },
     {
-      "id": "3636801f-8782-4359-8f97-85b1a56fd6d5",
-      "name": "Buscar Coordenadores Ativos",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        300,
-        350
-      ],
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Accept-Profile",
-              "value": "rotaviva"
-            }
-          ]
-        },
         "sendQuery": true,
-        "specifyQuery": "keypair",
         "queryParameters": {
           "parameters": [
             {
@@ -398,48 +371,49 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3636801f-8782-4359-8f97-85b1a56fd6d5",
+      "name": "Buscar Coordenadores Ativos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        304,
+        352
+      ]
     },
     {
-      "id": "3d2be83e-7cdf-4cd7-9b0b-d27bab4f1ddb",
-      "name": "Enviar Rota Diária (WhatsApp)",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        1700,
-        -350
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "sendTemplate",
         "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do número de telefone do WhatsApp Business (Meta Cloud API)__>",
         "recipientPhoneNumber": "={{ $json.telefone }}",
         "template": "rota_diaria",
         "components": {
           "component": [
             {
-              "type": "body",
               "bodyParameters": {
                 "parameter": [
                   {
-                    "type": "text",
                     "text": "={{ $json.nome }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.dataFormatada }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.qtdVisitas.toString() }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.listaVisitasTexto }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.listaRetornosTexto }}"
                   }
                 ]
@@ -448,40 +422,34 @@
           ]
         }
       },
+      "id": "3d2be83e-7cdf-4cd7-9b0b-d27bab4f1ddb",
+      "name": "Enviar Rota Diária (WhatsApp)",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1712,
+        -352
+      ],
       "webhookId": "c3141582-21ff-4aac-9672-e31be37ae12b",
       "disabled": true
     },
     {
-      "id": "ad40d1c1-102a-4519-9138-7802441b6644",
-      "name": "Enviar Alerta Rota Vazia (WhatsApp)",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        2200,
-        100
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "sendTemplate",
         "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do número de telefone do WhatsApp Business (Meta Cloud API)__>",
         "recipientPhoneNumber": "={{ $json.coordenador_telefone }}",
         "template": "alerta_rota_vazia",
         "components": {
           "component": [
             {
-              "type": "body",
               "bodyParameters": {
                 "parameter": [
                   {
-                    "type": "text",
                     "text": "={{ $json.coordenador_nome }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.data }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.usuario_nome }}"
                   }
                 ]
@@ -490,35 +458,33 @@
           ]
         }
       },
+      "id": "ad40d1c1-102a-4519-9138-7802441b6644",
+      "name": "Enviar Alerta Rota Vazia (WhatsApp)",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2208,
+        112
+      ],
       "webhookId": "c4295228-7b9b-4edf-b897-0888e6ba8369",
       "disabled": true
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nreturn { json: { usuario_id: j.usuario_id, tipo: 'rota_diaria', variaveis: { nome: j.nome, data: j.dataFormatada, qtd_visitas: j.qtdVisitas, lista_visitas: j.listaVisitasTexto, lista_retornos: j.listaRetornosTexto } } };"
+      },
       "id": "5f198581-a0a1-4d23-856e-dd7e70f00b3f",
       "name": "Montar Envio Rota (W0)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1700,
-        -450
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const j = $json;\nreturn { json: { usuario_id: j.usuario_id, tipo: 'rota_diaria', variaveis: { nome: j.nome, data: j.dataFormatada, qtd_visitas: j.qtdVisitas, lista_visitas: j.listaVisitasTexto, lista_retornos: j.listaRetornosTexto } } };"
-      }
+        1712,
+        -448
+      ]
     },
     {
-      "id": "37e0e929-c21c-4486-b1db-3b0cc03d530e",
-      "name": "Chamar W0 (Rota)",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        1900,
-        -450
-      ],
       "parameters": {
-        "source": "database",
         "workflowId": {
           "__rl": true,
           "mode": "id",
@@ -529,45 +495,51 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "id": "37e0e929-c21c-4486-b1db-3b0cc03d530e",
+      "name": "Chamar W0 (Rota)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1904,
+        -448
+      ]
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nreturn { json: { identidade: 'wa:' + (j.coordenador_telefone || ''), tipo: 'alerta_rota_vazia', variaveis: { coordenador: j.coordenador_nome, data: j.data, usuario_sem_rota: j.usuario_nome } } };"
+      },
       "id": "e6b2cd2e-398b-4b1d-bf46-9a1ce21b0d92",
       "name": "Montar Envio Alerta Vazia (W0)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2200,
-        100
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const j = $json;\nreturn { json: { identidade: 'wa:' + (j.coordenador_telefone || ''), tipo: 'alerta_rota_vazia', variaveis: { coordenador: j.coordenador_nome, data: j.data, usuario_sem_rota: j.usuario_nome } } };"
-      }
+        2208,
+        112
+      ]
     },
     {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YnkTgdXycHXNBJci",
+          "cachedResultName": "[RotaViva] W0 - Enviar Mensagem"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
       "id": "aea317af-b90c-4f07-adb7-58c145888af6",
       "name": "Chamar W0 (Alerta Vazio)",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
         2400,
-        100
-      ],
-      "parameters": {
-        "source": "database",
-        "workflowId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "YnkTgdXycHXNBJci",
-          "cachedResultName": "[RotaViva] W0 - Enviar Mensagem"
-        },
-        "mode": "each",
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      }
+        112
+      ]
     }
   ]
 }

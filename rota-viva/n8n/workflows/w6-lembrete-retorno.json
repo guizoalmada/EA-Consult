@@ -7,7 +7,8 @@
   "description": "Todos os dias às 08:00, busca visitas com data_retorno=hoje, envia lembrete WhatsApp ao promotor responsável e cria agenda_visitas de retorno (evitando duplicatas) para aparecer na rota do dia.",
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "connections": {
     "Trigger Diário 08:00": {
@@ -109,14 +110,6 @@
   },
   "nodes": [
     {
-      "id": "1f4bcd28-ddc7-4872-a4c4-c0a779876c5b",
-      "name": "Trigger Diário 08:00",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        240,
-        300
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -126,24 +119,22 @@
             }
           ]
         }
-      }
+      },
+      "id": "1f4bcd28-ddc7-4872-a4c4-c0a779876c5b",
+      "name": "Trigger Diário 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        304
+      ]
     },
     {
-      "id": "a84fea06-0019-4876-9034-c2988c849a66",
-      "name": "Buscar Visitas Retorno Hoje",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        540,
-        300
-      ],
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendQuery": true,
-        "specifyQuery": "keypair",
         "queryParameters": {
           "parameters": [
             {
@@ -157,7 +148,6 @@
           ]
         },
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -166,25 +156,23 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "3c164420-486f-40b2-881d-5381e11c66e0",
-      "name": "Verificar Agenda Existente",
+        "options": {}
+      },
+      "id": "a84fea06-0019-4876-9034-c2988c849a66",
+      "name": "Buscar Visitas Retorno Hoje",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1440,
-        140
-      ],
+        544,
+        304
+      ]
+    },
+    {
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendQuery": true,
-        "specifyQuery": "keypair",
         "queryParameters": {
           "parameters": [
             {
@@ -210,7 +198,6 @@
           ]
         },
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -219,25 +206,26 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
+      "id": "3c164420-486f-40b2-881d-5381e11c66e0",
+      "name": "Verificar Agenda Existente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1440,
+        144
+      ],
       "alwaysOutputData": true
     },
     {
-      "id": "c6f80899-c279-45bc-a041-c850501dfbf9",
-      "name": "Agenda de Retorno Já Existe?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1740,
-        140
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "loose",
+            "version": 1
           },
           "conditions": [
             {
@@ -250,38 +238,38 @@
             }
           ],
           "combinator": "and"
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "c6f80899-c279-45bc-a041-c850501dfbf9",
+      "name": "Agenda de Retorno Já Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1744,
+        144
+      ]
     },
     {
+      "parameters": {
+        "options": {}
+      },
       "id": "aa6ccda9-6044-45d5-9b53-1a9d2754a22e",
       "name": "Loop Visitas Retorno",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        840,
-        300
-      ],
-      "parameters": {
-        "batchSize": 1
-      }
+        848,
+        304
+      ]
     },
     {
-      "id": "dbcbc4b4-41b7-46b4-8405-1fb5f19dd8e6",
-      "name": "Criar Agenda Retorno",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        2040,
-        260
-      ],
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -299,8 +287,6 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
-        "specifyBody": "keypair",
         "bodyParameters": {
           "parameters": [
             {
@@ -325,44 +311,37 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "dbcbc4b4-41b7-46b4-8405-1fb5f19dd8e6",
+      "name": "Criar Agenda Retorno",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2048,
+        272
+      ]
     },
     {
-      "id": "656f1cb4-bca5-429e-9559-e17083c1010a",
-      "name": "Enviar Lembrete Retorno",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        1140,
-        200
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "sendTemplate",
         "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do número de telefone WhatsApp Business (Meta) remetente__>",
         "recipientPhoneNumber": "={{ $json.usuarios.telefone }}",
         "template": "lembrete_retorno",
         "components": {
           "component": [
             {
-              "type": "body",
               "bodyParameters": {
                 "parameter": [
                   {
-                    "type": "text",
                     "text": "={{ $json.usuarios.nome }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.lojas.nome }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.lojas.bairro }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.lojas.contato || ($json.lojas.telefones && $json.lojas.telefones[0]) || \"\" }}"
                   }
                 ]
@@ -371,35 +350,33 @@
           ]
         }
       },
+      "id": "656f1cb4-bca5-429e-9559-e17083c1010a",
+      "name": "Enviar Lembrete Retorno",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        208
+      ],
       "webhookId": "1e7d3c86-3587-42c7-bed9-115716312e8b",
       "disabled": true
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nconst contato = (j.lojas && (j.lojas.contato || (j.lojas.telefones && j.lojas.telefones[0]))) || '';\nreturn { json: { usuario_id: j.usuario_id, tipo: 'lembrete_retorno', variaveis: { nome: j.usuarios ? j.usuarios.nome : '', loja: j.lojas ? j.lojas.nome : '', bairro: j.lojas ? j.lojas.bairro : '', contato: contato } } };"
+      },
       "id": "99c2f83c-ef31-4b91-a464-a953c374c048",
       "name": "Montar Envio Lembrete (W0)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1140,
-        360
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const j = $json;\nconst contato = (j.lojas && (j.lojas.contato || (j.lojas.telefones && j.lojas.telefones[0]))) || '';\nreturn { json: { usuario_id: j.usuario_id, tipo: 'lembrete_retorno', variaveis: { nome: j.usuarios ? j.usuarios.nome : '', loja: j.lojas ? j.lojas.nome : '', bairro: j.lojas ? j.lojas.bairro : '', contato: contato } } };"
-      }
+        1152,
+        368
+      ]
     },
     {
-      "id": "aa498358-cbc0-4d92-8924-96757f155b44",
-      "name": "Chamar W0 (Lembrete)",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        1340,
-        360
-      ],
       "parameters": {
-        "source": "database",
         "workflowId": {
           "__rl": true,
           "mode": "id",
@@ -410,7 +387,15 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "id": "aa498358-cbc0-4d92-8924-96757f155b44",
+      "name": "Chamar W0 (Lembrete)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1344,
+        368
+      ]
     }
   ]
 }

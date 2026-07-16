@@ -7,7 +7,8 @@
   "description": "Relatório diário (seg-sáb 18h) com visitas, metas, oportunidades, perdas, contratos parados e retornos vencidos, enviado por WhatsApp ao gerente e por e-mail à lista de destinatários.",
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "connections": {
     "Gatilho 18h Seg-Sab": {
@@ -161,14 +162,6 @@
   },
   "nodes": [
     {
-      "id": "ea4068e8-d1fb-4513-bf80-c9c20fbbd5cf",
-      "name": "Gatilho 18h Seg-Sab",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        200,
-        380
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -178,24 +171,47 @@
             }
           ]
         }
-      }
+      },
+      "id": "ea4068e8-d1fb-4513-bf80-c9c20fbbd5cf",
+      "name": "Gatilho 18h Seg-Sab",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        384
+      ]
     },
     {
+      "parameters": {
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=in.(meta_visitas_dia,meta_visitas_mes,sla_dias_padrao,emails_relatorio)&select=chave,valor",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        },
+        "options": {}
+      },
       "id": "f3ea956d-cc8a-48ab-b3cc-e695120747cb",
       "name": "Buscar Config",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        460,
-        380
-      ],
+        464,
+        384
+      ]
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=in.(meta_visitas_dia,meta_visitas_mes,sla_dias_padrao,emails_relatorio)&select=chave,valor",
-        "authentication": "predefinedCredentialType",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?faz_visitas=eq.true&ativo=eq.true&select=id,nome,papel,telefone,meta_visitas_dia",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -204,25 +220,24 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
+        "options": {}
+      },
       "id": "051502ba-50fb-49ec-939a-3a0f0d63b695",
       "name": "Buscar Usuarios Campo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        680,
-        380
+        688,
+        384
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?faz_visitas=eq.true&ativo=eq.true&select=id,nome,papel,telefone,meta_visitas_dia",
-        "authentication": "predefinedCredentialType",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=eq.gerente&ativo=eq.true&select=id,nome,telefone&limit=1",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -231,26 +246,24 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
       "id": "5e2b76ca-fc82-41c1-a576-3e3f95923c00",
       "name": "Buscar Gerente",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        900,
-        380
+        912,
+        384
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=eq.gerente&ativo=eq.true&select=id,nome,telefone&limit=1",
-        "authentication": "predefinedCredentialType",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=eq.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,status,origem",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -259,26 +272,24 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
       "id": "f5756ee0-027c-4bc7-bcaa-02b864856b49",
       "name": "Buscar Agenda Hoje",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         1120,
-        380
+        384
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=eq.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,status,origem",
-        "authentication": "predefinedCredentialType",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=gte.{{ $today.startOf('month').toFormat('yyyy-MM-dd') }}&data=lte.{{ $today.toFormat('yyyy-MM-dd') }}&status=eq.realizada&select=id,usuario_id,data",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -287,26 +298,24 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
       "id": "550429a3-6718-4a9d-abcc-2955c1bfa8eb",
       "name": "Buscar Agenda Mes",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1340,
-        380
+        1344,
+        384
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?data=gte.{{ $today.startOf('month').toFormat('yyyy-MM-dd') }}&data=lte.{{ $today.toFormat('yyyy-MM-dd') }}&status=eq.realizada&select=id,usuario_id,data",
-        "authentication": "predefinedCredentialType",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?flag_suspeito=eq.true&checkin_at=gte.{{ $today.toISO() }}&checkin_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,usuario_id,loja_id,checkin_at",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -315,26 +324,24 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
       "id": "b5aeab5f-e6e6-48dc-a136-77dc1570c2f0",
       "name": "Buscar Checkins Suspeitos",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1560,
-        380
+        1568,
+        384
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?flag_suspeito=eq.true&checkin_at=gte.{{ $today.toISO() }}&checkin_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,usuario_id,loja_id,checkin_at",
-        "authentication": "predefinedCredentialType",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades?criado_em=gte.{{ $today.toISO() }}&criado_em=lt.{{ $today.plus(1,'days').toISO() }}&select=id,produto,loja_id,visita_id",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -343,26 +350,24 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
       "id": "773befb6-e0fa-4f19-a889-3c2f33fbd2cb",
       "name": "Buscar Oportunidades Hoje",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1780,
-        380
+        1792,
+        384
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades?criado_em=gte.{{ $today.toISO() }}&criado_em=lt.{{ $today.plus(1,'days').toISO() }}&select=id,produto,loja_id,visita_id",
-        "authentication": "predefinedCredentialType",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?status_1=eq.sem_interesse&checkout_at=gte.{{ $today.toISO() }}&checkout_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,loja_id,usuario_id,motivo_nao_fechamento",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -371,26 +376,24 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
       "id": "ca145c2b-bfa4-4e21-bd88-1e65c575fb8c",
       "name": "Buscar Perdas Hoje",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         2000,
-        380
+        384
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?status_1=eq.sem_interesse&checkout_at=gte.{{ $today.toISO() }}&checkout_at=lt.{{ $today.plus(1,'days').toISO() }}&select=id,loja_id,usuario_id,motivo_nao_fechamento",
-        "authentication": "predefinedCredentialType",
+        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?etapa=not.in.(ativo,cancelado)&select=id,loja_id,produto,etapa,etapa_desde,numero_fluig",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -399,26 +402,24 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
       "id": "bdf04151-5d8e-4c9d-ae63-4e2a882508b3",
       "name": "Buscar Contratos Abertos",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2220,
-        380
+        2224,
+        384
       ],
+      "executeOnce": true
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?etapa=not.in.(ativo,cancelado)&select=id,loja_id,produto,etapa,etapa_desde,numero_fluig",
-        "authentication": "predefinedCredentialType",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?origem=eq.retorno&status=eq.pendente&data=lt.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,data",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -427,123 +428,80 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
-      "executeOnce": true
-    },
-    {
       "id": "7cff77d3-b23f-4cc6-b291-717630202efb",
       "name": "Buscar Retornos Vencidos",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2440,
-        380
+        2448,
+        384
       ],
-      "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?origem=eq.retorno&status=eq.pendente&data=lt.{{ $today.toFormat('yyyy-MM-dd') }}&select=id,usuario_id,loja_id,data",
-        "authentication": "predefinedCredentialType",
-        "genericAuthType": "httpCustomAuth",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Accept-Profile",
-              "value": "rotaviva"
-            }
-          ]
-        },
-        "nodeCredentialType": "supabaseApi"
-      },
       "executeOnce": true
     },
     {
+      "parameters": {
+        "jsCode": "\nconst configRows = $('Buscar Config').all().map(i => i.json);\nconst config = {};\nconfigRows.forEach(r => { config[r.chave] = r.valor; });\n\nconst metaDia = parseFloat(config.meta_visitas_dia) || 12;\nconst metaMes = parseFloat(config.meta_visitas_mes) || 280;\nconst slaDias = parseFloat(config.sla_dias_padrao) || 3;\nconst emailsCsv = config.emails_relatorio || '';\nconst emailList = emailsCsv.split(',').map(s => s.trim()).filter(Boolean);\n\nconst usuariosCampo = $('Buscar Usuarios Campo').all().map(i => i.json);\n// meta efetiva: individual (usuarios.meta_visitas_dia) com fallback na config\nconst metaDoUsuario = (u) => (u && u.meta_visitas_dia != null ? parseFloat(u.meta_visitas_dia) : metaDia);\nconst gerenteRows = $('Buscar Gerente').all().map(i => i.json);\nconst gerente = gerenteRows[0] || {};\n\nconst agendaHoje = $('Buscar Agenda Hoje').all().map(i => i.json);\nconst visitasPlanejadas = agendaHoje.length;\nconst visitasRealizadas = agendaHoje.filter(a => a.status === 'realizada').length;\n\nconst porUsuario = {};\nusuariosCampo.forEach(u => {\n  porUsuario[u.id] = { nome: u.nome, meta: metaDoUsuario(u), planejadas: 0, realizadas: 0 };\n});\n// agenda de quem nao esta no roster (usuario removido/inativo, ou linha sem responsavel)\nagendaHoje.forEach(a => {\n  const chave = a.usuario_id || 'sem_responsavel';\n  if (!porUsuario[chave]) {\n    porUsuario[chave] = {\n      nome: a.usuario_id ? a.usuario_id : 'sem responsavel',\n      meta: metaDia, planejadas: 0, realizadas: 0\n    };\n  }\n  porUsuario[chave].planejadas += 1;\n  if (a.status === 'realizada') porUsuario[chave].realizadas += 1;\n});\n\n// so entra no ranking quem tinha rota hoje ou registrou visita:\n// quem nao tem visita planejada nao aparece como abaixo da meta.\nconst rankingUsuarios = Object.values(porUsuario)\n  .filter(u => u.planejadas > 0 || u.realizadas > 0)\n  .sort((a, b) => (b.realizadas - a.realizadas) || a.nome.localeCompare(b.nome));\n\n// meta do dia da equipe = soma das metas efetivas de quem tinha rota hoje\nconst metaDiaEquipe = rankingUsuarios.reduce((acc, u) => acc + u.meta, 0);\nconst pctMetaDia = metaDiaEquipe > 0 ? Math.round((visitasRealizadas / metaDiaEquipe) * 1000) / 10 : 0;\n\nconst detalhePorUsuario = rankingUsuarios.map((u, idx) => {\n  const pct = u.meta > 0 ? Math.round((u.realizadas / u.meta) * 1000) / 10 : 0;\n  return { posicao: idx + 1, nome: u.nome, realizadas: u.realizadas, planejadas: u.planejadas, meta: u.meta, pctMeta: pct };\n});\n\nconst agendaMes = $('Buscar Agenda Mes').all().map(i => i.json);\nconst acumuladoMes = agendaMes.length;\nconst pctMetaMes = metaMes > 0 ? Math.round((acumuladoMes / metaMes) * 1000) / 10 : 0;\n\nconst suspeitosRows = $('Buscar Checkins Suspeitos').all().map(i => i.json);\nconst suspeitosCount = suspeitosRows.length;\n\nconst opRows = $('Buscar Oportunidades Hoje').all().map(i => i.json);\nconst oportunidadesCount = opRows.length;\nconst oportunidadesPorProduto = {};\nopRows.forEach(o => {\n  const p = o.produto || 'nao_informado';\n  oportunidadesPorProduto[p] = (oportunidadesPorProduto[p] || 0) + 1;\n});\n\nconst perdasRows = $('Buscar Perdas Hoje').all().map(i => i.json);\nconst perdasCount = perdasRows.length;\n\nconst contratosRows = $('Buscar Contratos Abertos').all().map(i => i.json);\nconst agora = Date.now();\nconst contratosComDias = contratosRows.map(c => {\n  const desde = c.etapa_desde ? new Date(c.etapa_desde).getTime() : agora;\n  const diasParado = Math.floor((agora - desde) / (1000 * 60 * 60 * 24));\n  return Object.assign({}, c, { diasParado: diasParado, atrasado: diasParado > slaDias });\n});\nconst contratosAtrasados = contratosComDias.filter(c => c.atrasado);\nconst contratosAtrasadosCount = contratosAtrasados.length;\n\nconst retornosRows = $('Buscar Retornos Vencidos').all().map(i => i.json);\nconst retornosVencidosCount = retornosRows.length;\n\nconst now = new Date();\nconst dd = String(now.getDate()).padStart(2, '0');\nconst mm = String(now.getMonth() + 1).padStart(2, '0');\nconst yyyy = now.getFullYear();\nconst dataFormatada = dd + '/' + mm;\nconst dataCompleta = dd + '/' + mm + '/' + yyyy;\n\nconst oportunidadesLinhas = Object.keys(oportunidadesPorProduto).length\n  ? Object.entries(oportunidadesPorProduto).map(function (e) { return '<li>' + e[0] + ': ' + e[1] + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst perdasLinhas = perdasRows.length\n  ? perdasRows.map(function (p) { return '<li>Loja ' + (p.loja_id || '-') + ' - motivo: ' + (p.motivo_nao_fechamento || 'nao informado') + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst contratosLinhas = contratosAtrasados.length\n  ? contratosAtrasados.map(function (c) { return '<li>Contrato ' + (c.numero_fluig || c.id) + ' - etapa: ' + c.etapa + ' - ' + c.diasParado + ' dias parado</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst retornosLinhas = retornosRows.length\n  ? retornosRows.map(function (r) { return '<li>Loja ' + (r.loja_id || '-') + ' - agendado para ' + r.data + '</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst detalhePorUsuarioLinhas = detalhePorUsuario.length\n  ? detalhePorUsuario.map(function (u) { return '<li>' + u.posicao + '. ' + u.nome + ': ' + u.realizadas + '/' + u.planejadas + ' realizadas - ' + u.pctMeta + '% da meta de ' + u.meta + '</li>'; }).join('')\n  : '<li>ninguem com rota hoje</li>';\n\nconst htmlBody = '<h2>Relatorio Diario Rota Viva - ' + dataCompleta + '</h2>' +\n  '<h3>Visitas de hoje</h3>' +\n  '<p>Realizadas: ' + visitasRealizadas + ' | Planejadas: ' + visitasPlanejadas + ' | % da meta do dia: ' + pctMetaDia + '%</p>' +\n  '<h4>Ranking do dia</h4><ul>' + detalhePorUsuarioLinhas + '</ul>' +\n  '<h3>Acumulado do mes</h3>' +\n  '<p>' + acumuladoMes + ' de ' + metaMes + ' (' + pctMetaMes + '%)</p>' +\n  '<h3>Check-ins suspeitos hoje</h3>' +\n  '<p>' + suspeitosCount + '</p>' +\n  '<h3>Oportunidades novas hoje</h3>' +\n  '<ul>' + oportunidadesLinhas + '</ul>' +\n  '<h3>Perdas do dia (sem interesse)</h3>' +\n  '<ul>' + perdasLinhas + '</ul>' +\n  '<h3>Contratos parados alem do SLA (' + slaDias + ' dias)</h3>' +\n  '<ul>' + contratosLinhas + '</ul>' +\n  '<h3>Retornos vencidos nao cumpridos</h3>' +\n  '<ul>' + retornosLinhas + '</ul>';\n\nreturn [{\n  json: {\n    dataFormatada: dataFormatada,\n    dataCompleta: dataCompleta,\n    visitasRealizadas: visitasRealizadas,\n    visitasPlanejadas: visitasPlanejadas,\n    metaDiaEquipe: metaDiaEquipe,\n    ranking: detalhePorUsuario,\n    pctMetaDia: pctMetaDia,\n    acumuladoMes: acumuladoMes,\n    metaMes: metaMes,\n    pctMetaMes: pctMetaMes,\n    suspeitosCount: suspeitosCount,\n    oportunidadesCount: oportunidadesCount,\n    oportunidadesPorProduto: oportunidadesPorProduto,\n    perdasCount: perdasCount,\n    contratosAtrasadosCount: contratosAtrasadosCount,\n    retornosVencidosCount: retornosVencidosCount,\n    gerenteNome: gerente.nome || 'Gerente',\n    gerenteTelefone: gerente.telefone || '',\n    emailsRelatorioStr: emailList.join(','),\n    htmlBody: htmlBody\n  }\n}];\n"
+      },
       "id": "49846187-4eb9-4cb1-b83b-433939cb0bb2",
       "name": "Consolidar Metricas",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2680,
-        380
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst configRows = $('Buscar Config').all().map(i => i.json);\nconst config = {};\nconfigRows.forEach(r => { config[r.chave] = r.valor; });\n\nconst metaDia = parseFloat(config.meta_visitas_dia) || 12;\nconst metaMes = parseFloat(config.meta_visitas_mes) || 280;\nconst slaDias = parseFloat(config.sla_dias_padrao) || 3;\nconst emailsCsv = config.emails_relatorio || '';\nconst emailList = emailsCsv.split(',').map(s => s.trim()).filter(Boolean);\n\nconst usuariosCampo = $('Buscar Usuarios Campo').all().map(i => i.json);\n// meta efetiva: individual (usuarios.meta_visitas_dia) com fallback na config\nconst metaDoUsuario = (u) => (u && u.meta_visitas_dia != null ? parseFloat(u.meta_visitas_dia) : metaDia);\nconst gerenteRows = $('Buscar Gerente').all().map(i => i.json);\nconst gerente = gerenteRows[0] || {};\n\nconst agendaHoje = $('Buscar Agenda Hoje').all().map(i => i.json);\nconst visitasPlanejadas = agendaHoje.length;\nconst visitasRealizadas = agendaHoje.filter(a => a.status === 'realizada').length;\n\nconst porUsuario = {};\nusuariosCampo.forEach(u => {\n  porUsuario[u.id] = { nome: u.nome, meta: metaDoUsuario(u), planejadas: 0, realizadas: 0 };\n});\n// agenda de quem nao esta no roster (usuario removido/inativo, ou linha sem responsavel)\nagendaHoje.forEach(a => {\n  const chave = a.usuario_id || 'sem_responsavel';\n  if (!porUsuario[chave]) {\n    porUsuario[chave] = {\n      nome: a.usuario_id ? a.usuario_id : 'sem responsavel',\n      meta: metaDia, planejadas: 0, realizadas: 0\n    };\n  }\n  porUsuario[chave].planejadas += 1;\n  if (a.status === 'realizada') porUsuario[chave].realizadas += 1;\n});\n\n// so entra no ranking quem tinha rota hoje ou registrou visita:\n// quem nao tem visita planejada nao aparece como abaixo da meta.\nconst rankingUsuarios = Object.values(porUsuario)\n  .filter(u => u.planejadas > 0 || u.realizadas > 0)\n  .sort((a, b) => (b.realizadas - a.realizadas) || a.nome.localeCompare(b.nome));\n\n// meta do dia da equipe = soma das metas efetivas de quem tinha rota hoje\nconst metaDiaEquipe = rankingUsuarios.reduce((acc, u) => acc + u.meta, 0);\nconst pctMetaDia = metaDiaEquipe > 0 ? Math.round((visitasRealizadas / metaDiaEquipe) * 1000) / 10 : 0;\n\nconst detalhePorUsuario = rankingUsuarios.map((u, idx) => {\n  const pct = u.meta > 0 ? Math.round((u.realizadas / u.meta) * 1000) / 10 : 0;\n  return { posicao: idx + 1, nome: u.nome, realizadas: u.realizadas, planejadas: u.planejadas, meta: u.meta, pctMeta: pct };\n});\n\nconst agendaMes = $('Buscar Agenda Mes').all().map(i => i.json);\nconst acumuladoMes = agendaMes.length;\nconst pctMetaMes = metaMes > 0 ? Math.round((acumuladoMes / metaMes) * 1000) / 10 : 0;\n\nconst suspeitosRows = $('Buscar Checkins Suspeitos').all().map(i => i.json);\nconst suspeitosCount = suspeitosRows.length;\n\nconst opRows = $('Buscar Oportunidades Hoje').all().map(i => i.json);\nconst oportunidadesCount = opRows.length;\nconst oportunidadesPorProduto = {};\nopRows.forEach(o => {\n  const p = o.produto || 'nao_informado';\n  oportunidadesPorProduto[p] = (oportunidadesPorProduto[p] || 0) + 1;\n});\n\nconst perdasRows = $('Buscar Perdas Hoje').all().map(i => i.json);\nconst perdasCount = perdasRows.length;\n\nconst contratosRows = $('Buscar Contratos Abertos').all().map(i => i.json);\nconst agora = Date.now();\nconst contratosComDias = contratosRows.map(c => {\n  const desde = c.etapa_desde ? new Date(c.etapa_desde).getTime() : agora;\n  const diasParado = Math.floor((agora - desde) / (1000 * 60 * 60 * 24));\n  return Object.assign({}, c, { diasParado: diasParado, atrasado: diasParado > slaDias });\n});\nconst contratosAtrasados = contratosComDias.filter(c => c.atrasado);\nconst contratosAtrasadosCount = contratosAtrasados.length;\n\nconst retornosRows = $('Buscar Retornos Vencidos').all().map(i => i.json);\nconst retornosVencidosCount = retornosRows.length;\n\nconst now = new Date();\nconst dd = String(now.getDate()).padStart(2, '0');\nconst mm = String(now.getMonth() + 1).padStart(2, '0');\nconst yyyy = now.getFullYear();\nconst dataFormatada = dd + '/' + mm;\nconst dataCompleta = dd + '/' + mm + '/' + yyyy;\n\nconst oportunidadesLinhas = Object.keys(oportunidadesPorProduto).length\n  ? Object.entries(oportunidadesPorProduto).map(function (e) { return '<li>' + e[0] + ': ' + e[1] + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst perdasLinhas = perdasRows.length\n  ? perdasRows.map(function (p) { return '<li>Loja ' + (p.loja_id || '-') + ' - motivo: ' + (p.motivo_nao_fechamento || 'nao informado') + '</li>'; }).join('')\n  : '<li>nenhuma</li>';\n\nconst contratosLinhas = contratosAtrasados.length\n  ? contratosAtrasados.map(function (c) { return '<li>Contrato ' + (c.numero_fluig || c.id) + ' - etapa: ' + c.etapa + ' - ' + c.diasParado + ' dias parado</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst retornosLinhas = retornosRows.length\n  ? retornosRows.map(function (r) { return '<li>Loja ' + (r.loja_id || '-') + ' - agendado para ' + r.data + '</li>'; }).join('')\n  : '<li>nenhum</li>';\n\nconst detalhePorUsuarioLinhas = detalhePorUsuario.length\n  ? detalhePorUsuario.map(function (u) { return '<li>' + u.posicao + '. ' + u.nome + ': ' + u.realizadas + '/' + u.planejadas + ' realizadas - ' + u.pctMeta + '% da meta de ' + u.meta + '</li>'; }).join('')\n  : '<li>ninguem com rota hoje</li>';\n\nconst htmlBody = '<h2>Relatorio Diario Rota Viva - ' + dataCompleta + '</h2>' +\n  '<h3>Visitas de hoje</h3>' +\n  '<p>Realizadas: ' + visitasRealizadas + ' | Planejadas: ' + visitasPlanejadas + ' | % da meta do dia: ' + pctMetaDia + '%</p>' +\n  '<h4>Ranking do dia</h4><ul>' + detalhePorUsuarioLinhas + '</ul>' +\n  '<h3>Acumulado do mes</h3>' +\n  '<p>' + acumuladoMes + ' de ' + metaMes + ' (' + pctMetaMes + '%)</p>' +\n  '<h3>Check-ins suspeitos hoje</h3>' +\n  '<p>' + suspeitosCount + '</p>' +\n  '<h3>Oportunidades novas hoje</h3>' +\n  '<ul>' + oportunidadesLinhas + '</ul>' +\n  '<h3>Perdas do dia (sem interesse)</h3>' +\n  '<ul>' + perdasLinhas + '</ul>' +\n  '<h3>Contratos parados alem do SLA (' + slaDias + ' dias)</h3>' +\n  '<ul>' + contratosLinhas + '</ul>' +\n  '<h3>Retornos vencidos nao cumpridos</h3>' +\n  '<ul>' + retornosLinhas + '</ul>';\n\nreturn [{\n  json: {\n    dataFormatada: dataFormatada,\n    dataCompleta: dataCompleta,\n    visitasRealizadas: visitasRealizadas,\n    visitasPlanejadas: visitasPlanejadas,\n    metaDiaEquipe: metaDiaEquipe,\n    ranking: detalhePorUsuario,\n    pctMetaDia: pctMetaDia,\n    acumuladoMes: acumuladoMes,\n    metaMes: metaMes,\n    pctMetaMes: pctMetaMes,\n    suspeitosCount: suspeitosCount,\n    oportunidadesCount: oportunidadesCount,\n    oportunidadesPorProduto: oportunidadesPorProduto,\n    perdasCount: perdasCount,\n    contratosAtrasadosCount: contratosAtrasadosCount,\n    retornosVencidosCount: retornosVencidosCount,\n    gerenteNome: gerente.nome || 'Gerente',\n    gerenteTelefone: gerente.telefone || '',\n    emailsRelatorioStr: emailList.join(','),\n    htmlBody: htmlBody\n  }\n}];\n"
-      }
+        2688,
+        384
+      ]
     },
     {
+      "parameters": {
+        "sendTo": "={{ $json.emailsRelatorioStr }}",
+        "subject": "=Relatorio Diario Rota Viva - {{ $json.dataFormatada }}",
+        "message": "={{ $json.htmlBody }}",
+        "options": {}
+      },
       "id": "2f2afffc-9726-4732-b3ac-e34169cfc2b3",
       "name": "Enviar Email Relatorio",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        2940,
-        540
+        2944,
+        544
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "sendTo": "={{ $json.emailsRelatorioStr }}",
-        "subject": "=Relatorio Diario Rota Viva - {{ $json.dataFormatada }}",
-        "emailType": "html",
-        "message": "={{ $json.htmlBody }}"
-      },
       "webhookId": "ce75b26c-d333-4ffb-be47-6f2d544f6cc0"
     },
     {
-      "id": "ba4e768a-a32a-4ae7-8e13-6742babf9675",
-      "name": "Enviar WhatsApp Gerente",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        2940,
-        220
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "sendTemplate",
         "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta phone_number_id) do RotaViva__>",
         "recipientPhoneNumber": "={{ $json.gerenteTelefone }}",
         "template": "relatorio_diario_gerente",
         "components": {
           "component": [
             {
-              "type": "body",
               "bodyParameters": {
                 "parameter": [
                   {
-                    "type": "text",
                     "text": "={{ $json.dataFormatada }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ String($json.visitasRealizadas) }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ String($json.visitasPlanejadas) }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ String($json.pctMetaDia) + '%' }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ String($json.acumuladoMes) + '/' + String($json.metaMes) }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ String($json.suspeitosCount) }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ String($json.oportunidadesCount) }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ String($json.contratosAtrasadosCount) }}"
                   }
                 ]
@@ -552,35 +510,33 @@
           ]
         }
       },
+      "id": "ba4e768a-a32a-4ae7-8e13-6742babf9675",
+      "name": "Enviar WhatsApp Gerente",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2944,
+        224
+      ],
       "webhookId": "43490af2-5b4f-44f2-99c1-9b05121a4e1e",
       "disabled": true
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nreturn { json: { identidade: 'wa:' + (j.gerenteTelefone || ''), tipo: 'relatorio_diario', variaveis: { data: j.dataFormatada, realizadas: j.visitasRealizadas, planejadas: j.visitasPlanejadas, pct_meta: j.pctMetaDia, acumulado_mes: j.acumuladoMes, checkins_suspeitos: j.suspeitosCount, oportunidades_novas: j.oportunidadesCount, contratos_sla: j.contratosAtrasadosCount } } };"
+      },
       "id": "9ca6cc76-bdbd-4e64-bcbb-9d6735319a64",
       "name": "Montar Envio Relatorio (W0)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3160,
-        220
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const j = $json;\nreturn { json: { identidade: 'wa:' + (j.gerenteTelefone || ''), tipo: 'relatorio_diario', variaveis: { data: j.dataFormatada, realizadas: j.visitasRealizadas, planejadas: j.visitasPlanejadas, pct_meta: j.pctMetaDia, acumulado_mes: j.acumuladoMes, checkins_suspeitos: j.suspeitosCount, oportunidades_novas: j.oportunidadesCount, contratos_sla: j.contratosAtrasadosCount } } };"
-      }
+        3168,
+        224
+      ]
     },
     {
-      "id": "4f4eca0e-db12-43d9-af69-395744fe4d65",
-      "name": "Chamar W0 (Relatorio)",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        3360,
-        220
-      ],
       "parameters": {
-        "source": "database",
         "workflowId": {
           "__rl": true,
           "mode": "id",
@@ -591,7 +547,15 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "id": "4f4eca0e-db12-43d9-af69-395744fe4d65",
+      "name": "Chamar W0 (Relatorio)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3360,
+        224
+      ]
     }
   ]
 }

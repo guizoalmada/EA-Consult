@@ -7,7 +7,8 @@
   "description": "Maquina de estados MULTICANAL (D-10): Telegram padrao com /start por contato; WhatsApp preservado dormente. Check-in, foto, checkout (decisor/produto/observacao; audio via Whisper+Haiku) e comandos de texto.",
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "connections": {
     "WhatsApp Trigger": {
@@ -83,7 +84,7 @@
         ],
         [
           {
-            "node": "Buscar Loja por Codcl (Maquininha)",
+            "node": "Extrair Loja Maquininha",
             "type": "main",
             "index": 0
           }
@@ -148,15 +149,9 @@
             "node": "Confirmar Contrato Assinado (TG)",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar Loja por Codcl (Maquininha)": {
-      "main": [
-        [
+          },
           {
-            "node": "Extrair Loja Maquininha",
+            "node": "Chamar W5 (push sync)",
             "type": "main",
             "index": 0
           }
@@ -164,17 +159,6 @@
       ]
     },
     "Extrair Loja Maquininha": {
-      "main": [
-        [
-          {
-            "node": "Buscar Contrato Atual (Maquininha)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar Contrato Atual (Maquininha)": {
       "main": [
         [
           {
@@ -201,6 +185,11 @@
         [
           {
             "node": "Confirmar Maquininha Ativada (TG)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chamar W5 (push sync)",
             "type": "main",
             "index": 0
           }
@@ -661,6 +650,11 @@
             "node": "Rotear Mensagem de Saida",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Chamar W5 (push sync)",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -935,6 +929,12 @@
   },
   "nodes": [
     {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
       "id": "120acb2f-446e-4d9e-8c67-716a2f437715",
       "name": "WhatsApp Trigger",
       "type": "n8n-nodes-base.whatsAppTrigger",
@@ -943,45 +943,29 @@
         0,
         0
       ],
-      "parameters": {
-        "updates": [
-          "messages"
-        ]
-      },
       "webhookId": "d7c0db11-473c-42b8-9413-4af895b7b53c",
       "disabled": true
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst raw = $json;\nconst value = (raw.messages ? raw : (raw.body && raw.body.entry && raw.body.entry[0] && raw.body.entry[0].changes && raw.body.entry[0].changes[0] && raw.body.entry[0].changes[0].value)) || raw;\nconst msg = (value.messages && value.messages[0]) || {};\nconst tipoMensagem = msg.type || 'desconhecido';\nlet texto = '';\nlet respostaId = '';\nif (tipoMensagem === 'text') {\n  texto = (msg.text && msg.text.body) || '';\n} else if (tipoMensagem === 'interactive') {\n  if (msg.interactive && msg.interactive.type === 'button_reply') {\n    respostaId = (msg.interactive.button_reply && msg.interactive.button_reply.id) || '';\n    texto = (msg.interactive.button_reply && msg.interactive.button_reply.title) || '';\n  } else if (msg.interactive && msg.interactive.type === 'list_reply') {\n    respostaId = (msg.interactive.list_reply && msg.interactive.list_reply.id) || '';\n    texto = (msg.interactive.list_reply && msg.interactive.list_reply.title) || '';\n  }\n} else if (tipoMensagem === 'button') {\n  respostaId = (msg.button && msg.button.payload) || '';\n  texto = (msg.button && msg.button.text) || '';\n}\nconst lat = (msg.location && msg.location.latitude != null) ? msg.location.latitude : null;\nconst long = (msg.location && msg.location.longitude != null) ? msg.location.longitude : null;\nconst mediaId = (msg.image && msg.image.id) || (msg.audio && msg.audio.id) || null;\nconst fromRaw = msg.from || '';\nconst telefone = fromRaw.indexOf('+') === 0 ? fromRaw : ('+' + fromRaw);\nconst textoNormalizado = texto.trim();\nconst matchContrato = textoNormalizado.match(/^contrato\\s+(\\S+)\\s+assinado$/i);\nconst matchMaquininha = textoNormalizado.match(/^maquininha\\s+(\\S+)\\s+ativada$/i);\nlet comandoTipo = '';\nlet comandoCodcl = '';\nif (matchContrato) {\n  comandoTipo = 'contrato_assinado';\n  comandoCodcl = matchContrato[1];\n} else if (matchMaquininha) {\n  comandoTipo = 'maquininha_ativada';\n  comandoCodcl = matchMaquininha[1];\n}\nreturn {\n  json: {\n    telefone: telefone,\n    tipoMensagem: tipoMensagem,\n    texto: textoNormalizado,\n    respostaId: respostaId,\n    lat: lat,\n    long: long,\n    mediaId: mediaId,\n    waMessageId: msg.id || null,\n    comandoTipo: comandoTipo,\n    comandoCodcl: comandoCodcl\n  }\n};\n"
+      },
       "id": "3d8303e3-8111-4225-b5b6-3e95e4c0ac95",
       "name": "Normalizar Mensagem",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        200,
+        208,
         0
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "\nconst raw = $json;\nconst value = (raw.messages ? raw : (raw.body && raw.body.entry && raw.body.entry[0] && raw.body.entry[0].changes && raw.body.entry[0].changes[0] && raw.body.entry[0].changes[0].value)) || raw;\nconst msg = (value.messages && value.messages[0]) || {};\nconst tipoMensagem = msg.type || 'desconhecido';\nlet texto = '';\nlet respostaId = '';\nif (tipoMensagem === 'text') {\n  texto = (msg.text && msg.text.body) || '';\n} else if (tipoMensagem === 'interactive') {\n  if (msg.interactive && msg.interactive.type === 'button_reply') {\n    respostaId = (msg.interactive.button_reply && msg.interactive.button_reply.id) || '';\n    texto = (msg.interactive.button_reply && msg.interactive.button_reply.title) || '';\n  } else if (msg.interactive && msg.interactive.type === 'list_reply') {\n    respostaId = (msg.interactive.list_reply && msg.interactive.list_reply.id) || '';\n    texto = (msg.interactive.list_reply && msg.interactive.list_reply.title) || '';\n  }\n} else if (tipoMensagem === 'button') {\n  respostaId = (msg.button && msg.button.payload) || '';\n  texto = (msg.button && msg.button.text) || '';\n}\nconst lat = (msg.location && msg.location.latitude != null) ? msg.location.latitude : null;\nconst long = (msg.location && msg.location.longitude != null) ? msg.location.longitude : null;\nconst mediaId = (msg.image && msg.image.id) || (msg.audio && msg.audio.id) || null;\nconst fromRaw = msg.from || '';\nconst telefone = fromRaw.indexOf('+') === 0 ? fromRaw : ('+' + fromRaw);\nconst textoNormalizado = texto.trim();\nconst matchContrato = textoNormalizado.match(/^contrato\\s+(\\S+)\\s+assinado$/i);\nconst matchMaquininha = textoNormalizado.match(/^maquininha\\s+(\\S+)\\s+ativada$/i);\nlet comandoTipo = '';\nlet comandoCodcl = '';\nif (matchContrato) {\n  comandoTipo = 'contrato_assinado';\n  comandoCodcl = matchContrato[1];\n} else if (matchMaquininha) {\n  comandoTipo = 'maquininha_ativada';\n  comandoCodcl = matchMaquininha[1];\n}\nreturn {\n  json: {\n    telefone: telefone,\n    tipoMensagem: tipoMensagem,\n    texto: textoNormalizado,\n    respostaId: respostaId,\n    lat: lat,\n    long: long,\n    mediaId: mediaId,\n    waMessageId: msg.id || null,\n    comandoTipo: comandoTipo,\n    comandoCodcl: comandoCodcl\n  }\n};\n"
-      }
+      ]
     },
     {
-      "id": "262b3680-04e5-40ba-b1cf-a9dd712477c1",
-      "name": "Buscar Usuario Ativo",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        400,
-        0
-      ],
       "parameters": {
-        "method": "GET",
         "url": "={{ $json.urlUsuario }}",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -990,40 +974,39 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "262b3680-04e5-40ba-b1cf-a9dd712477c1",
+      "name": "Buscar Usuario Ativo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        0
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) {\n  return [];\n}\nconst usuario = rows[0];\nconst msg = $('Entrada Normalizada').first().json;\nreturn [{\n  json: Object.assign({}, msg, {\n    usuarioId: usuario.id,\n    papel: usuario.papel,\n    nomeUsuario: usuario.nome\n  })\n}];"
+      },
       "id": "f51fd9ce-5ed3-4680-b320-ed83f809707f",
       "name": "Validar Usuario Ativo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        600,
+        608,
         0
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) {\n  return [];\n}\nconst usuario = rows[0];\nconst msg = $('Entrada Normalizada').first().json;\nreturn [{\n  json: Object.assign({}, msg, {\n    usuarioId: usuario.id,\n    papel: usuario.papel,\n    nomeUsuario: usuario.nome\n  })\n}];"
-      }
+      ]
     },
     {
-      "id": "9ad0719c-3ca8-42c4-b8e9-ec60ae75f36c",
-      "name": "Texto e Comando?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        800,
-        0
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -1035,30 +1018,30 @@
               "rightValue": ""
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "9ad0719c-3ca8-42c4-b8e9-ec60ae75f36c",
+      "name": "Texto e Comando?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        0
+      ]
     },
     {
-      "id": "d68e2f71-350c-495b-abfa-6ffec51ef015",
-      "name": "Rotear Comando",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1000,
-        -300
-      ],
       "parameters": {
-        "mode": "rules",
         "rules": {
           "values": [
             {
-              "outputKey": "contrato_assinado",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -1073,13 +1056,13 @@
               }
             },
             {
-              "outputKey": "maquininha_ativada",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -1099,24 +1082,60 @@
           "fallbackOutput": "extra",
           "renameFallbackOutput": "Desconhecido"
         }
-      }
+      },
+      "id": "d68e2f71-350c-495b-abfa-6ffec51ef015",
+      "name": "Rotear Comando",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1008,
+        -304
+      ]
     },
     {
+      "parameters": {
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?codcl=eq.{{ $json.comandoCodcl }}&select=*",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept-Profile",
+              "value": "rotaviva"
+            }
+          ]
+        },
+        "options": {}
+      },
       "id": "2d14f7da-fb04-43c4-921f-cc1790ac9c29",
       "name": "Buscar Loja por Codcl (Contrato)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         1200,
-        -350
-      ],
+        -352
+      ]
+    },
+    {
       "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?codcl=eq.{{ $json.comandoCodcl }}&select=*",
-        "authentication": "predefinedCredentialType",
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst loja = rows[0];\nconst ctx = $('Validar Usuario Ativo').first().json;\nreturn [{ json: Object.assign({}, ctx, { lojaId: loja.id, lojaNome: loja.nome }) }];\n"
+      },
+      "id": "cd87e669-6ee2-4338-ab80-bf64f6727844",
+      "name": "Extrair Loja Contrato Assinado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        -352
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?loja_id=eq.{{ $json.lojaId }}&etapa=in.(docs_enviados,processamento_matriz)&order=criado_em.desc&limit=1&select=*",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1125,82 +1144,119 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "cd87e669-6ee2-4338-ab80-bf64f6727844",
-      "name": "Extrair Loja Contrato Assinado",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1400,
-        -350
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst loja = rows[0];\nconst ctx = $('Validar Usuario Ativo').first().json;\nreturn [{ json: Object.assign({}, ctx, { lojaId: loja.id, lojaNome: loja.nome }) }];\n"
-      }
-    },
-    {
+        "options": {}
+      },
       "id": "763d234d-e282-4813-be8b-d1702c8e85bb",
       "name": "Buscar Contrato Atual (Assinatura)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         1600,
-        -350
-      ],
-      "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?loja_id=eq.{{ $json.lojaId }}&etapa=in.(docs_enviados,processamento_matriz)&order=criado_em.desc&limit=1&select=*",
-        "authentication": "predefinedCredentialType",
-        "genericAuthType": "httpCustomAuth",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Accept-Profile",
-              "value": "rotaviva"
-            }
-          ]
-        },
-        "nodeCredentialType": "supabaseApi"
-      }
+        -352
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst contrato = rows[0];\nconst ctx = $('Extrair Loja Contrato Assinado').first().json;\nreturn [{ json: Object.assign({}, ctx, { contratoId: contrato.id }) }];\n"
+      },
       "id": "20da192a-1921-4996-881e-645923d76966",
       "name": "Extrair Contrato Atual Assinatura",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1800,
-        -350
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst contrato = rows[0];\nconst ctx = $('Extrair Loja Contrato Assinado').first().json;\nreturn [{ json: Object.assign({}, ctx, { contratoId: contrato.id }) }];\n"
-      }
+        1808,
+        -352
+      ]
     },
     {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?id=eq.{{ $json.contratoId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"etapa\": \"assinatura_cliente\", \"etapa_desde\": $today.toISODate(), \"atualizado_por\": $json.usuarioId, \"atualizado_em\": $now.toISO() } }}",
+        "options": {}
+      },
       "id": "8683536a-9c4f-43ca-ad5d-6a24db958626",
       "name": "Atualizar Contrato Assinatura Cliente",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         2000,
-        -350
+        -352
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $(\"Extrair Contrato Atual Assinatura\").item.json.telefone }}",
+        "textBody": "=Contrato da loja {{ $(\"Extrair Contrato Atual Assinatura\").item.json.lojaNome }} atualizado: assinatura do cliente confirmada. Obrigado!",
+        "additionalFields": {}
+      },
+      "id": "48f560da-ed92-459c-9b68-3b4e800e20fd",
+      "name": "Confirmar Contrato Assinado",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        2208,
+        -352
       ],
+      "webhookId": "ad143cb0-5b31-4b14-a740-bcbae6b89568",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst loja = rows[0];\nconst ctx = $('Validar Usuario Ativo').first().json;\nreturn [{ json: Object.assign({}, ctx, { lojaId: loja.id, lojaNome: loja.nome }) }];\n"
+      },
+      "id": "12bb2e22-3804-465b-ac3a-8099f4e7cddf",
+      "name": "Extrair Loja Maquininha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst contrato = rows[0];\nconst ctx = $('Extrair Loja Maquininha').first().json;\nconst vigenciaInicio = $today.plus({ months: 1 }).startOf('month').toISODate();\nconst patchBody = { etapa: 'ativo', data_ativacao: $today.toISODate() };\nif (contrato.produto === 'top_service') {\n  patchBody.vigencia_inicio = vigenciaInicio;\n}\nreturn [{ json: Object.assign({}, ctx, { contratoId: contrato.id, produtoContrato: contrato.produto, patchBody: patchBody }) }];\n"
+      },
+      "id": "fcf8de2f-30e8-4d10-be95-18700b4ba9ac",
+      "name": "Extrair Contrato Maquininha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        -256
+      ]
+    },
+    {
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?id=eq.{{ $json.contratoId }}",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1218,202 +1274,55 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"etapa\": \"assinatura_cliente\", \"etapa_desde\": $today.toISODate(), \"atualizado_por\": $json.usuarioId, \"atualizado_em\": $now.toISO() } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "48f560da-ed92-459c-9b68-3b4e800e20fd",
-      "name": "Confirmar Contrato Assinado",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        2200,
-        -350
-      ],
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
-        "recipientPhoneNumber": "={{ $(\"Extrair Contrato Atual Assinatura\").item.json.telefone }}",
-        "messageType": "text",
-        "textBody": "=Contrato da loja {{ $(\"Extrair Contrato Atual Assinatura\").item.json.lojaNome }} atualizado: assinatura do cliente confirmada. Obrigado!"
+        "jsonBody": "={{ $json.patchBody }}",
+        "options": {}
       },
-      "webhookId": "ad143cb0-5b31-4b14-a740-bcbae6b89568",
-      "disabled": true
-    },
-    {
-      "id": "bd6992fb-1a32-46c2-b76e-1583516ee011",
-      "name": "Buscar Loja por Codcl (Maquininha)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1200,
-        -250
-      ],
-      "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?codcl=eq.{{ $json.comandoCodcl }}&select=*",
-        "authentication": "predefinedCredentialType",
-        "genericAuthType": "httpCustomAuth",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Accept-Profile",
-              "value": "rotaviva"
-            }
-          ]
-        },
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "12bb2e22-3804-465b-ac3a-8099f4e7cddf",
-      "name": "Extrair Loja Maquininha",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1400,
-        -250
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst loja = rows[0];\nconst ctx = $('Validar Usuario Ativo').first().json;\nreturn [{ json: Object.assign({}, ctx, { lojaId: loja.id, lojaNome: loja.nome }) }];\n"
-      }
-    },
-    {
-      "id": "70f77d35-076f-480d-9705-bcff07abf255",
-      "name": "Buscar Contrato Atual (Maquininha)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1600,
-        -250
-      ],
-      "parameters": {
-        "method": "GET",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?loja_id=eq.{{ $json.lojaId }}&order=criado_em.desc&limit=1&select=*",
-        "authentication": "predefinedCredentialType",
-        "genericAuthType": "httpCustomAuth",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Accept-Profile",
-              "value": "rotaviva"
-            }
-          ]
-        },
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "fcf8de2f-30e8-4d10-be95-18700b4ba9ac",
-      "name": "Extrair Contrato Maquininha",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1800,
-        -250
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nif (!Array.isArray(rows) || rows.length === 0) return [];\nconst contrato = rows[0];\nconst ctx = $('Extrair Loja Maquininha').first().json;\nconst vigenciaInicio = $today.plus({ months: 1 }).startOf('month').toISODate();\nconst patchBody = { etapa: 'ativo', data_ativacao: $today.toISODate() };\nif (contrato.produto === 'top_service') {\n  patchBody.vigencia_inicio = vigenciaInicio;\n}\nreturn [{ json: Object.assign({}, ctx, { contratoId: contrato.id, produtoContrato: contrato.produto, patchBody: patchBody }) }];\n"
-      }
-    },
-    {
       "id": "1b66ee62-bc14-4031-abc2-7c3ab99ab491",
       "name": "Atualizar Contrato Ativo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         2000,
-        -250
-      ],
-      "parameters": {
-        "method": "PATCH",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos?id=eq.{{ $json.contratoId }}",
-        "authentication": "predefinedCredentialType",
-        "genericAuthType": "httpCustomAuth",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Profile",
-              "value": "rotaviva"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            },
-            {
-              "name": "Prefer",
-              "value": "return=representation"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "specifyBody": "json",
-        "jsonBody": "={{ $json.patchBody }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        -256
+      ]
     },
     {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $(\"Extrair Contrato Maquininha\").item.json.telefone }}",
+        "textBody": "=Maquininha da loja {{ $(\"Extrair Contrato Maquininha\").item.json.lojaNome }} marcada como ativa. Obrigado!",
+        "additionalFields": {}
+      },
       "id": "1fa962a1-1672-4c1d-9a05-7ea353323cb4",
       "name": "Confirmar Maquininha Ativada",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        2200,
-        -250
+        2208,
+        -256
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
-        "recipientPhoneNumber": "={{ $(\"Extrair Contrato Maquininha\").item.json.telefone }}",
-        "messageType": "text",
-        "textBody": "=Maquininha da loja {{ $(\"Extrair Contrato Maquininha\").item.json.lojaNome }} marcada como ativa. Obrigado!"
-      },
       "webhookId": "37cea68c-105e-40e3-97f7-c02282a9e2a4",
       "disabled": true
     },
     {
+      "parameters": {},
       "id": "3241efd6-a89d-4cd2-9a50-9164665f9122",
       "name": "Comando Desconhecido - Ignorar",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1200,
-        -400
-      ],
-      "parameters": {}
+        1216,
+        -480
+      ]
     },
     {
-      "id": "ef23986b-461e-4a2c-9a0f-dae4d635b876",
-      "name": "Buscar Estado Conversa",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1000,
-        200
-      ],
       "parameters": {
-        "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?telefone=eq.{{ $json.telefone }}&select=*",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1422,45 +1331,42 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "ef23986b-461e-4a2c-9a0f-dae4d635b876",
+      "name": "Buscar Estado Conversa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1008,
+        208
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst found = (Array.isArray(rows) && rows.length) ? rows[0] : null;\nconst usuario = $('Validar Usuario Ativo').first().json;\nconst estado = found ? found.estado : 'ocioso';\nconst contexto = (found && found.contexto) ? found.contexto : {};\nreturn [{\n  json: Object.assign({}, usuario, {\n    estado: estado,\n    contexto: contexto\n  })\n}];\n"
+      },
       "id": "7480072d-6d11-47d0-9a1f-cdbca7b91a33",
       "name": "Normalizar Estado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         1200,
-        200
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst found = (Array.isArray(rows) && rows.length) ? rows[0] : null;\nconst usuario = $('Validar Usuario Ativo').first().json;\nconst estado = found ? found.estado : 'ocioso';\nconst contexto = (found && found.contexto) ? found.contexto : {};\nreturn [{\n  json: Object.assign({}, usuario, {\n    estado: estado,\n    contexto: contexto\n  })\n}];\n"
-      }
+        208
+      ]
     },
     {
-      "id": "1266e551-b5c4-4c75-ab51-1e9f112acd00",
-      "name": "Rotear Estado",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1400,
-        200
-      ],
       "parameters": {
-        "mode": "rules",
         "rules": {
           "values": [
             {
-              "outputKey": "ocioso",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -1475,13 +1381,13 @@
               }
             },
             {
-              "outputKey": "aguardando_foto",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -1496,13 +1402,13 @@
               }
             },
             {
-              "outputKey": "checkout",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -1522,24 +1428,25 @@
           "fallbackOutput": "extra",
           "renameFallbackOutput": "Desconhecido"
         }
-      }
+      },
+      "id": "1266e551-b5c4-4c75-ab51-1e9f112acd00",
+      "name": "Rotear Estado",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1408,
+        208
+      ]
     },
     {
-      "id": "9cd307c3-1909-4a74-83bc-079f422ea910",
-      "name": "Mensagem e Localizacao?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1600,
-        -50
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -1551,25 +1458,24 @@
               "rightValue": "location"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "9cd307c3-1909-4a74-83bc-079f422ea910",
+      "name": "Mensagem e Localizacao?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        -48
+      ]
     },
     {
-      "id": "daffbe80-3a15-423f-a3ca-7b3b68d86683",
-      "name": "Buscar Agenda Pendente Hoje",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1800,
-        -50
-      ],
       "parameters": {
-        "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?usuario_id=eq.{{ $json.usuarioId }}&data=eq.{{ $today.toISODate() }}&status=eq.pendente&select=*,lojas(*)",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1578,40 +1484,39 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "daffbe80-3a15-423f-a3ca-7b3b68d86683",
+      "name": "Buscar Agenda Pendente Hoje",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1808,
+        -48
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Normalizar Estado').first().json;\nif (!Array.isArray(rows) || rows.length === 0) {\n  return [{ json: Object.assign({}, ctx, { nenhumaVisitaPendente: 'true' }) }];\n}\nconst lat1 = parseFloat(ctx.lat);\nconst lon1 = parseFloat(ctx.long);\nfunction toRad(v) { return (v * Math.PI) / 180; }\nfunction haversine(la1, lo1, la2, lo2) {\n  const R = 6371000;\n  const dLat = toRad(la2 - la1);\n  const dLon = toRad(lo2 - lo1);\n  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +\n    Math.cos(toRad(la1)) * Math.cos(toRad(la2)) *\n    Math.sin(dLon / 2) * Math.sin(dLon / 2);\n  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n  return R * c;\n}\nlet melhor = null;\nlet melhorDist = Infinity;\nfor (const row of rows) {\n  const loja = row.lojas || {};\n  if (loja.lat == null || loja.long == null) continue;\n  const d = haversine(lat1, lon1, parseFloat(loja.lat), parseFloat(loja.long));\n  if (d < melhorDist) {\n    melhorDist = d;\n    melhor = { agendaId: row.id, lojaId: loja.id, lojaNome: loja.nome };\n  }\n}\nif (!melhor) {\n  return [{ json: Object.assign({}, ctx, { nenhumaVisitaPendente: 'true' }) }];\n}\nreturn [{\n  json: Object.assign({}, ctx, {\n    nenhumaVisitaPendente: 'false',\n    agendaId: melhor.agendaId,\n    lojaId: melhor.lojaId,\n    lojaNome: melhor.lojaNome,\n    distanciaM: Math.round(melhorDist),\n    checkinLat: lat1,\n    checkinLong: lon1\n  })\n}];\n"
+      },
       "id": "b6ec43b5-4ac4-4387-88fb-3e5d74e34bbd",
       "name": "Calcular Loja Mais Proxima",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         2000,
-        -50
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Normalizar Estado').first().json;\nif (!Array.isArray(rows) || rows.length === 0) {\n  return [{ json: Object.assign({}, ctx, { nenhumaVisitaPendente: 'true' }) }];\n}\nconst lat1 = parseFloat(ctx.lat);\nconst lon1 = parseFloat(ctx.long);\nfunction toRad(v) { return (v * Math.PI) / 180; }\nfunction haversine(la1, lo1, la2, lo2) {\n  const R = 6371000;\n  const dLat = toRad(la2 - la1);\n  const dLon = toRad(lo2 - lo1);\n  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +\n    Math.cos(toRad(la1)) * Math.cos(toRad(la2)) *\n    Math.sin(dLon / 2) * Math.sin(dLon / 2);\n  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n  return R * c;\n}\nlet melhor = null;\nlet melhorDist = Infinity;\nfor (const row of rows) {\n  const loja = row.lojas || {};\n  if (loja.lat == null || loja.long == null) continue;\n  const d = haversine(lat1, lon1, parseFloat(loja.lat), parseFloat(loja.long));\n  if (d < melhorDist) {\n    melhorDist = d;\n    melhor = { agendaId: row.id, lojaId: loja.id, lojaNome: loja.nome };\n  }\n}\nif (!melhor) {\n  return [{ json: Object.assign({}, ctx, { nenhumaVisitaPendente: 'true' }) }];\n}\nreturn [{\n  json: Object.assign({}, ctx, {\n    nenhumaVisitaPendente: 'false',\n    agendaId: melhor.agendaId,\n    lojaId: melhor.lojaId,\n    lojaNome: melhor.lojaNome,\n    distanciaM: Math.round(melhorDist),\n    checkinLat: lat1,\n    checkinLong: lon1\n  })\n}];\n"
-      }
+        -48
+      ]
     },
     {
-      "id": "09e4ded1-f759-46fc-86a6-f449a13f72d4",
-      "name": "Nenhuma Visita Pendente?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        2200,
-        -50
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -1623,45 +1528,43 @@
               "rightValue": "true"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "09e4ded1-f759-46fc-86a6-f449a13f72d4",
+      "name": "Nenhuma Visita Pendente?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2208,
+        -48
+      ]
     },
     {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $json.telefone }}",
+        "textBody": "Nao encontrei nenhuma visita pendente para hoje na sua rota.",
+        "additionalFields": {}
+      },
       "id": "fb4d6ffd-b29d-4e1f-bb8e-c4e72f4e8864",
       "name": "Avisar Sem Visita Pendente",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
         2400,
-        -150
+        -144
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
-        "recipientPhoneNumber": "={{ $json.telefone }}",
-        "messageType": "text",
-        "textBody": "Nao encontrei nenhuma visita pendente para hoje na sua rota."
-      },
       "webhookId": "72e61a7d-925b-40da-9537-fce6e5c20833",
       "disabled": true
     },
     {
-      "id": "43e97754-b53f-47de-a103-28f7f6c89fa1",
-      "name": "Buscar Config Raio Checkin",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        2400,
-        -50
-      ],
       "parameters": {
-        "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/config?chave=eq.raio_checkin_m&select=valor",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1670,40 +1573,39 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "43e97754-b53f-47de-a103-28f7f6c89fa1",
+      "name": "Buscar Config Raio Checkin",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2400,
+        -48
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Calcular Loja Mais Proxima').first().json;\nconst raio = rows.length ? parseFloat(rows[0].valor) : 200;\nconst flagSuspeito = ctx.distanciaM > raio ? 'true' : 'false';\nreturn [{\n  json: Object.assign({}, ctx, {\n    raioCheckinM: raio,\n    flagSuspeito: flagSuspeito\n  })\n}];\n"
+      },
       "id": "c8e352c7-d836-4673-967c-966bc1160f65",
       "name": "Avaliar Suspeita",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2600,
-        -50
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Calcular Loja Mais Proxima').first().json;\nconst raio = rows.length ? parseFloat(rows[0].valor) : 200;\nconst flagSuspeito = ctx.distanciaM > raio ? 'true' : 'false';\nreturn [{\n  json: Object.assign({}, ctx, {\n    raioCheckinM: raio,\n    flagSuspeito: flagSuspeito\n  })\n}];\n"
-      }
+        2608,
+        -48
+      ]
     },
     {
-      "id": "2f03a52e-f4fa-45da-8114-05c1a490c279",
-      "name": "Flag Suspeito?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        2800,
-        -50
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -1715,25 +1617,24 @@
               "rightValue": "true"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "2f03a52e-f4fa-45da-8114-05c1a490c279",
+      "name": "Flag Suspeito?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2800,
+        -48
+      ]
     },
     {
-      "id": "cf869053-6240-4cb9-9b92-2a37c1128c15",
-      "name": "Buscar Destinatarios Alerta",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        3000,
-        -150
-      ],
       "parameters": {
-        "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?papel=in.(coordenador,gerente)&ativo=eq.true&select=*",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1742,59 +1643,50 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "cf869053-6240-4cb9-9b92-2a37c1128c15",
+      "name": "Buscar Destinatarios Alerta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3008,
+        -144
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Avaliar Suspeita').first().json;\nconst papelUsuario = $('Validar Usuario Ativo').first().json.papel;\n// Escalonamento (D-06): check-in suspeito do proprio coordenador sobe ao gerente.\nconst papelDestino = papelUsuario === 'coordenador' ? 'gerente' : 'coordenador';\nconst destinatarios = rows.filter((u) => u.papel === papelDestino && u.telegram_chat_id);\nreturn destinatarios.map((c) => ({\n  json: {\n    destinatarioChatId: c.telegram_chat_id,\n    destinatarioTelefone: c.telefone,\n    destinatarioPapel: c.papel,\n    nomeUsuario: ctx.nomeUsuario,\n    lojaNome: ctx.lojaNome,\n    distanciaM: ctx.distanciaM,\n    raioCheckinM: ctx.raioCheckinM\n  }\n}));"
+      },
       "id": "4a9abcfe-06b0-4608-be47-aca840811be2",
       "name": "Mapear Destinatarios Alerta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         3200,
-        -150
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Avaliar Suspeita').first().json;\nconst papelUsuario = $('Validar Usuario Ativo').first().json.papel;\n// Escalonamento (D-06): check-in suspeito do proprio coordenador sobe ao gerente.\nconst papelDestino = papelUsuario === 'coordenador' ? 'gerente' : 'coordenador';\nconst destinatarios = rows.filter((u) => u.papel === papelDestino && u.telegram_chat_id);\nreturn destinatarios.map((c) => ({\n  json: {\n    destinatarioChatId: c.telegram_chat_id,\n    destinatarioTelefone: c.telefone,\n    destinatarioPapel: c.papel,\n    nomeUsuario: ctx.nomeUsuario,\n    lojaNome: ctx.lojaNome,\n    distanciaM: ctx.distanciaM,\n    raioCheckinM: ctx.raioCheckinM\n  }\n}));"
-      }
+        -144
+      ]
     },
     {
-      "id": "66527dca-ff14-4cb0-8a6a-7e001c50e910",
-      "name": "Enviar Template Checkin Suspeito",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        3400,
-        -150
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "sendTemplate",
         "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
         "recipientPhoneNumber": "={{ $json.destinatarioTelefone }}",
         "template": "checkin_suspeito",
         "components": {
           "component": [
             {
-              "type": "body",
               "bodyParameters": {
                 "parameter": [
                   {
-                    "type": "text",
                     "text": "={{ $json.nomeUsuario }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.lojaNome }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.distanciaM }}"
                   },
                   {
-                    "type": "text",
                     "text": "={{ $json.raioCheckinM }}"
                   }
                 ]
@@ -1803,40 +1695,37 @@
           ]
         }
       },
+      "id": "66527dca-ff14-4cb0-8a6a-7e001c50e910",
+      "name": "Enviar Template Checkin Suspeito",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        3408,
+        -144
+      ],
       "webhookId": "43b9ce4e-40b1-4db7-a6b6-8fec3bb26bc5",
       "disabled": true
     },
     {
+      "parameters": {
+        "jsCode": "\nconst ctx = $('Avaliar Suspeita').first().json;\nreturn [{ json: ctx }];\n"
+      },
       "id": "fa902efa-3614-4202-a6de-2469749d5429",
       "name": "Consolidar Alerta Destinatarios",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         3600,
-        -150
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst ctx = $('Avaliar Suspeita').first().json;\nreturn [{ json: ctx }];\n"
-      }
+        -144
+      ]
     },
     {
-      "id": "c45343e1-2f19-45c8-aa03-8dc5da09b0bb",
-      "name": "Upsert Estado Aguardando Foto",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        3800,
-        -50
-      ],
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1854,59 +1743,58 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"telefone\": $json.telefone, \"estado\": \"aguardando_foto\", \"contexto\": { \"agenda_id\": $json.agendaId, \"loja_id\": $json.lojaId, \"checkin_lat\": $json.checkinLat, \"checkin_long\": $json.checkinLong, \"distancia_m\": $json.distanciaM, \"flag_suspeito\": $json.flagSuspeito === \"true\" }, \"atualizado_em\": $now.toISO() } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "c45343e1-2f19-45c8-aa03-8dc5da09b0bb",
+      "name": "Upsert Estado Aguardando Foto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3808,
+        -48
+      ]
     },
     {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $(\"Avaliar Suspeita\").item.json.telefone }}",
+        "textBody": "=Check-in confirmado. Envie uma foto da fachada da loja {{ $(\"Avaliar Suspeita\").item.json.lojaNome }} para continuar.",
+        "additionalFields": {}
+      },
       "id": "2df866c6-888f-4ee8-9ba1-36c045937350",
       "name": "Pedir Foto Fachada",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
         4000,
-        -50
+        -48
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
-        "recipientPhoneNumber": "={{ $(\"Avaliar Suspeita\").item.json.telefone }}",
-        "messageType": "text",
-        "textBody": "=Check-in confirmado. Envie uma foto da fachada da loja {{ $(\"Avaliar Suspeita\").item.json.lojaNome }} para continuar."
-      },
       "webhookId": "87992c05-3468-4477-a017-cd7b342777ea",
       "disabled": true
     },
     {
+      "parameters": {},
       "id": "e9b13e5a-36bf-431f-b5bf-a85494d7b01c",
       "name": "Ocioso - Nao E Localizacao - Ignorar",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1800,
-        -150
-      ],
-      "parameters": {}
+        1808,
+        -144
+      ]
     },
     {
-      "id": "f878296b-2563-4aef-a309-84ab45c8c184",
-      "name": "Mensagem e Imagem?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1600,
-        150
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -1918,67 +1806,65 @@
               "rightValue": "image"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "f878296b-2563-4aef-a309-84ab45c8c184",
+      "name": "Mensagem e Imagem?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        160
+      ]
     },
     {
-      "id": "3e38937a-1a08-4dba-b813-49e2088ba859",
-      "name": "Buscar URL Midia Foto",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        1800,
-        150
-      ],
       "parameters": {
         "resource": "media",
         "operation": "mediaUrlGet",
         "mediaGetId": "={{ $json.mediaId }}"
       },
+      "id": "3e38937a-1a08-4dba-b813-49e2088ba859",
+      "name": "Buscar URL Midia Foto",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1808,
+        160
+      ],
       "webhookId": "d27db361-95ee-4523-8084-49f5a6888727",
       "disabled": true
     },
     {
-      "id": "2bbc151e-f690-4879-bd63-cfc35a891c2c",
-      "name": "Baixar Foto",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        2000,
-        150
-      ],
       "parameters": {
-        "method": "GET",
         "url": "={{ $json.url }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "whatsAppApi",
         "options": {
           "response": {
             "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "data"
+              "responseFormat": "file"
             }
           }
         }
       },
-      "disabled": true
-    },
-    {
-      "id": "f10002d1-1786-4078-a001-7c6e91433d57",
-      "name": "Upload Foto Storage",
+      "id": "2bbc151e-f690-4879-bd63-cfc35a891c2c",
+      "name": "Baixar Foto",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2200,
-        150
+        2000,
+        160
       ],
+      "disabled": true
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/storage/v1/object/rotaviva-fotos/{{ $(\"Normalizar Estado\").item.json.contexto.agenda_id }}.jpg",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1994,40 +1880,37 @@
         "sendBody": true,
         "contentType": "binaryData",
         "inputDataFieldName": "data",
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "f10002d1-1786-4078-a001-7c6e91433d57",
+      "name": "Upload Foto Storage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2208,
+        160
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "\nconst ctx = $('Normalizar Estado').first().json;\nconst contexto = ctx.contexto || {};\nconst agendaId = contexto.agenda_id;\nconst fotoUrl = 'rotaviva-fotos/' + agendaId + '.jpg';\nreturn [{ json: Object.assign({}, ctx, { fotoUrl: fotoUrl }) }];\n"
+      },
       "id": "5c754104-162a-436b-80a8-95da1b547c26",
       "name": "Preparar Contexto Apos Upload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         2400,
-        150
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst ctx = $('Normalizar Estado').first().json;\nconst contexto = ctx.contexto || {};\nconst agendaId = contexto.agenda_id;\nconst fotoUrl = 'rotaviva-fotos/' + agendaId + '.jpg';\nreturn [{ json: Object.assign({}, ctx, { fotoUrl: fotoUrl }) }];\n"
-      }
+        160
+      ]
     },
     {
-      "id": "4cd3f1c4-2f59-4515-93f2-71bbcb35098e",
-      "name": "Criar Visita",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        2600,
-        150
-      ],
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2045,43 +1928,39 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"agenda_id\": $json.contexto.agenda_id, \"usuario_id\": $json.usuarioId, \"loja_id\": $json.contexto.loja_id, \"checkin_at\": $now.toISO(), \"checkin_lat\": $json.contexto.checkin_lat, \"checkin_long\": $json.contexto.checkin_long, \"distancia_m\": $json.contexto.distancia_m, \"foto_url\": $json.fotoUrl, \"flag_suspeito\": $json.contexto.flag_suspeito } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "4cd3f1c4-2f59-4515-93f2-71bbcb35098e",
+      "name": "Criar Visita",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2608,
+        160
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst visita = Array.isArray(rows) ? rows[0] : rows;\nconst ctx = $('Preparar Contexto Apos Upload').first().json;\nreturn [{ json: Object.assign({}, ctx, { visitaId: visita.id }) }];\n"
+      },
       "id": "841be7ad-5eec-42e9-b6ba-d82d10c143f0",
       "name": "Preparar Contexto Apos Visita",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         2800,
-        150
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst visita = Array.isArray(rows) ? rows[0] : rows;\nconst ctx = $('Preparar Contexto Apos Upload').first().json;\nreturn [{ json: Object.assign({}, ctx, { visitaId: visita.id }) }];\n"
-      }
+        160
+      ]
     },
     {
-      "id": "77a339f1-d137-4e61-8973-9e241a6f3f51",
-      "name": "Upsert Estado Checkout",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        3000,
-        150
-      ],
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2099,28 +1978,26 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"telefone\": $json.telefone, \"estado\": \"checkout\", \"contexto\": { ...$json.contexto, \"visita_id\": $json.visitaId, \"etapa_checkout\": \"decisor\" }, \"atualizado_em\": $now.toISO() } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "6ea71aab-7070-4c15-b2a9-547dc58f8494",
-      "name": "Enviar Pergunta Decisor",
+        "options": {}
+      },
+      "id": "77a339f1-d137-4e61-8973-9e241a6f3f51",
+      "name": "Upsert Estado Checkout",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3200,
-        150
-      ],
+        3008,
+        160
+      ]
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "<__PLACEHOLDER_VALUE__URL completa: https://graph.facebook.com/v19.0/<PHONE_NUMBER_ID>/messages__>",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "whatsAppApi",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2130,39 +2007,40 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $json[0].telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"list\", \"body\": { \"text\": \"Falou com o decisor da loja?\" }, \"action\": { \"button\": \"Selecionar\", \"sections\": [ { \"title\": \"Opcoes\", \"rows\": [ { \"id\": \"decisor_sim\", \"title\": \"Sim\" }, { \"id\": \"decisor_nao\", \"title\": \"Nao\" }, { \"id\": \"decisor_loja_fechada\", \"title\": \"Loja fechada\" }, { \"id\": \"decisor_contato_ausente\", \"title\": \"Contato ausente\" } ] } ] } } } }}"
+        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $json[0].telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"list\", \"body\": { \"text\": \"Falou com o decisor da loja?\" }, \"action\": { \"button\": \"Selecionar\", \"sections\": [ { \"title\": \"Opcoes\", \"rows\": [ { \"id\": \"decisor_sim\", \"title\": \"Sim\" }, { \"id\": \"decisor_nao\", \"title\": \"Nao\" }, { \"id\": \"decisor_loja_fechada\", \"title\": \"Loja fechada\" }, { \"id\": \"decisor_contato_ausente\", \"title\": \"Contato ausente\" } ] } ] } } } }}",
+        "options": {}
       },
+      "id": "6ea71aab-7070-4c15-b2a9-547dc58f8494",
+      "name": "Enviar Pergunta Decisor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3200,
+        160
+      ],
       "disabled": true
     },
     {
+      "parameters": {},
       "id": "f82328f4-e0d2-4d8a-ae8f-eb1b5af2a9f9",
       "name": "Aguardando Foto - Nao E Imagem - Ignorar",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1800,
-        250
-      ],
-      "parameters": {}
+        1808,
+        256
+      ]
     },
     {
-      "id": "953ca5e3-6861-40b1-9aee-c983b68eb733",
-      "name": "Observacao Por Audio?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1600,
-        450
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -2182,68 +2060,80 @@
               "rightValue": "audio"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "953ca5e3-6861-40b1-9aee-c983b68eb733",
+      "name": "Observacao Por Audio?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        464
+      ]
     },
     {
-      "id": "2be99bb6-9557-4624-9da5-31acb06cd754",
-      "name": "Buscar URL Midia Audio",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        1800,
-        400
-      ],
       "parameters": {
         "resource": "media",
         "operation": "mediaUrlGet",
         "mediaGetId": "={{ $json.mediaId }}"
       },
+      "id": "2be99bb6-9557-4624-9da5-31acb06cd754",
+      "name": "Buscar URL Midia Audio",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1808,
+        400
+      ],
       "webhookId": "005131ef-f789-4acb-a03e-8dbcd3b2484f",
       "disabled": true
     },
     {
-      "id": "42170ff6-b61c-4df8-a13b-f3342b23b693",
-      "name": "Baixar Audio",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        2000,
-        400
-      ],
       "parameters": {
-        "method": "GET",
         "url": "={{ $json.url }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "whatsAppApi",
         "options": {
           "response": {
             "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "data"
+              "responseFormat": "file"
             }
           }
         }
       },
+      "id": "42170ff6-b61c-4df8-a13b-f3342b23b693",
+      "name": "Baixar Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2048,
+        400
+      ],
       "disabled": true
     },
     {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
       "id": "8cfffa9e-bb95-40da-82de-22d199ef4218",
       "name": "Transcrever Audio",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 2.3,
       "position": [
-        2200,
+        2208,
         400
-      ],
-      "parameters": {
-        "resource": "audio",
-        "operation": "transcribe",
-        "binaryPropertyName": "data",
-        "options": {}
-      }
+      ]
     },
     {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extraia motivo, contraproposta, data de retorno sugerida e um resumo curto a partir da observacao de campo a seguir, em portugues do Brasil. Se um campo nao for mencionado, retorne string vazia.\n\nObservacao transcrita: {{ $json.text }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
       "id": "9e281273-1395-4b33-8772-f22e3266157e",
       "name": "Estruturar Observacao",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
@@ -2251,22 +2141,9 @@
       "position": [
         2400,
         400
-      ],
-      "parameters": {
-        "promptType": "define",
-        "text": "=Extraia motivo, contraproposta, data de retorno sugerida e um resumo curto a partir da observacao de campo a seguir, em portugues do Brasil. Se um campo nao for mencionado, retorne string vazia.\n\nObservacao transcrita: {{ $json.text }}",
-        "hasOutputParser": true
-      }
+      ]
     },
     {
-      "id": "00ba137f-fe1a-4a75-aa4a-ec09e667a40e",
-      "name": "Modelo Anthropic Claude Haiku",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.5,
-      "position": [
-        2400,
-        500
-      ],
       "parameters": {
         "model": {
           "__rl": true,
@@ -2277,68 +2154,65 @@
         "options": {
           "temperature": 0.2
         }
-      }
+      },
+      "id": "00ba137f-fe1a-4a75-aa4a-ec09e667a40e",
+      "name": "Modelo Anthropic Claude Haiku",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        2400,
+        688
+      ]
     },
     {
+      "parameters": {
+        "jsonSchemaExample": "{ \"motivo\": \"\", \"contraproposta\": \"\", \"data_retorno_sugerida\": \"\", \"resumo\": \"\" }"
+      },
       "id": "c5cb4c46-3aa1-42ad-b665-2a319f433d94",
       "name": "Parser Estruturado Observacao",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        2600,
-        500
-      ],
-      "parameters": {
-        "schemaType": "fromJson",
-        "jsonSchemaExample": "{ \"motivo\": \"\", \"contraproposta\": \"\", \"data_retorno_sugerida\": \"\", \"resumo\": \"\" }"
-      }
+        2608,
+        672
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "\nconst ctx = $('Normalizar Estado').first().json;\nconst transcricao = $('Transcrever Audio').first().json;\nconst estruturado = ($input.first().json && $input.first().json.output) || {};\nreturn [{ json: Object.assign({}, ctx, {\n  obsAudioTranscrito: (transcricao && transcricao.text) || '',\n  motivoEstruturado: estruturado.motivo || null,\n  contrapropostaEstruturada: estruturado.contraproposta || null,\n  dataRetornoSugeridaEstruturada: estruturado.data_retorno_sugerida || null,\n  resumoEstruturado: estruturado.resumo || null\n}) }];\n"
+      },
       "id": "99b7234c-b035-499a-ac02-692156709acf",
       "name": "Preparar Resultado Audio",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2600,
+        2656,
         400
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst ctx = $('Normalizar Estado').first().json;\nconst transcricao = $('Transcrever Audio').first().json;\nconst estruturado = ($input.first().json && $input.first().json.output) || {};\nreturn [{ json: Object.assign({}, ctx, {\n  obsAudioTranscrito: (transcricao && transcricao.text) || '',\n  motivoEstruturado: estruturado.motivo || null,\n  contrapropostaEstruturada: estruturado.contraproposta || null,\n  dataRetornoSugeridaEstruturada: estruturado.data_retorno_sugerida || null,\n  resumoEstruturado: estruturado.resumo || null\n}) }];\n"
-      }
+      ]
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst item = $json;\nconst contexto = item.contexto || {};\nconst etapaAtual = contexto.etapa_checkout || null;\nconst respostaId = item.respostaId || '';\nconst textoResp = (item.texto || '').trim();\nconst tipoMensagem = item.tipoMensagem;\nconst usuarioId = item.usuarioId;\nconst telefone = item.telefone;\nconst visitaId = contexto.visita_id;\nconst agendaId = contexto.agenda_id;\nconst lojaId = contexto.loja_id;\n\nconst hoje = $today.toISODate();\n\nfunction proximoDiaUtil() {\n  let d = $today.plus({ days: 1 });\n  while (d.weekday === 6 || d.weekday === 7) {\n    d = d.plus({ days: 1 });\n  }\n  return d.toISODate();\n}\n\nlet novoEstado = 'checkout';\nlet novoContexto = Object.assign({}, contexto);\nlet visitaUpdates = {};\nlet temVisitaUpdates = 'false';\nlet acaoEspecial = 'nenhuma';\nlet dadosAgendaReagendada = null;\nlet dadosOportunidade = null;\nlet dadosContrato = null;\nlet marcarAgendaRealizada = 'false';\nlet mensagemSaida = { tipo: 'text', texto: 'Nao entendi sua resposta. Pode tentar novamente?', opcoes: [] };\n\nfunction listaProduto() {\n  return {\n    tipo: 'list',\n    texto: 'Interesse em qual produto?',\n    opcoes: [\n      { id: 'produto_autocred', titulo: 'Autocred' },\n      { id: 'produto_top_service', titulo: 'Top Service' },\n      { id: 'produto_ambos', titulo: 'Ambos' },\n      { id: 'produto_nenhum', titulo: 'Nenhum' }\n    ]\n  };\n}\nfunction botoesFecharAnalisar() {\n  return {\n    tipo: 'buttons',\n    texto: 'Fechou ou vai analisar?',\n    opcoes: [\n      { id: 'fa_fechou', titulo: 'Fechou' },\n      { id: 'fa_analisar', titulo: 'Analisar' }\n    ]\n  };\n}\nfunction listaDataRetorno() {\n  return {\n    tipo: 'list',\n    texto: 'Qual a data de retorno prevista?',\n    opcoes: [\n      { id: 'dr_amanha', titulo: 'Amanha' },\n      { id: 'dr_3dias', titulo: '3 dias' },\n      { id: 'dr_prox_semana', titulo: 'Proxima semana' },\n      { id: 'dr_outra', titulo: 'Outra data' }\n    ]\n  };\n}\nfunction listaMotivo() {\n  return {\n    tipo: 'list',\n    texto: 'Qual o motivo?',\n    opcoes: [\n      { id: 'motivo_taxas', titulo: 'Taxas concorrente' },\n      { id: 'motivo_ja_possui', titulo: 'Ja possui' },\n      { id: 'motivo_decisor_ausente', titulo: 'Decisor ausente' },\n      { id: 'motivo_outro', titulo: 'Outro' }\n    ]\n  };\n}\nfunction botoesContraproposta() {\n  return {\n    tipo: 'buttons',\n    texto: 'Houve contraproposta?',\n    opcoes: [\n      { id: 'cp_sim', titulo: 'Sim' },\n      { id: 'cp_nao', titulo: 'Nao' }\n    ]\n  };\n}\nfunction textoObservacao(prefixo) {\n  return {\n    tipo: 'text',\n    texto: (prefixo ? prefixo + '\\n\\n' : '') + 'Alguma observacao sobre a visita? (texto, audio, ou responda nao)',\n    opcoes: []\n  };\n}\n\nif (etapaAtual === 'decisor') {\n  if (['decisor_sim', 'decisor_nao', 'decisor_loja_fechada', 'decisor_contato_ausente'].indexOf(respostaId) === -1) {\n    mensagemSaida = {\n      tipo: 'list',\n      texto: 'Nao entendi. Falou com o decisor da loja?',\n      opcoes: [\n        { id: 'decisor_sim', titulo: 'Sim' },\n        { id: 'decisor_nao', titulo: 'Nao' },\n        { id: 'decisor_loja_fechada', titulo: 'Loja fechada' },\n        { id: 'decisor_contato_ausente', titulo: 'Contato ausente' }\n      ]\n    };\n  } else if (respostaId === 'decisor_loja_fechada' || respostaId === 'decisor_contato_ausente') {\n    visitaUpdates = {\n      resultado: respostaId === 'decisor_loja_fechada' ? 'loja_fechada' : 'contato_ausente',\n      checkout_at: $now.toISO()\n    };\n    temVisitaUpdates = 'true';\n    marcarAgendaRealizada = 'true';\n    acaoEspecial = 'reagendar';\n    dadosAgendaReagendada = { data: proximoDiaUtil(), usuario_id: usuarioId, loja_id: lojaId, origem: 'reagendada', status: 'pendente' };\n    novoEstado = 'ocioso';\n    novoContexto = {};\n    mensagemSaida = { tipo: 'text', texto: 'Visita encerrada. Obrigado! Reagendei essa loja para o proximo dia util.', opcoes: [] };\n  } else {\n    visitaUpdates = { falou_decisor: respostaId === 'decisor_sim', resultado: 'normal' };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'produto' });\n    mensagemSaida = listaProduto();\n  }\n} else if (etapaAtual === 'produto') {\n  const mapaProduto = { produto_autocred: 'autocred', produto_top_service: 'top_service', produto_ambos: 'ambos', produto_nenhum: 'nenhum' };\n  if (!mapaProduto[respostaId]) {\n    mensagemSaida = listaProduto();\n  } else {\n    visitaUpdates = { produto_interesse: mapaProduto[respostaId] };\n    temVisitaUpdates = 'true';\n    if (respostaId === 'produto_nenhum') {\n      novoContexto = Object.assign({}, contexto, { etapa_checkout: 'motivo' });\n      mensagemSaida = listaMotivo();\n    } else {\n      novoContexto = Object.assign({}, contexto, { etapa_checkout: 'fechou_ou_analisar', produto_selecionado: mapaProduto[respostaId] });\n      mensagemSaida = botoesFecharAnalisar();\n    }\n  }\n} else if (etapaAtual === 'fechou_ou_analisar') {\n  if (respostaId === 'fa_fechou') {\n    visitaUpdates = { status_1: 'fechou' };\n    temVisitaUpdates = 'true';\n    acaoEspecial = 'oportunidade';\n    dadosOportunidade = { visita_id: visitaId, loja_id: lojaId, produto: contexto.produto_selecionado, status: 'aberta' };\n    dadosContrato = { loja_id: lojaId, produto: contexto.produto_selecionado, etapa: 'docs_enviados', etapa_desde: hoje };\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Registrado! Envie a documentacao a matriz e me avise quando o cliente assinar.');\n  } else if (respostaId === 'fa_analisar') {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'data_retorno' });\n    mensagemSaida = listaDataRetorno();\n  } else {\n    mensagemSaida = botoesFecharAnalisar();\n  }\n} else if (etapaAtual === 'data_retorno') {\n  const mapaData = { dr_amanha: 1, dr_3dias: 3, dr_prox_semana: 7 };\n  if (respostaId === 'dr_outra') {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'data_retorno_outra' });\n    mensagemSaida = { tipo: 'text', texto: 'Informe a data de retorno (dd/mm/aaaa):', opcoes: [] };\n  } else if (mapaData[respostaId]) {\n    const dataRetorno = $today.plus({ days: mapaData[respostaId] }).toISODate();\n    visitaUpdates = { status_1: 'analisar', data_retorno: dataRetorno };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Combinado, retorno agendado para ' + dataRetorno + '.');\n  } else {\n    mensagemSaida = listaDataRetorno();\n  }\n} else if (etapaAtual === 'data_retorno_outra') {\n  if (!textoResp) {\n    mensagemSaida = { tipo: 'text', texto: 'Nao entendi. Informe a data de retorno (dd/mm/aaaa):', opcoes: [] };\n  } else {\n    visitaUpdates = { status_1: 'analisar', data_retorno: textoResp };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Combinado, retorno agendado para ' + textoResp + '.');\n  }\n} else if (etapaAtual === 'motivo') {\n  const mapaMotivo = { motivo_taxas: 'Taxas concorrente', motivo_ja_possui: 'Ja possui', motivo_decisor_ausente: 'Decisor ausente', motivo_outro: 'Outro' };\n  if (!mapaMotivo[respostaId]) {\n    mensagemSaida = listaMotivo();\n  } else {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'contraproposta', motivo_selecionado: mapaMotivo[respostaId] });\n    mensagemSaida = botoesContraproposta();\n  }\n} else if (etapaAtual === 'contraproposta') {\n  if (respostaId !== 'cp_sim' && respostaId !== 'cp_nao') {\n    mensagemSaida = botoesContraproposta();\n  } else {\n    visitaUpdates = {\n      status_1: 'sem_interesse',\n      motivo_nao_fechamento: contexto.motivo_selecionado,\n      contraproposta: respostaId === 'cp_sim' ? 'Sim' : 'Nao'\n    };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Entendido.');\n  }\n} else if (etapaAtual === 'observacao') {\n  const updates = { checkout_at: $now.toISO() };\n  if (tipoMensagem === 'audio') {\n    updates.obs_audio_transcrito = item.obsAudioTranscrito || '';\n    if (item.motivoEstruturado) updates.motivo_nao_fechamento = item.motivoEstruturado;\n    if (item.contrapropostaEstruturada) updates.contraproposta = item.contrapropostaEstruturada;\n    if (item.dataRetornoSugeridaEstruturada) updates.data_retorno = item.dataRetornoSugeridaEstruturada;\n  } else {\n    const textoLower = textoResp.toLowerCase();\n    const textoSemAcento = textoLower.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n    if (textoSemAcento !== 'nao') {\n      updates.obs_texto = textoResp;\n    }\n  }\n  visitaUpdates = updates;\n  temVisitaUpdates = 'true';\n  marcarAgendaRealizada = 'true';\n  novoEstado = 'ocioso';\n  novoContexto = {};\n  mensagemSaida = { tipo: 'text', texto: 'Obrigado! Visita concluida com sucesso.', opcoes: [] };\n} else {\n  novoEstado = 'ocioso';\n  novoContexto = {};\n  mensagemSaida = { tipo: 'text', texto: 'Ocorreu um erro no fluxo de checkout. Por favor, envie sua localizacao para reiniciar o check-in.', opcoes: [] };\n}\n\nreturn {\n  json: {\n    telefone: telefone,\n    novoEstado: novoEstado,\n    novoContexto: novoContexto,\n    visitaId: visitaId,\n    agendaIdParaRealizar: agendaId,\n    visitaUpdates: visitaUpdates,\n    temVisitaUpdates: temVisitaUpdates,\n    acaoEspecial: acaoEspecial,\n    dadosAgendaReagendada: dadosAgendaReagendada,\n    dadosOportunidade: dadosOportunidade,\n    dadosContrato: dadosContrato,\n    marcarAgendaRealizada: marcarAgendaRealizada,\n    mensagemSaida: mensagemSaida\n  }\n};\n"
+      },
       "id": "16e8abf5-31aa-4bcd-9f03-bfe958347ca7",
       "name": "Motor de Checkout",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         2800,
-        450
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "\nconst item = $json;\nconst contexto = item.contexto || {};\nconst etapaAtual = contexto.etapa_checkout || null;\nconst respostaId = item.respostaId || '';\nconst textoResp = (item.texto || '').trim();\nconst tipoMensagem = item.tipoMensagem;\nconst usuarioId = item.usuarioId;\nconst telefone = item.telefone;\nconst visitaId = contexto.visita_id;\nconst agendaId = contexto.agenda_id;\nconst lojaId = contexto.loja_id;\n\nconst hoje = $today.toISODate();\n\nfunction proximoDiaUtil() {\n  let d = $today.plus({ days: 1 });\n  while (d.weekday === 6 || d.weekday === 7) {\n    d = d.plus({ days: 1 });\n  }\n  return d.toISODate();\n}\n\nlet novoEstado = 'checkout';\nlet novoContexto = Object.assign({}, contexto);\nlet visitaUpdates = {};\nlet temVisitaUpdates = 'false';\nlet acaoEspecial = 'nenhuma';\nlet dadosAgendaReagendada = null;\nlet dadosOportunidade = null;\nlet dadosContrato = null;\nlet marcarAgendaRealizada = 'false';\nlet mensagemSaida = { tipo: 'text', texto: 'Nao entendi sua resposta. Pode tentar novamente?', opcoes: [] };\n\nfunction listaProduto() {\n  return {\n    tipo: 'list',\n    texto: 'Interesse em qual produto?',\n    opcoes: [\n      { id: 'produto_autocred', titulo: 'Autocred' },\n      { id: 'produto_top_service', titulo: 'Top Service' },\n      { id: 'produto_ambos', titulo: 'Ambos' },\n      { id: 'produto_nenhum', titulo: 'Nenhum' }\n    ]\n  };\n}\nfunction botoesFecharAnalisar() {\n  return {\n    tipo: 'buttons',\n    texto: 'Fechou ou vai analisar?',\n    opcoes: [\n      { id: 'fa_fechou', titulo: 'Fechou' },\n      { id: 'fa_analisar', titulo: 'Analisar' }\n    ]\n  };\n}\nfunction listaDataRetorno() {\n  return {\n    tipo: 'list',\n    texto: 'Qual a data de retorno prevista?',\n    opcoes: [\n      { id: 'dr_amanha', titulo: 'Amanha' },\n      { id: 'dr_3dias', titulo: '3 dias' },\n      { id: 'dr_prox_semana', titulo: 'Proxima semana' },\n      { id: 'dr_outra', titulo: 'Outra data' }\n    ]\n  };\n}\nfunction listaMotivo() {\n  return {\n    tipo: 'list',\n    texto: 'Qual o motivo?',\n    opcoes: [\n      { id: 'motivo_taxas', titulo: 'Taxas concorrente' },\n      { id: 'motivo_ja_possui', titulo: 'Ja possui' },\n      { id: 'motivo_decisor_ausente', titulo: 'Decisor ausente' },\n      { id: 'motivo_outro', titulo: 'Outro' }\n    ]\n  };\n}\nfunction botoesContraproposta() {\n  return {\n    tipo: 'buttons',\n    texto: 'Houve contraproposta?',\n    opcoes: [\n      { id: 'cp_sim', titulo: 'Sim' },\n      { id: 'cp_nao', titulo: 'Nao' }\n    ]\n  };\n}\nfunction textoObservacao(prefixo) {\n  return {\n    tipo: 'text',\n    texto: (prefixo ? prefixo + '\\n\\n' : '') + 'Alguma observacao sobre a visita? (texto, audio, ou responda nao)',\n    opcoes: []\n  };\n}\n\nif (etapaAtual === 'decisor') {\n  if (['decisor_sim', 'decisor_nao', 'decisor_loja_fechada', 'decisor_contato_ausente'].indexOf(respostaId) === -1) {\n    mensagemSaida = {\n      tipo: 'list',\n      texto: 'Nao entendi. Falou com o decisor da loja?',\n      opcoes: [\n        { id: 'decisor_sim', titulo: 'Sim' },\n        { id: 'decisor_nao', titulo: 'Nao' },\n        { id: 'decisor_loja_fechada', titulo: 'Loja fechada' },\n        { id: 'decisor_contato_ausente', titulo: 'Contato ausente' }\n      ]\n    };\n  } else if (respostaId === 'decisor_loja_fechada' || respostaId === 'decisor_contato_ausente') {\n    visitaUpdates = {\n      resultado: respostaId === 'decisor_loja_fechada' ? 'loja_fechada' : 'contato_ausente',\n      checkout_at: $now.toISO()\n    };\n    temVisitaUpdates = 'true';\n    marcarAgendaRealizada = 'true';\n    acaoEspecial = 'reagendar';\n    dadosAgendaReagendada = { data: proximoDiaUtil(), usuario_id: usuarioId, loja_id: lojaId, origem: 'reagendada', status: 'pendente' };\n    novoEstado = 'ocioso';\n    novoContexto = {};\n    mensagemSaida = { tipo: 'text', texto: 'Visita encerrada. Obrigado! Reagendei essa loja para o proximo dia util.', opcoes: [] };\n  } else {\n    visitaUpdates = { falou_decisor: respostaId === 'decisor_sim', resultado: 'normal' };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'produto' });\n    mensagemSaida = listaProduto();\n  }\n} else if (etapaAtual === 'produto') {\n  const mapaProduto = { produto_autocred: 'autocred', produto_top_service: 'top_service', produto_ambos: 'ambos', produto_nenhum: 'nenhum' };\n  if (!mapaProduto[respostaId]) {\n    mensagemSaida = listaProduto();\n  } else {\n    visitaUpdates = { produto_interesse: mapaProduto[respostaId] };\n    temVisitaUpdates = 'true';\n    if (respostaId === 'produto_nenhum') {\n      novoContexto = Object.assign({}, contexto, { etapa_checkout: 'motivo' });\n      mensagemSaida = listaMotivo();\n    } else {\n      novoContexto = Object.assign({}, contexto, { etapa_checkout: 'fechou_ou_analisar', produto_selecionado: mapaProduto[respostaId] });\n      mensagemSaida = botoesFecharAnalisar();\n    }\n  }\n} else if (etapaAtual === 'fechou_ou_analisar') {\n  if (respostaId === 'fa_fechou') {\n    visitaUpdates = { status_1: 'fechou' };\n    temVisitaUpdates = 'true';\n    acaoEspecial = 'oportunidade';\n    dadosOportunidade = { visita_id: visitaId, loja_id: lojaId, produto: contexto.produto_selecionado, status: 'aberta' };\n    dadosContrato = { loja_id: lojaId, produto: contexto.produto_selecionado, etapa: 'docs_enviados', etapa_desde: hoje };\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Registrado! Envie a documentacao a matriz e me avise quando o cliente assinar.');\n  } else if (respostaId === 'fa_analisar') {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'data_retorno' });\n    mensagemSaida = listaDataRetorno();\n  } else {\n    mensagemSaida = botoesFecharAnalisar();\n  }\n} else if (etapaAtual === 'data_retorno') {\n  const mapaData = { dr_amanha: 1, dr_3dias: 3, dr_prox_semana: 7 };\n  if (respostaId === 'dr_outra') {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'data_retorno_outra' });\n    mensagemSaida = { tipo: 'text', texto: 'Informe a data de retorno (dd/mm/aaaa):', opcoes: [] };\n  } else if (mapaData[respostaId]) {\n    const dataRetorno = $today.plus({ days: mapaData[respostaId] }).toISODate();\n    visitaUpdates = { status_1: 'analisar', data_retorno: dataRetorno };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Combinado, retorno agendado para ' + dataRetorno + '.');\n  } else {\n    mensagemSaida = listaDataRetorno();\n  }\n} else if (etapaAtual === 'data_retorno_outra') {\n  if (!textoResp) {\n    mensagemSaida = { tipo: 'text', texto: 'Nao entendi. Informe a data de retorno (dd/mm/aaaa):', opcoes: [] };\n  } else {\n    visitaUpdates = { status_1: 'analisar', data_retorno: textoResp };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Combinado, retorno agendado para ' + textoResp + '.');\n  }\n} else if (etapaAtual === 'motivo') {\n  const mapaMotivo = { motivo_taxas: 'Taxas concorrente', motivo_ja_possui: 'Ja possui', motivo_decisor_ausente: 'Decisor ausente', motivo_outro: 'Outro' };\n  if (!mapaMotivo[respostaId]) {\n    mensagemSaida = listaMotivo();\n  } else {\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'contraproposta', motivo_selecionado: mapaMotivo[respostaId] });\n    mensagemSaida = botoesContraproposta();\n  }\n} else if (etapaAtual === 'contraproposta') {\n  if (respostaId !== 'cp_sim' && respostaId !== 'cp_nao') {\n    mensagemSaida = botoesContraproposta();\n  } else {\n    visitaUpdates = {\n      status_1: 'sem_interesse',\n      motivo_nao_fechamento: contexto.motivo_selecionado,\n      contraproposta: respostaId === 'cp_sim' ? 'Sim' : 'Nao'\n    };\n    temVisitaUpdates = 'true';\n    novoContexto = Object.assign({}, contexto, { etapa_checkout: 'observacao' });\n    mensagemSaida = textoObservacao('Entendido.');\n  }\n} else if (etapaAtual === 'observacao') {\n  const updates = { checkout_at: $now.toISO() };\n  if (tipoMensagem === 'audio') {\n    updates.obs_audio_transcrito = item.obsAudioTranscrito || '';\n    if (item.motivoEstruturado) updates.motivo_nao_fechamento = item.motivoEstruturado;\n    if (item.contrapropostaEstruturada) updates.contraproposta = item.contrapropostaEstruturada;\n    if (item.dataRetornoSugeridaEstruturada) updates.data_retorno = item.dataRetornoSugeridaEstruturada;\n  } else {\n    const textoLower = textoResp.toLowerCase();\n    const textoSemAcento = textoLower.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n    if (textoSemAcento !== 'nao') {\n      updates.obs_texto = textoResp;\n    }\n  }\n  visitaUpdates = updates;\n  temVisitaUpdates = 'true';\n  marcarAgendaRealizada = 'true';\n  novoEstado = 'ocioso';\n  novoContexto = {};\n  mensagemSaida = { tipo: 'text', texto: 'Obrigado! Visita concluida com sucesso.', opcoes: [] };\n} else {\n  novoEstado = 'ocioso';\n  novoContexto = {};\n  mensagemSaida = { tipo: 'text', texto: 'Ocorreu um erro no fluxo de checkout. Por favor, envie sua localizacao para reiniciar o check-in.', opcoes: [] };\n}\n\nreturn {\n  json: {\n    telefone: telefone,\n    novoEstado: novoEstado,\n    novoContexto: novoContexto,\n    visitaId: visitaId,\n    agendaIdParaRealizar: agendaId,\n    visitaUpdates: visitaUpdates,\n    temVisitaUpdates: temVisitaUpdates,\n    acaoEspecial: acaoEspecial,\n    dadosAgendaReagendada: dadosAgendaReagendada,\n    dadosOportunidade: dadosOportunidade,\n    dadosContrato: dadosContrato,\n    marcarAgendaRealizada: marcarAgendaRealizada,\n    mensagemSaida: mensagemSaida\n  }\n};\n"
-      }
+        464
+      ]
     },
     {
-      "id": "a3142ae3-e044-4dd7-beda-528f014cb8e9",
-      "name": "Tem Atualizacoes de Visita?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        3000,
-        450
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -2350,25 +2224,25 @@
               "rightValue": "true"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "a3142ae3-e044-4dd7-beda-528f014cb8e9",
+      "name": "Tem Atualizacoes de Visita?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3008,
+        464
+      ]
     },
     {
-      "id": "b8a5f64b-f5ef-4815-a3d4-0893d5cdc4ec",
-      "name": "Atualizar Visita",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        3200,
-        400
-      ],
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/visitas?id=eq.{{ $(\"Motor de Checkout\").item.json.visitaId }}",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2386,33 +2260,31 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ $(\"Motor de Checkout\").item.json.visitaUpdates }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "b8a5f64b-f5ef-4815-a3d4-0893d5cdc4ec",
+      "name": "Atualizar Visita",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3200,
+        400
+      ]
     },
     {
-      "id": "7713d731-af2b-489b-9bc3-7b62db2ef874",
-      "name": "Rotear Acao Especial",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        3400,
-        450
-      ],
       "parameters": {
-        "mode": "rules",
         "rules": {
           "values": [
             {
-              "outputKey": "reagendar",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -2427,13 +2299,13 @@
               }
             },
             {
-              "outputKey": "oportunidade",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -2453,24 +2325,23 @@
           "fallbackOutput": "extra",
           "renameFallbackOutput": "Nenhuma"
         }
-      }
+      },
+      "id": "7713d731-af2b-489b-9bc3-7b62db2ef874",
+      "name": "Rotear Acao Especial",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        3408,
+        464
+      ]
     },
     {
-      "id": "d79bec7a-ab6b-4cfa-ab54-be25641940d9",
-      "name": "Criar Agenda Reagendada",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        3600,
-        350
-      ],
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2488,28 +2359,28 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosAgendaReagendada }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "d79bec7a-ab6b-4cfa-ab54-be25641940d9",
+      "name": "Criar Agenda Reagendada",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3600,
+        352
+      ]
     },
     {
-      "id": "a9dfd212-67ab-46aa-9a68-8d581c1c8a69",
-      "name": "Marcar Agenda Realizada?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        4000,
-        450
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -2521,25 +2392,25 @@
               "rightValue": "true"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "a9dfd212-67ab-46aa-9a68-8d581c1c8a69",
+      "name": "Marcar Agenda Realizada?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4000,
+        464
+      ]
     },
     {
-      "id": "674ccef6-c2cc-47d1-9449-bfaba9337a87",
-      "name": "Marcar Agenda Realizada",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        4200,
-        400
-      ],
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas?id=eq.{{ $(\"Motor de Checkout\").item.json.agendaIdParaRealizar }}",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2553,28 +2424,26 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"status\": \"realizada\" } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "32e59e0d-0e31-4e7e-bed8-88868581e5b7",
-      "name": "Upsert Estado Final Checkout",
+        "options": {}
+      },
+      "id": "674ccef6-c2cc-47d1-9449-bfaba9337a87",
+      "name": "Marcar Agenda Realizada",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4400,
-        450
-      ],
+        4208,
+        400
+      ]
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/estado_conversa?on_conflict=telefone",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2592,33 +2461,31 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"telefone\": $(\"Motor de Checkout\").item.json.telefone, \"estado\": $(\"Motor de Checkout\").item.json.novoEstado, \"contexto\": $(\"Motor de Checkout\").item.json.novoContexto, \"atualizado_em\": $now.toISO() } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "32e59e0d-0e31-4e7e-bed8-88868581e5b7",
+      "name": "Upsert Estado Final Checkout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4400,
+        464
+      ]
     },
     {
-      "id": "7f9e3bdc-6422-4b7c-a71b-0cef65917818",
-      "name": "Rotear Mensagem de Saida",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        4600,
-        450
-      ],
       "parameters": {
-        "mode": "rules",
         "rules": {
           "values": [
             {
-              "outputKey": "text",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -2633,13 +2500,13 @@
               }
             },
             {
-              "outputKey": "list",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -2654,13 +2521,13 @@
               }
             },
             {
-              "outputKey": "buttons",
               "conditions": {
                 "combinator": "and",
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -2680,44 +2547,72 @@
           "fallbackOutput": "extra",
           "renameFallbackOutput": "Desconhecido"
         }
-      }
+      },
+      "id": "7f9e3bdc-6422-4b7c-a71b-0cef65917818",
+      "name": "Rotear Mensagem de Saida",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        4608,
+        464
+      ]
     },
     {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $(\"Motor de Checkout\").item.json.telefone }}",
+        "textBody": "={{ $(\"Motor de Checkout\").item.json.mensagemSaida.texto }}",
+        "additionalFields": {}
+      },
       "id": "886ef07e-a1fc-4a02-bb5e-f636bf712465",
       "name": "Enviar Texto Checkout",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
         4800,
-        300
+        304
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do numero de telefone WhatsApp Business (Meta Cloud API)__>",
-        "recipientPhoneNumber": "={{ $(\"Motor de Checkout\").item.json.telefone }}",
-        "messageType": "text",
-        "textBody": "={{ $(\"Motor de Checkout\").item.json.mensagemSaida.texto }}"
-      },
       "webhookId": "6d03c2b4-9244-4f85-bb88-72ed8ee73a67",
       "disabled": true
     },
     {
+      "parameters": {
+        "method": "POST",
+        "url": "<__PLACEHOLDER_VALUE__URL completa: https://graph.facebook.com/v19.0/<PHONE_NUMBER_ID>/messages__>",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $(\"Motor de Checkout\").item.json.telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"list\", \"body\": { \"text\": $(\"Motor de Checkout\").item.json.mensagemSaida.texto }, \"action\": { \"button\": \"Selecionar\", \"sections\": [ { \"title\": \"Opcoes\", \"rows\": $(\"Motor de Checkout\").item.json.mensagemSaida.opcoes.map(o => ({ id: o.id, title: o.titulo })) } ] } } } }}",
+        "options": {}
+      },
       "id": "2a841aeb-f4ba-4242-963d-42ce9f35e702",
       "name": "Enviar Lista Checkout",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         4800,
-        450
+        464
       ],
+      "disabled": true
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "<__PLACEHOLDER_VALUE__URL completa: https://graph.facebook.com/v19.0/<PHONE_NUMBER_ID>/messages__>",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "whatsAppApi",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2727,81 +2622,86 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $(\"Motor de Checkout\").item.json.telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"list\", \"body\": { \"text\": $(\"Motor de Checkout\").item.json.mensagemSaida.texto }, \"action\": { \"button\": \"Selecionar\", \"sections\": [ { \"title\": \"Opcoes\", \"rows\": $(\"Motor de Checkout\").item.json.mensagemSaida.opcoes.map(o => ({ id: o.id, title: o.titulo })) } ] } } } }}"
+        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $(\"Motor de Checkout\").item.json.telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"button\", \"body\": { \"text\": $(\"Motor de Checkout\").item.json.mensagemSaida.texto }, \"action\": { \"buttons\": $(\"Motor de Checkout\").item.json.mensagemSaida.opcoes.map(o => ({ type: \"reply\", reply: { id: o.id, title: o.titulo } })) } } } }}",
+        "options": {}
       },
-      "disabled": true
-    },
-    {
       "id": "91104968-13e7-46ac-a56f-3b24efb70ee2",
       "name": "Enviar Botoes Checkout",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         4800,
-        600
+        608
       ],
-      "parameters": {
-        "method": "POST",
-        "url": "<__PLACEHOLDER_VALUE__URL completa: https://graph.facebook.com/v19.0/<PHONE_NUMBER_ID>/messages__>",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "whatsAppApi",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "specifyBody": "json",
-        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"to\": $(\"Motor de Checkout\").item.json.telefone, \"type\": \"interactive\", \"interactive\": { \"type\": \"button\", \"body\": { \"text\": $(\"Motor de Checkout\").item.json.mensagemSaida.texto }, \"action\": { \"buttons\": $(\"Motor de Checkout\").item.json.mensagemSaida.opcoes.map(o => ({ type: \"reply\", reply: { id: o.id, title: o.titulo } })) } } } }}"
-      },
       "disabled": true
     },
     {
+      "parameters": {},
       "id": "8167e1f8-859f-4aa9-98d9-247ae5a105cc",
       "name": "Mensagem Saida Desconhecida",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
         4800,
-        750
-      ],
-      "parameters": {}
+        752
+      ]
     },
     {
+      "parameters": {},
       "id": "f8789a1c-e160-4db4-9f4d-358d89833c27",
       "name": "Sem Marcar Realizada",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        4200,
-        550
-      ],
-      "parameters": {}
+        4208,
+        560
+      ]
     },
     {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Profile",
+              "value": "rotaviva"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosOportunidade }}",
+        "options": {}
+      },
       "id": "d2ad2b37-1614-4cf1-9c7a-2199f7539870",
       "name": "Criar Oportunidade",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
         3600,
-        450
-      ],
+        464
+      ]
+    },
+    {
       "parameters": {
         "method": "POST",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/oportunidades",
-        "authentication": "predefinedCredentialType",
+        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -2819,156 +2719,114 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ $(\"Motor de Checkout\").item.json.dadosOportunidade }}",
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
+        "jsonBody": "={{ { ...$(\"Motor de Checkout\").item.json.dadosContrato, \"oportunidade_id\": $json[0].id } }}",
+        "options": {}
+      },
       "id": "2fd53f37-2856-4ba4-aae8-a3499b55c253",
       "name": "Criar Contrato",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3800,
-        450
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/contratos",
-        "authentication": "predefinedCredentialType",
-        "genericAuthType": "httpCustomAuth",
-        "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Profile",
-              "value": "rotaviva"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            },
-            {
-              "name": "Prefer",
-              "value": "return=representation"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "specifyBody": "json",
-        "jsonBody": "={{ { ...$(\"Motor de Checkout\").item.json.dadosContrato, \"oportunidade_id\": $json[0].id } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        3808,
+        464
+      ]
     },
     {
+      "parameters": {},
       "id": "7e97fe3f-dcef-4bf9-bdc5-eb7232a23c69",
       "name": "Sem Acao Especial",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
         3600,
-        550
-      ],
-      "parameters": {}
+        560
+      ]
     },
     {
+      "parameters": {},
       "id": "2d9b2809-5c09-4808-81ed-6f656dab50c6",
       "name": "Sem Atualizacao de Visita",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
         3200,
-        550
-      ],
-      "parameters": {}
+        560
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "\nconst ctx = $input.first().json;\nreturn [{ json: Object.assign({}, ctx, {\n  obsAudioTranscrito: null,\n  motivoEstruturado: null,\n  contrapropostaEstruturada: null,\n  dataRetornoSugeridaEstruturada: null,\n  resumoEstruturado: null\n}) }];\n"
+      },
       "id": "ff8359c9-7fef-4580-9c7d-2f7d540cb5b4",
       "name": "Preparar Resultado Texto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1800,
-        550
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "\nconst ctx = $input.first().json;\nreturn [{ json: Object.assign({}, ctx, {\n  obsAudioTranscrito: null,\n  motivoEstruturado: null,\n  contrapropostaEstruturada: null,\n  dataRetornoSugeridaEstruturada: null,\n  resumoEstruturado: null\n}) }];\n"
-      }
+        1808,
+        560
+      ]
     },
     {
+      "parameters": {},
       "id": "441e5654-aa17-4762-80ec-d7e28d45670d",
       "name": "Estado Desconhecido - Ignorar",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
         1600,
-        500
-      ],
-      "parameters": {}
+        512
+      ]
     },
     {
+      "parameters": {
+        "content": "SIMPLIFICACAO ARQUITETURAL: a maquina de sub-estados do checkout (decisor / produto / fechou_ou_analisar / data_retorno / data_retorno_outra / motivo / contraproposta / observacao) foi consolidada no node de codigo \"Motor de Checkout\" em vez de multiplos nodes Switch aninhados, para manter o grafo gerenciavel. Toda a logica de negocio da especificacao (D-01: apenas nodes deterministicos decidem estado - IF/Switch/Code, sem AI Agent orquestrando) foi preservada dentro do codigo. Os nodes seguintes (IF/Switch) apenas executam os efeitos colaterais (updates no Supabase e envio de mensagem) com base no plano calculado por este node.",
+        "height": 200,
+        "width": 300,
+        "color": 5
+      },
       "id": "6613a0c6-3a97-40d4-8c6a-6865ec2b36f7",
       "name": "Sticky Note 3e04a6ea",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2750,
+        2752,
         400
-      ],
-      "parameters": {
-        "content": "SIMPLIFICACAO ARQUITETURAL: a maquina de sub-estados do checkout (decisor / produto / fechou_ou_analisar / data_retorno / data_retorno_outra / motivo / contraproposta / observacao) foi consolidada no node de codigo \"Motor de Checkout\" em vez de multiplos nodes Switch aninhados, para manter o grafo gerenciavel. Toda a logica de negocio da especificacao (D-01: apenas nodes deterministicos decidem estado - IF/Switch/Code, sem AI Agent orquestrando) foi preservada dentro do codigo. Os nodes seguintes (IF/Switch) apenas executam os efeitos colaterais (updates no Supabase e envio de mensagem) com base no plano calculado por este node.",
-        "color": 5,
-        "width": 300,
-        "height": 200
-      }
+      ]
     },
     {
+      "parameters": {
+        "content": "LIMITACAO DOCUMENTADA: em \"Extrair Contrato Maquininha\", vigencia_inicio para produto Top Service e aproximada como o primeiro dia do mes seguinte a HOJE (data do comando \"maquininha ativada\"), pois este workflow nao tem acesso ao historico de quando o contrato passou pela etapa assinatura_diretoria (a tabela contratos guarda apenas a etapa atual e etapa_desde). Uma tabela de historico de etapas seria necessaria para o calculo exato pedido na especificacao.",
+        "height": 200,
+        "width": 500,
+        "color": 4
+      },
       "id": "0c36c0d7-efd0-4ce9-9566-1fd5a8acc8ac",
       "name": "Sticky Note 12472041",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1750,
-        -300
-      ],
-      "parameters": {
-        "content": "LIMITACAO DOCUMENTADA: em \"Extrair Contrato Maquininha\", vigencia_inicio para produto Top Service e aproximada como o primeiro dia do mes seguinte a HOJE (data do comando \"maquininha ativada\"), pois este workflow nao tem acesso ao historico de quando o contrato passou pela etapa assinatura_diretoria (a tabela contratos guarda apenas a etapa atual e etapa_desde). Uma tabela de historico de etapas seria necessaria para o calculo exato pedido na especificacao.",
-        "color": 4,
-        "width": 500,
-        "height": 200
-      }
+        1760,
+        -304
+      ]
     },
     {
+      "parameters": {
+        "content": "NOTA: o bucket rotaviva-fotos e privado, entao visitas.foto_url grava apenas o caminho do objeto no storage (rotaviva-fotos/{agenda_id}.jpg), nao uma URL publica. A aplicacao consumidora deve gerar uma signed URL sob demanda.",
+        "height": 200,
+        "width": 700,
+        "color": 3
+      },
       "id": "26e58cdd-6508-4c7a-9405-d513535d567e",
       "name": "Sticky Note 0bfbdf93",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2150,
-        100
-      ],
-      "parameters": {
-        "content": "NOTA: o bucket rotaviva-fotos e privado, entao visitas.foto_url grava apenas o caminho do objeto no storage (rotaviva-fotos/{agenda_id}.jpg), nao uma URL publica. A aplicacao consumidora deve gerar uma signed URL sob demanda.",
-        "color": 3,
-        "width": 700,
-        "height": 200
-      }
+        2160,
+        112
+      ]
     },
     {
-      "id": "cdb48274-8098-4fea-bdda-d307472b5335",
-      "name": "Telegram Trigger",
-      "type": "n8n-nodes-base.telegramTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        0,
-        760
-      ],
       "parameters": {
         "updates": [
           "message",
@@ -2976,39 +2834,39 @@
         ],
         "additionalFields": {}
       },
-      "notes": "B-01: unico telegramApi na conta e o da ARMCOM. Trocar para CRED_TELEGRAM_BOT real antes do go-live.",
-      "webhookId": "e567ce03-aa3b-4271-859e-717b18a59c27"
+      "id": "cdb48274-8098-4fea-bdda-d307472b5335",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        768
+      ],
+      "webhookId": "e567ce03-aa3b-4271-859e-717b18a59c27",
+      "notes": "B-01: unico telegramApi na conta e o da ARMCOM. Trocar para CRED_TELEGRAM_BOT real antes do go-live."
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const u = $json;\nconst cq = u.callback_query || null;\nconst msg = cq ? (cq.message || {}) : (u.message || u.edited_message || {});\nconst chatId = String((cq ? (cq.from && cq.from.id) : (msg.chat && msg.chat.id)) || (msg.chat && msg.chat.id) || '');\nlet tipoMensagem = 'desconhecido';\nlet texto = '';\nlet respostaId = '';\nlet lat = null, long = null, mediaId = null, contactPhone = '';\nlet isStart = false;\nif (cq) {\n  tipoMensagem = 'interactive';\n  respostaId = cq.data || '';\n} else if (u.message) {\n  const m = u.message;\n  if (m.text != null) {\n    texto = String(m.text).trim();\n    tipoMensagem = 'text';\n    if (texto.toLowerCase() === '/start') isStart = true;\n  } else if (m.location) {\n    tipoMensagem = 'location'; lat = m.location.latitude; long = m.location.longitude;\n  } else if (m.photo && m.photo.length) {\n    tipoMensagem = 'image'; mediaId = m.photo[m.photo.length - 1].file_id;\n  } else if (m.voice) {\n    tipoMensagem = 'audio'; mediaId = m.voice.file_id;\n  } else if (m.audio) {\n    tipoMensagem = 'audio'; mediaId = m.audio.file_id;\n  } else if (m.contact) {\n    tipoMensagem = 'contact'; contactPhone = m.contact.phone_number || '';\n  }\n}\nconst mC = texto.match(/^contrato\\s+(\\S+)\\s+assinado$/i);\nconst mM = texto.match(/^maquininha\\s+(\\S+)\\s+ativada$/i);\nlet comandoTipo = '', comandoCodcl = '';\nif (mC) { comandoTipo = 'contrato_assinado'; comandoCodcl = mC[1]; }\nelse if (mM) { comandoTipo = 'maquininha_ativada'; comandoCodcl = mM[1]; }\nconst SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\nconst urlUsuario = SUPA + '/usuarios?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&ativo=eq.true&select=*';\nreturn { json: { canal: 'telegram', identidade: 'tg:' + chatId, chatId, telefone: '', tipoMensagem, texto, respostaId, lat, long, mediaId, waMessageId: null, comandoTipo, comandoCodcl, contactPhone, isStart, callbackQueryId: cq ? cq.id : '', urlUsuario } };"
+      },
       "id": "ab5008e1-d9af-48f9-ab53-51bfdc05400f",
       "name": "Normalizar Telegram",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        220,
-        760
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const u = $json;\nconst cq = u.callback_query || null;\nconst msg = cq ? (cq.message || {}) : (u.message || u.edited_message || {});\nconst chatId = String((cq ? (cq.from && cq.from.id) : (msg.chat && msg.chat.id)) || (msg.chat && msg.chat.id) || '');\nlet tipoMensagem = 'desconhecido';\nlet texto = '';\nlet respostaId = '';\nlet lat = null, long = null, mediaId = null, contactPhone = '';\nlet isStart = false;\nif (cq) {\n  tipoMensagem = 'interactive';\n  respostaId = cq.data || '';\n} else if (u.message) {\n  const m = u.message;\n  if (m.text != null) {\n    texto = String(m.text).trim();\n    tipoMensagem = 'text';\n    if (texto.toLowerCase() === '/start') isStart = true;\n  } else if (m.location) {\n    tipoMensagem = 'location'; lat = m.location.latitude; long = m.location.longitude;\n  } else if (m.photo && m.photo.length) {\n    tipoMensagem = 'image'; mediaId = m.photo[m.photo.length - 1].file_id;\n  } else if (m.voice) {\n    tipoMensagem = 'audio'; mediaId = m.voice.file_id;\n  } else if (m.audio) {\n    tipoMensagem = 'audio'; mediaId = m.audio.file_id;\n  } else if (m.contact) {\n    tipoMensagem = 'contact'; contactPhone = m.contact.phone_number || '';\n  }\n}\nconst mC = texto.match(/^contrato\\s+(\\S+)\\s+assinado$/i);\nconst mM = texto.match(/^maquininha\\s+(\\S+)\\s+ativada$/i);\nlet comandoTipo = '', comandoCodcl = '';\nif (mC) { comandoTipo = 'contrato_assinado'; comandoCodcl = mC[1]; }\nelse if (mM) { comandoTipo = 'maquininha_ativada'; comandoCodcl = mM[1]; }\nconst SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\nconst urlUsuario = SUPA + '/usuarios?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&ativo=eq.true&select=*';\nreturn { json: { canal: 'telegram', identidade: 'tg:' + chatId, chatId, telefone: '', tipoMensagem, texto, respostaId, lat, long, mediaId, waMessageId: null, comandoTipo, comandoCodcl, contactPhone, isStart, callbackQueryId: cq ? cq.id : '', urlUsuario } };"
-      }
+        224,
+        768
+      ]
     },
     {
-      "id": "ee14dfb0-4ba5-4d47-88ce-1e24c3c07b07",
-      "name": "Roteia Start/Contato?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        440,
-        760
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "loose",
+            "version": 1
           },
           "combinator": "or",
           "conditions": [
@@ -3029,24 +2887,26 @@
               "rightValue": "contact"
             }
           ]
-        }
-      }
-    },
-    {
-      "id": "54c6f40f-3567-42b3-a554-7bd06604a38d",
-      "name": "É Contato?",
+        },
+        "options": {}
+      },
+      "id": "ee14dfb0-4ba5-4d47-88ce-1e24c3c07b07",
+      "name": "Roteia Start/Contato?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        660,
-        700
-      ],
+        448,
+        768
+      ]
+    },
+    {
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "loose",
+            "version": 1
           },
           "combinator": "and",
           "conditions": [
@@ -3059,21 +2919,20 @@
               "rightValue": "contact"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "54c6f40f-3567-42b3-a554-7bd06604a38d",
+      "name": "É Contato?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        704
+      ]
     },
     {
-      "id": "f691cc45-c166-405e-ba7c-aa0bed798719",
-      "name": "Pedir Contato (/start)",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        880,
-        800
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $json.chatId }}",
         "text": "Bem-vindo ao Rota Viva! Toque no botão abaixo para compartilhar seu contato e vincular seu acesso.",
         "replyMarkup": "replyKeyboard",
@@ -3101,25 +2960,23 @@
           "appendAttribution": false
         }
       },
-      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live.",
-      "webhookId": "36c97780-5322-408a-9805-51d7c5ba6503"
-    },
-    {
-      "id": "e81632aa-441c-47b5-95cf-a485f4e20c11",
-      "name": "Buscar Usuarios p/ Vincular",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "id": "f691cc45-c166-405e-ba7c-aa0bed798719",
+      "name": "Pedir Contato (/start)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
       "position": [
         880,
-        640
+        800
       ],
+      "webhookId": "36c97780-5322-408a-9805-51d7c5ba6503",
+      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live."
+    },
+    {
       "parameters": {
-        "method": "GET",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?ativo=eq.true&select=id,nome,telefone",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -3127,39 +2984,39 @@
               "value": "rotaviva"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "e81632aa-441c-47b5-95cf-a485f4e20c11",
+      "name": "Buscar Usuarios p/ Vincular",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        880,
+        640
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const ctx = $('Normalizar Telegram').first().json;\nconst chatId = ctx.chatId;\nfunction canon(s){ let d = String(s || '').replace(/\\D/g, ''); if (d.startsWith('55') && d.length > 11) d = d.slice(2); if (d.length === 11) d = d.slice(0, 2) + d.slice(3); return d; }\nconst alvo = canon(ctx.contactPhone);\nconst users = $input.all().map(i => i.json);\nlet found = null;\nfor (const usr of users) { if (alvo && canon(usr.telefone) === alvo) { found = usr; break; } }\nif (found) return [{ json: { match: true, usuarioId: found.id, nome: found.nome, chatId } }];\nreturn [{ json: { match: false, chatId } }];"
+      },
       "id": "07765f89-3dc7-453d-a2e6-c89f405aba11",
       "name": "Casar Telefone",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1100,
+        1104,
         640
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const ctx = $('Normalizar Telegram').first().json;\nconst chatId = ctx.chatId;\nfunction canon(s){ let d = String(s || '').replace(/\\D/g, ''); if (d.startsWith('55') && d.length > 11) d = d.slice(2); if (d.length === 11) d = d.slice(0, 2) + d.slice(3); return d; }\nconst alvo = canon(ctx.contactPhone);\nconst users = $input.all().map(i => i.json);\nlet found = null;\nfor (const usr of users) { if (alvo && canon(usr.telefone) === alvo) { found = usr; break; } }\nif (found) return [{ json: { match: true, usuarioId: found.id, nome: found.nome, chatId } }];\nreturn [{ json: { match: false, chatId } }];"
-      }
+      ]
     },
     {
-      "id": "164ae138-5f4f-45d1-aed7-3fdf250c57bd",
-      "name": "Achou Usuario?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        1320,
-        640
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "loose",
+            "version": 1
           },
           "combinator": "and",
           "conditions": [
@@ -3172,25 +3029,25 @@
               }
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "164ae138-5f4f-45d1-aed7-3fdf250c57bd",
+      "name": "Achou Usuario?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1328,
+        640
+      ]
     },
     {
-      "id": "7ac33978-a249-49fc-a3ac-c447ceb8cdd3",
-      "name": "Vincular telegram_chat_id",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1540,
-        580
-      ],
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?id=eq.{{ $json.usuarioId }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -3208,158 +3065,142 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"telegram_chat_id\": $json.chatId } }}"
-      }
+        "jsonBody": "={{ { \"telegram_chat_id\": $json.chatId } }}",
+        "options": {}
+      },
+      "id": "7ac33978-a249-49fc-a3ac-c447ceb8cdd3",
+      "name": "Vincular telegram_chat_id",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1552,
+        592
+      ]
     },
     {
-      "id": "315e9cfd-9481-49c1-9f15-1c6b3b2c4925",
-      "name": "Confirmar Vinculacao",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1760,
-        580
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Casar Telefone').first().json.chatId }}",
         "text": "=Vinculado, {{ $('Casar Telefone').first().json.nome }}! Seu acesso ao Rota Viva está pronto.",
         "additionalFields": {
           "appendAttribution": false
         }
       },
-      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live.",
-      "webhookId": "ece1506e-cd65-4737-8298-5c5715903897"
-    },
-    {
-      "id": "35d96f31-605f-4cbd-8de7-4fcf245c9371",
-      "name": "Orientar Nao Cadastrado",
+      "id": "315e9cfd-9481-49c1-9f15-1c6b3b2c4925",
+      "name": "Confirmar Vinculacao",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1540,
-        720
+        1936,
+        752
       ],
+      "webhookId": "ece1506e-cd65-4737-8298-5c5715903897",
+      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live."
+    },
+    {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Casar Telefone').first().json.chatId }}",
         "text": "Não encontrei seu telefone no cadastro do Rota Viva. Fale com seu coordenador para ser incluído.",
         "additionalFields": {
           "appendAttribution": false
         }
       },
-      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live.",
-      "webhookId": "102fe020-00dc-4166-b507-2d363c393d1c"
+      "id": "35d96f31-605f-4cbd-8de7-4fcf245c9371",
+      "name": "Orientar Nao Cadastrado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1552,
+        720
+      ],
+      "webhookId": "102fe020-00dc-4166-b507-2d363c393d1c",
+      "notes": "B-01: trocar telegramApi para CRED_TELEGRAM_BOT real antes do go-live."
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nif (!j.urlUsuario) {\n  const SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\n  j.canal = j.canal || 'whatsapp';\n  j.chatId = j.chatId || '';\n  j.isStart = j.isStart || false;\n  j.contactPhone = j.contactPhone || '';\n  j.urlUsuario = SUPA + '/usuarios?telefone=eq.' + encodeURIComponent(j.telefone || '') + '&ativo=eq.true&select=*';\n}\nreturn { json: j };"
+      },
       "id": "a8906881-cdfb-4a9c-8a3e-aa1cb3fabd25",
       "name": "Entrada Normalizada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        660,
-        300
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const j = $json;\nif (!j.urlUsuario) {\n  const SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\n  j.canal = j.canal || 'whatsapp';\n  j.chatId = j.chatId || '';\n  j.isStart = j.isStart || false;\n  j.contactPhone = j.contactPhone || '';\n  j.urlUsuario = SUPA + '/usuarios?telefone=eq.' + encodeURIComponent(j.telefone || '') + '&ativo=eq.true&select=*';\n}\nreturn { json: j };"
-      }
+        672,
+        304
+      ]
     },
     {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.mediaId }}",
+        "additionalFields": {}
+      },
       "id": "c78e4c8e-635e-4737-8c81-fee21fd53faf",
       "name": "Baixar Foto (Telegram)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1900,
-        150
+        1904,
+        160
       ],
-      "parameters": {
-        "resource": "file",
-        "operation": "get",
-        "fileId": "={{ $json.mediaId }}",
-        "download": true,
-        "additionalFields": {}
-      },
       "webhookId": "e5c929d8-ce94-4c6c-8905-e3edd211992e"
     },
     {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.mediaId }}",
+        "additionalFields": {}
+      },
       "id": "871ed917-b143-4893-998f-43075f7786c9",
       "name": "Baixar Audio (Telegram)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1900,
+        1936,
         400
       ],
-      "parameters": {
-        "resource": "file",
-        "operation": "get",
-        "fileId": "={{ $json.mediaId }}",
-        "download": true,
-        "additionalFields": {}
-      },
       "webhookId": "2405d969-ec6e-4bd6-ae4e-f735030ba201"
     },
     {
+      "parameters": {
+        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
+        "text": "={{ $('Motor de Checkout').item.json.mensagemSaida.texto }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
       "id": "d41580ba-c562-401b-8943-b06bc157d80a",
       "name": "Enviar Texto Checkout (TG)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        5050,
-        300
+        5056,
+        304
       ],
+      "webhookId": "b769ea18-cd82-4f97-aaff-f34bfc244fa8"
+    },
+    {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
         "text": "={{ $('Motor de Checkout').item.json.mensagemSaida.texto }}",
+        "replyMarkup": "inlineKeyboard",
         "additionalFields": {
           "appendAttribution": false
         }
       },
-      "webhookId": "b769ea18-cd82-4f97-aaff-f34bfc244fa8"
-    },
-    {
       "id": "d86f7834-e267-4fb0-b0f9-4d1f116b223a",
       "name": "Enviar Interativo Checkout (TG)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        5050,
-        500
+        5056,
+        512
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
-        "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
-        "text": "={{ $('Motor de Checkout').item.json.mensagemSaida.texto }}",
-        "replyMarkup": "inlineKeyboard",
-        "inlineKeyboard": "={{ { rows: $('Motor de Checkout').item.json.mensagemSaida.opcoes.map(o => ({ row: { buttons: [ { text: o.titulo, additionalFields: { callback_data: o.id } } ] } })) } }}",
-        "additionalFields": {
-          "appendAttribution": false
-        }
-      },
       "webhookId": "bfef44de-689e-4942-9b38-93e937d3a7cb"
     },
     {
-      "id": "58d6829c-179c-4201-b7d2-ff40b52203f5",
-      "name": "Enviar Pergunta Decisor (TG)",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        3400,
-        150
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
         "text": "Falou com o decisor da loja?",
         "replyMarkup": "inlineKeyboard",
@@ -3419,123 +3260,114 @@
           "appendAttribution": false
         }
       },
-      "webhookId": "8d7464e2-ca37-475c-bd74-fecbf3761397"
-    },
-    {
-      "id": "a0f8a433-a55c-48a8-973a-754c3d0c8e53",
-      "name": "Pedir Foto Fachada (TG)",
+      "id": "58d6829c-179c-4201-b7d2-ff40b52203f5",
+      "name": "Enviar Pergunta Decisor (TG)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        4200,
-        -50
+        3408,
+        160
       ],
+      "webhookId": "8d7464e2-ca37-475c-bd74-fecbf3761397"
+    },
+    {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
         "text": "=Check-in confirmado. Envie uma foto da fachada da loja {{ $('Avaliar Suspeita').item.json.lojaNome }} para continuar.",
         "additionalFields": {
           "appendAttribution": false
         }
       },
-      "webhookId": "f6571e30-707f-451f-893a-fd59277a4731"
-    },
-    {
-      "id": "e6adc3d6-4acf-4994-898d-77b500f89b3a",
-      "name": "Avisar Sem Visita Pendente (TG)",
+      "id": "a0f8a433-a55c-48a8-973a-754c3d0c8e53",
+      "name": "Pedir Foto Fachada (TG)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2400,
-        -150
+        4208,
+        -48
       ],
+      "webhookId": "f6571e30-707f-451f-893a-fd59277a4731"
+    },
+    {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
         "text": "Não encontrei nenhuma visita pendente para hoje na sua rota.",
         "additionalFields": {
           "appendAttribution": false
         }
       },
-      "webhookId": "9ba3854c-71ee-4479-8a2e-8d1810b3275d"
-    },
-    {
-      "id": "f1fe0093-1da8-403f-996e-6746ab4a62ac",
-      "name": "Confirmar Contrato Assinado (TG)",
+      "id": "e6adc3d6-4acf-4994-898d-77b500f89b3a",
+      "name": "Avisar Sem Visita Pendente (TG)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2200,
-        -420
+        2400,
+        -144
       ],
+      "webhookId": "9ba3854c-71ee-4479-8a2e-8d1810b3275d"
+    },
+    {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
         "text": "=Contrato da loja {{ $('Extrair Contrato Atual Assinatura').item.json.lojaNome }} atualizado: assinatura do cliente confirmada. Obrigado!",
         "additionalFields": {
           "appendAttribution": false
         }
       },
-      "webhookId": "5ee20ed1-3b75-4e5b-a1d7-4104eb1eab97"
-    },
-    {
-      "id": "6e3e1f13-22c3-40d5-9014-c495ffc81fa4",
-      "name": "Confirmar Maquininha Ativada (TG)",
+      "id": "f1fe0093-1da8-403f-996e-6746ab4a62ac",
+      "name": "Confirmar Contrato Assinado (TG)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2200,
-        -250
+        2208,
+        -416
       ],
+      "webhookId": "5ee20ed1-3b75-4e5b-a1d7-4104eb1eab97"
+    },
+    {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Entrada Normalizada').first().json.chatId }}",
         "text": "=Maquininha da loja {{ $('Extrair Contrato Maquininha').item.json.lojaNome }} marcada como ativa. Obrigado!",
         "additionalFields": {
           "appendAttribution": false
         }
       },
-      "webhookId": "096d1e39-69d8-4ac7-a503-5b97debe4c33"
-    },
-    {
-      "id": "732b6c9e-3c8b-4dc3-a984-d8a19eaaec33",
-      "name": "Enviar Alerta Checkin (TG)",
+      "id": "6e3e1f13-22c3-40d5-9014-c495ffc81fa4",
+      "name": "Confirmar Maquininha Ativada (TG)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3400,
-        -150
+        2208,
+        -256
       ],
+      "webhookId": "096d1e39-69d8-4ac7-a503-5b97debe4c33"
+    },
+    {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $json.destinatarioChatId }}",
         "text": "=Alerta: check-in de {{ $json.nomeUsuario }} na loja {{ $json.lojaNome }} foi registrado a {{ $json.distanciaM }}m de distância (acima do limite de {{ $json.raioCheckinM }}m). Verifique.",
         "additionalFields": {
           "appendAttribution": false
         }
       },
+      "id": "732b6c9e-3c8b-4dc3-a984-d8a19eaaec33",
+      "name": "Enviar Alerta Checkin (TG)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3408,
+        -144
+      ],
       "webhookId": "fcf50e47-4880-44ff-b112-102088e10d35"
     },
     {
-      "id": "2e16722e-1237-4a89-a083-c570998e08a9",
-      "name": "É Callback?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        440,
-        920
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "loose",
+            "version": 1
           },
           "combinator": "and",
           "conditions": [
@@ -3548,25 +3380,57 @@
               "rightValue": ""
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "2e16722e-1237-4a89-a083-c570998e08a9",
+      "name": "É Callback?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        928
+      ]
     },
     {
+      "parameters": {
+        "resource": "callback",
+        "queryId": "={{ $json.callbackQueryId }}",
+        "additionalFields": {}
+      },
       "id": "88e0ffcd-21ef-43dd-b415-a58ebb54c91e",
       "name": "Answer Callback Query",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        660,
-        920
+        672,
+        928
+      ],
+      "webhookId": "e0733b7d-8648-4ee3-a109-92edd30ef388"
+    },
+    {
+      "id": "7d9cb4b4-a999-417f-9936-08b01aaedbf9",
+      "name": "Chamar W5 (push sync)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4800,
+        900
       ],
       "parameters": {
-        "resource": "callback",
-        "operation": "answerQuery",
-        "queryId": "={{ $json.callbackQueryId }}",
-        "additionalFields": {}
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "rn6h3RP5qK4DNHgp",
+          "cachedResultName": "[RotaViva] W5 - Sync to Sheets"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": false
+        }
       },
-      "webhookId": "e0733b7d-8648-4ee3-a109-92edd30ef388"
+      "notes": "Push imediato para o W5 sincronizar ao Google Sheets (D-13). Fire-and-forget; o cron 5min do W5 e a rede de seguranca."
     }
   ]
 }

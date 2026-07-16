@@ -7,7 +7,8 @@
   "description": "Recebe a planilha de rota (XLSX) do coordenador via Telegram (documento), faz upsert de lojas, geocodifica enderecos novos, popula agenda_visitas e confirma via W0. WhatsApp preservado dormente.",
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "connections": {
     "Guard Coordenador Ativo": {
@@ -334,21 +335,11 @@
   },
   "nodes": [
     {
-      "id": "c8db4b91-187f-4d47-b72d-d910e51ba26e",
-      "name": "Guard Coordenador Ativo",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        260,
-        0
-      ],
       "parameters": {
-        "method": "GET",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/usuarios?telefone=eq.{{ $json.messages[0].from }}&papel=eq.coordenador&ativo=eq.true&select=*",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -357,25 +348,26 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
+      "id": "c8db4b91-187f-4d47-b72d-d910e51ba26e",
+      "name": "Guard Coordenador Ativo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        0
+      ],
       "disabled": true
     },
     {
-      "id": "99703d3f-9fa5-4c56-8125-9c118a14c103",
-      "name": "Mensagem tem documento?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        520,
-        0
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "combinator": "and",
           "conditions": [
@@ -388,83 +380,79 @@
               "rightValue": "document"
             }
           ]
-        }
+        },
+        "options": {}
       },
+      "id": "99703d3f-9fa5-4c56-8125-9c118a14c103",
+      "name": "Mensagem tem documento?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        0
+      ],
       "disabled": true
     },
     {
-      "id": "20f1f3e9-d217-439c-949e-cc70fbd4445e",
-      "name": "Baixar Arquivo da Rota",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1040,
-        -150
-      ],
       "parameters": {
-        "method": "GET",
         "url": "={{ $json.url }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "whatsAppApi",
         "options": {
           "response": {
             "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "data"
+              "responseFormat": "file"
             }
           }
         }
       },
+      "id": "20f1f3e9-d217-439c-949e-cc70fbd4445e",
+      "name": "Baixar Arquivo da Rota",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1040,
+        -144
+      ],
       "disabled": true
     },
     {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "headerRow": true
+        }
+      },
       "id": "938f499d-f347-465e-a0bb-e393710b2a67",
       "name": "Extrair Planilha da Rota",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        1300,
-        -150
-      ],
-      "parameters": {
-        "operation": "xlsx",
-        "binaryPropertyName": "data",
-        "options": {
-          "headerRow": true
-        }
-      }
+        1312,
+        -144
+      ]
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const row = $json;\nconst serial = Number(row.DATA);\nlet dataNormalizada = null;\nif (!isNaN(serial)) {\n  const ms = Date.UTC(1899, 11, 30) + serial * 86400 * 1000;\n  const d = new Date(ms);\n  dataNormalizada = d.toISOString().slice(0, 10);\n}\nlet telefones = [];\nif (row.FONE !== undefined && row.FONE !== null && String(row.FONE).trim().length > 0) {\n  telefones = String(row.FONE).split(',').map((s) => s.trim()).filter((s) => s.length > 0);\n}\nreturn {\n  json: {\n    ...row,\n    data_normalizada: dataNormalizada,\n    telefones: telefones\n  }\n};"
+      },
       "id": "f4e3843a-4650-4f22-9a58-27b9b7876fc0",
       "name": "Normalizar Linhas",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1560,
-        -150
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const row = $json;\nconst serial = Number(row.DATA);\nlet dataNormalizada = null;\nif (!isNaN(serial)) {\n  const ms = Date.UTC(1899, 11, 30) + serial * 86400 * 1000;\n  const d = new Date(ms);\n  dataNormalizada = d.toISOString().slice(0, 10);\n}\nlet telefones = [];\nif (row.FONE !== undefined && row.FONE !== null && String(row.FONE).trim().length > 0) {\n  telefones = String(row.FONE).split(',').map((s) => s.trim()).filter((s) => s.length > 0);\n}\nreturn {\n  json: {\n    ...row,\n    data_normalizada: dataNormalizada,\n    telefones: telefones\n  }\n};"
-      }
+        1568,
+        -144
+      ]
     },
     {
-      "id": "10819b0c-e318-4dd1-91a8-6b536b812b9b",
-      "name": "Upsert Loja",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1820,
-        -250
-      ],
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?on_conflict=codcl",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -482,27 +470,27 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"codcl\": $json.CODCL, \"cnpj\": $json.CNPJ, \"nome\": $json.NOME_CLIENTE, \"endereco\": $json.ENDERECO, \"bairro\": $json.BAIRRO, \"cidade\": $json.CIDADE, \"telefones\": $json.telefones, \"contato\": $json.CONTATO, \"caracteristica\": $json.CARACTERISTICA, \"vendedor_dpk\": $json.VEND } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "10819b0c-e318-4dd1-91a8-6b536b812b9b",
+      "name": "Upsert Loja",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1824,
+        -256
+      ]
     },
     {
-      "id": "eae3144f-032b-422f-bb69-ad664232c6a1",
-      "name": "Precisa Geocodificar?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        2080,
-        -250
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "combinator": "and",
           "conditions": [
@@ -515,25 +503,24 @@
               "rightValue": true
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "eae3144f-032b-422f-bb69-ad664232c6a1",
+      "name": "Precisa Geocodificar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2080,
+        -256
+      ]
     },
     {
-      "id": "ecb646e7-922d-4370-a962-3056c7cc7fbb",
-      "name": "Geocodificar Endereco",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        2340,
-        -400
-      ],
       "parameters": {
-        "method": "GET",
         "url": "<__PLACEHOLDER_VALUE__URL base do servico de geocodificacao (ex.: https://maps.googleapis.com/maps/api/geocode/json)__>",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpQueryAuth",
         "sendQuery": true,
-        "specifyQuery": "keypair",
         "queryParameters": {
           "parameters": [
             {
@@ -541,41 +528,40 @@
               "value": "={{ $json.endereco }}, {{ $json.bairro }}, {{ $json.cidade }}, MG, Brasil"
             }
           ]
-        }
+        },
+        "options": {}
       },
+      "id": "ecb646e7-922d-4370-a962-3056c7cc7fbb",
+      "name": "Geocodificar Endereco",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2352,
+        -400
+      ],
       "onError": "continueRegularOutput"
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const body = $json;\nlet lat = null;\nlet long = null;\ntry {\n  if (body && Array.isArray(body.results) && body.results.length > 0 && body.results[0].geometry && body.results[0].geometry.location) {\n    lat = body.results[0].geometry.location.lat;\n    long = body.results[0].geometry.location.lng;\n  } else if (body && typeof body.lat !== 'undefined' && (typeof body.lon !== 'undefined' || typeof body.lng !== 'undefined')) {\n    lat = body.lat;\n    long = typeof body.lon !== 'undefined' ? body.lon : body.lng;\n  }\n} catch (e) {\n  lat = null;\n  long = null;\n}\nif (typeof lat !== 'number' || typeof long !== 'number' || Number.isNaN(lat) || Number.isNaN(long)) {\n  lat = null;\n  long = null;\n}\nreturn {\n  json: {\n    id: $('Upsert Loja').item.json.id,\n    codcl: $('Upsert Loja').item.json.codcl,\n    lat: lat,\n    long: long\n  }\n};"
+      },
       "id": "fe5e3c6f-1c03-4aa1-bce0-4e2efbe8e052",
       "name": "Interpretar Resultado Geocoding",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2600,
+        2608,
         -400
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const body = $json;\nlet lat = null;\nlet long = null;\ntry {\n  if (body && Array.isArray(body.results) && body.results.length > 0 && body.results[0].geometry && body.results[0].geometry.location) {\n    lat = body.results[0].geometry.location.lat;\n    long = body.results[0].geometry.location.lng;\n  } else if (body && typeof body.lat !== 'undefined' && (typeof body.lon !== 'undefined' || typeof body.lng !== 'undefined')) {\n    lat = body.lat;\n    long = typeof body.lon !== 'undefined' ? body.lon : body.lng;\n  }\n} catch (e) {\n  lat = null;\n  long = null;\n}\nif (typeof lat !== 'number' || typeof long !== 'number' || Number.isNaN(lat) || Number.isNaN(long)) {\n  lat = null;\n  long = null;\n}\nreturn {\n  json: {\n    id: $('Upsert Loja').item.json.id,\n    codcl: $('Upsert Loja').item.json.codcl,\n    lat: lat,\n    long: long\n  }\n};"
-      }
+      ]
     },
     {
-      "id": "0a251c50-2867-41d6-9c2c-47f0e40bea29",
-      "name": "Atualizar Lat Long da Loja",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        2860,
-        -400
-      ],
       "parameters": {
         "method": "PATCH",
         "url": "=https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/lojas?id=eq.{{ $json.id }}",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -593,25 +579,22 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"lat\": $json.lat, \"long\": $json.long } }}",
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
+      "id": "0a251c50-2867-41d6-9c2c-47f0e40bea29",
+      "name": "Atualizar Lat Long da Loja",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2864,
+        -400
+      ],
       "onError": "continueRegularOutput"
     },
     {
-      "id": "2da52c98-fb9e-4cc2-b0b3-de954578169a",
-      "name": "Marcar Geocodificado",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        3120,
-        -400
-      ],
       "parameters": {
-        "mode": "manual",
-        "includeOtherFields": true,
         "assignments": {
           "assignments": [
             {
@@ -639,21 +622,21 @@
               "type": "string"
             }
           ]
-        }
-      }
-    },
-    {
-      "id": "2835d5de-d41d-4105-b6f7-83c6d65d9753",
-      "name": "Marcar Ja Geocodificada",
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2da52c98-fb9e-4cc2-b0b3-de954578169a",
+      "name": "Marcar Geocodificado",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2340,
-        -100
-      ],
+        3120,
+        -400
+      ]
+    },
+    {
       "parameters": {
-        "mode": "manual",
-        "includeOtherFields": true,
         "assignments": {
           "assignments": [
             {
@@ -681,42 +664,43 @@
               "type": "string"
             }
           ]
-        }
-      }
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2835d5de-d41d-4105-b6f7-83c6d65d9753",
+      "name": "Marcar Ja Geocodificada",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2352,
+        -96
+      ]
     },
     {
+      "parameters": {},
       "id": "c9de40f6-a483-45f3-b57d-9011f3012f29",
       "name": "Ignorar (nao e documento)",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        780,
-        150
-      ],
-      "parameters": {}
+        784,
+        160
+      ]
     },
     {
+      "parameters": {},
       "id": "3fa7b54f-2a0d-4934-99c6-2bfb56cad846",
       "name": "Prepare Agenda Item",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        3380,
-        -250
-      ],
-      "parameters": {}
+        3392,
+        -256
+      ]
     },
     {
-      "id": "a0e5bd60-963f-4cd4-91f1-488c8804ee09",
-      "name": "Agregar Flags de Geolocalizacao",
-      "type": "n8n-nodes-base.aggregate",
-      "typeVersion": 1,
-      "position": [
-        3640,
-        -350
-      ],
       "parameters": {
-        "aggregate": "aggregateIndividualFields",
         "fieldsToAggregate": {
           "fieldToAggregate": [
             {
@@ -726,25 +710,25 @@
               "fieldToAggregate": "promo_nao_reconhecido"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "a0e5bd60-963f-4cd4-91f1-488c8804ee09",
+      "name": "Agregar Flags de Geolocalizacao",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3648,
+        -352
+      ]
     },
     {
-      "id": "bd6bc5ff-01f3-487d-826a-c75a0aeedf75",
-      "name": "Resolver Responsavel (RPC)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        3640,
-        -150
-      ],
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/rpc/resolver_usuario_por_nome",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -758,28 +742,26 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"p_nome\": $json.promo } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
-    },
-    {
-      "id": "b2af1c41-12e7-47ee-853f-040ea8dfbf0a",
-      "name": "Inserir Agenda Visita",
+        "options": {}
+      },
+      "id": "bd6bc5ff-01f3-487d-826a-c75a0aeedf75",
+      "name": "Resolver Responsavel (RPC)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3900,
-        -150
-      ],
+        3648,
+        -144
+      ]
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "https://zvqwjtndvbqryonjplal.supabase.co/rest/v1/agenda_visitas",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -797,23 +779,21 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ { \"data\": $('Prepare Agenda Item').item.json.data_visita, \"usuario_id\": $json.usuario_id || null, \"loja_id\": $('Prepare Agenda Item').item.json.loja_id, \"origem\": \"rota\", \"status\": \"pendente\" } }}",
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "b2af1c41-12e7-47ee-853f-040ea8dfbf0a",
+      "name": "Inserir Agenda Visita",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3904,
+        -144
+      ]
     },
     {
-      "id": "3e81bdb4-2063-490b-84b0-4dbae645b2da",
-      "name": "Agregar Linhas da Rota",
-      "type": "n8n-nodes-base.aggregate",
-      "typeVersion": 1,
-      "position": [
-        1820,
-        100
-      ],
       "parameters": {
-        "aggregate": "aggregateIndividualFields",
         "fieldsToAggregate": {
           "fieldToAggregate": [
             {
@@ -823,103 +803,117 @@
               "fieldToAggregate": "data_normalizada"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "3e81bdb4-2063-490b-84b0-4dbae645b2da",
+      "name": "Agregar Linhas da Rota",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        112
+      ]
     },
     {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
       "id": "cb68c32b-2813-4bb7-82cc-c6f1d48d17d3",
       "name": "Combinar Agregados",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3900,
-        100
-      ],
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition"
-      }
+        3904,
+        112
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const item = $json;\nconst promos = item.PROMO || [];\nconst dates = item.data_normalizada || [];\nconst semGeoFlags = item.sem_geo || [];\nconst naoReconhecidosRaw = item.promo_nao_reconhecido || [];\nconst n = promos.length;\nconst distinct = new Set(promos.filter((p) => p !== undefined && p !== null && p !== '')).size;\nconst k = semGeoFlags.filter((f) => f === true).length;\n\n// linhas cujo nome na coluna PROMO nao casou com nenhum usuario que faz visitas:\n// foram importadas como pendentes sem responsavel e precisam ser corrigidas.\nconst naoReconhecidos = naoReconhecidosRaw.filter((p) => p !== undefined && p !== null && String(p).trim() !== '');\nconst nomesUnicos = Array.from(new Set(naoReconhecidos.map((p) => String(p).trim())));\nconst qtdNaoReconhecidas = naoReconhecidos.length;\nconst aviso = qtdNaoReconhecidas > 0\n  ? '\\n\\n' + qtdNaoReconhecidas + ' linha' + (qtdNaoReconhecidas > 1 ? 's' : '') +\n    ' com responsavel nao reconhecido: ' + nomesUnicos.join(', ') +\n    '\\nEssas visitas foram importadas sem responsavel.'\n  : '';\n\nconst isoDate = dates.length > 0 ? dates[0] : null;\nlet dataDisplay = '';\nif (isoDate) {\n  const d = new Date(isoDate + 'T00:00:00Z');\n  const dd = String(d.getUTCDate()).padStart(2, '0');\n  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');\n  const yyyy = d.getUTCFullYear();\n  dataDisplay = dd + '/' + mm + '/' + yyyy;\n}\nreturn {\n  json: {\n    n: n,\n    m: distinct,\n    k: k,\n    qtdNaoReconhecidas: qtdNaoReconhecidas,\n    nomesNaoReconhecidos: nomesUnicos,\n    aviso: aviso,\n    data: dataDisplay\n  }\n};"
+      },
       "id": "799bb6b8-b232-400c-afef-dfd9ed3c9088",
       "name": "Calcular Resumo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         4160,
-        100
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const item = $json;\nconst promos = item.PROMO || [];\nconst dates = item.data_normalizada || [];\nconst semGeoFlags = item.sem_geo || [];\nconst naoReconhecidosRaw = item.promo_nao_reconhecido || [];\nconst n = promos.length;\nconst distinct = new Set(promos.filter((p) => p !== undefined && p !== null && p !== '')).size;\nconst k = semGeoFlags.filter((f) => f === true).length;\n\n// linhas cujo nome na coluna PROMO nao casou com nenhum usuario que faz visitas:\n// foram importadas como pendentes sem responsavel e precisam ser corrigidas.\nconst naoReconhecidos = naoReconhecidosRaw.filter((p) => p !== undefined && p !== null && String(p).trim() !== '');\nconst nomesUnicos = Array.from(new Set(naoReconhecidos.map((p) => String(p).trim())));\nconst qtdNaoReconhecidas = naoReconhecidos.length;\nconst aviso = qtdNaoReconhecidas > 0\n  ? '\\n\\n' + qtdNaoReconhecidas + ' linha' + (qtdNaoReconhecidas > 1 ? 's' : '') +\n    ' com responsavel nao reconhecido: ' + nomesUnicos.join(', ') +\n    '\\nEssas visitas foram importadas sem responsavel.'\n  : '';\n\nconst isoDate = dates.length > 0 ? dates[0] : null;\nlet dataDisplay = '';\nif (isoDate) {\n  const d = new Date(isoDate + 'T00:00:00Z');\n  const dd = String(d.getUTCDate()).padStart(2, '0');\n  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');\n  const yyyy = d.getUTCFullYear();\n  dataDisplay = dd + '/' + mm + '/' + yyyy;\n}\nreturn {\n  json: {\n    n: n,\n    m: distinct,\n    k: k,\n    qtdNaoReconhecidas: qtdNaoReconhecidas,\n    nomesNaoReconhecidos: nomesUnicos,\n    aviso: aviso,\n    data: dataDisplay\n  }\n};"
-      }
+        112
+      ]
     },
     {
+      "parameters": {
+        "content": "## Guard + Deteccao\nVerifica coordenador ativo (0 resultados = encerra silenciosamente) e se a mensagem tem documento anexado.",
+        "height": 350,
+        "width": 820,
+        "color": 4
+      },
       "id": "8b013b8b-f404-4724-a444-48a4528a4103",
       "name": "Sticky Note 1e999c32",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        210,
-        -50
-      ],
-      "parameters": {
-        "content": "## Guard + Deteccao\nVerifica coordenador ativo (0 resultados = encerra silenciosamente) e se a mensagem tem documento anexado.",
-        "color": 4,
-        "width": 820,
-        "height": 350
-      }
+        224,
+        -48
+      ]
     },
     {
+      "parameters": {
+        "content": "## Download e Extracao\nBaixa o xlsx via WhatsApp Media API e converte em itens JSON.",
+        "height": 200,
+        "width": 1080,
+        "color": 5
+      },
       "id": "82d1ddaa-ce95-4b5e-a127-b01cef9a5053",
       "name": "Sticky Note a89866c3",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        730,
-        -200
-      ],
-      "parameters": {
-        "content": "## Download e Extracao\nBaixa o xlsx via WhatsApp Media API e converte em itens JSON.",
-        "color": 5,
-        "width": 1080,
-        "height": 200
-      }
+        736,
+        -208
+      ]
     },
     {
+      "parameters": {
+        "content": "## Upsert Loja + Geocodificacao\nUpsert por codcl. Geocodifica somente lojas sem lat/long. Falha de geocoding nao interrompe o fluxo (onError continueRegularOutput).",
+        "height": 500,
+        "width": 1860,
+        "color": 3
+      },
       "id": "5d43f4a2-14ab-4765-b410-1842e167caec",
       "name": "Sticky Note 8f6721a0",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1770,
-        -450
-      ],
-      "parameters": {
-        "content": "## Upsert Loja + Geocodificacao\nUpsert por codcl. Geocodifica somente lojas sem lat/long. Falha de geocoding nao interrompe o fluxo (onError continueRegularOutput).",
-        "color": 3,
-        "width": 1860,
-        "height": 500
-      }
+        1776,
+        -448
+      ]
     },
     {
+      "parameters": {
+        "content": "## Agenda de Visitas + Resumo\nPopula agenda_visitas por linha e agrega contadores para a mensagem final ao coordenador.",
+        "height": 650,
+        "width": 2900,
+        "color": 6
+      },
       "id": "d5c9b903-fdbc-4a52-b161-0e4e879e4919",
       "name": "Sticky Note 97fc8518",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1770,
+        1776,
         -400
-      ],
-      "parameters": {
-        "content": "## Agenda de Visitas + Resumo\nPopula agenda_visitas por linha e agrega contadores para a mensagem final ao coordenador.",
-        "color": 6,
-        "width": 2900,
-        "height": 650
-      }
+      ]
     },
     {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
       "id": "0ae47114-9c13-49bd-b265-90902fa6f37b",
       "name": "WhatsApp Trigger",
       "type": "n8n-nodes-base.whatsAppTrigger",
@@ -928,63 +922,47 @@
         0,
         0
       ],
-      "parameters": {
-        "updates": [
-          "messages"
-        ]
-      },
       "webhookId": "6d869352-5d62-4c5e-b816-25f8f400756f",
       "disabled": true
     },
     {
-      "id": "7a806626-82f7-4539-981a-23c5f199c398",
-      "name": "Obter URL do Media",
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        780,
-        -150
-      ],
       "parameters": {
         "resource": "media",
         "operation": "mediaUrlGet",
         "mediaGetId": "={{ $('WhatsApp Trigger').item.json.messages[0].document.id }}"
       },
+      "id": "7a806626-82f7-4539-981a-23c5f199c398",
+      "name": "Obter URL do Media",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        -144
+      ],
       "webhookId": "bddefd2d-0d23-466a-bccf-f685cfa00207",
       "disabled": true
     },
     {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__WhatsApp Business Phone Number ID (WABA) do RotaViva__>",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').first().json.messages[0].from }}",
+        "textBody": "=Rota de {{ $json.data }} recebida: {{ $json.n }} visitas para {{ $json.m }} responsaveis. {{ $json.k }} lojas sem geolocalizacao.{{ $json.aviso }}",
+        "additionalFields": {}
+      },
       "id": "09f0e714-75bc-4be9-9516-54357860f779",
       "name": "Responder Coordenador",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        4420,
-        100
+        4432,
+        112
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "phoneNumberId": "<__PLACEHOLDER_VALUE__WhatsApp Business Phone Number ID (WABA) do RotaViva__>",
-        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').first().json.messages[0].from }}",
-        "messageType": "text",
-        "textBody": "=Rota de {{ $json.data }} recebida: {{ $json.n }} visitas para {{ $json.m }} responsaveis. {{ $json.k }} lojas sem geolocalizacao.{{ $json.aviso }}"
-      },
       "webhookId": "c5b7d86c-acf0-464f-bf88-84832ae29e5c",
       "disabled": true
     },
     {
-      "id": "4f41cbd8-1d9f-4273-8e54-bb2db9aed7c0",
-      "name": "Marcar Responsavel",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        3770,
-        20
-      ],
       "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
         "assignments": {
           "assignments": [
             {
@@ -1006,57 +984,55 @@
               "value": "={{ $json.usuario_id ? '' : $('Prepare Agenda Item').item.json.promo }}"
             }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "4f41cbd8-1d9f-4273-8e54-bb2db9aed7c0",
+      "name": "Marcar Responsavel",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3776,
+        32
+      ]
     },
     {
-      "id": "4a74f9c1-d0b8-417b-bf70-28f935893042",
-      "name": "Telegram Trigger (W1)",
-      "type": "n8n-nodes-base.telegramTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        0,
-        600
-      ],
       "parameters": {
         "updates": [
           "message"
         ],
         "additionalFields": {}
       },
+      "id": "4a74f9c1-d0b8-417b-bf70-28f935893042",
+      "name": "Telegram Trigger (W1)",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        608
+      ],
       "webhookId": "0d5cecca-ac62-4d94-809a-8e5fd2991a9c"
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const u = $json;\nconst m = u.message || {};\nconst chatId = String((m.chat && m.chat.id) || (m.from && m.from.id) || '');\nconst doc = m.document || null;\nconst temDocumento = !!(doc && doc.file_id);\nconst documentFileId = doc ? doc.file_id : '';\nconst SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\nconst urlGuard = SUPA + '/usuarios?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&papel=eq.coordenador&ativo=eq.true&select=*';\nreturn { json: { canal: 'telegram', chatId, temDocumento, documentFileId, urlGuard } };"
+      },
       "id": "b6901881-e4e8-4516-b03c-cad269c6fc21",
       "name": "Normalizar Telegram (W1)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        260,
-        600
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const u = $json;\nconst m = u.message || {};\nconst chatId = String((m.chat && m.chat.id) || (m.from && m.from.id) || '');\nconst doc = m.document || null;\nconst temDocumento = !!(doc && doc.file_id);\nconst documentFileId = doc ? doc.file_id : '';\nconst SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\nconst urlGuard = SUPA + '/usuarios?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&papel=eq.coordenador&ativo=eq.true&select=*';\nreturn { json: { canal: 'telegram', chatId, temDocumento, documentFileId, urlGuard } };"
-      }
+        272,
+        608
+      ]
     },
     {
-      "id": "8b1742eb-f51b-43d5-a47e-36431057b0b6",
-      "name": "Guard Coordenador (TG)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        520,
-        600
-      ],
       "parameters": {
-        "method": "GET",
         "url": "={{ $json.urlGuard }}",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -1065,68 +1041,62 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
-      }
+        "options": {}
+      },
+      "id": "8b1742eb-f51b-43d5-a47e-36431057b0b6",
+      "name": "Guard Coordenador (TG)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        528,
+        608
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Normalizar Telegram (W1)').first().json;\n// nao e coordenador ativo, ou nao veio documento -> ignora silenciosamente\nif (!Array.isArray(rows) || rows.length === 0) return [];\nif (!ctx.temDocumento) return [];\nreturn [{ json: { chatId: ctx.chatId, documentFileId: ctx.documentFileId, coordenador_id: rows[0].id, coordenador_nome: rows[0].nome } }];"
+      },
       "id": "bc3e632f-6588-44d1-8490-046870bacee8",
       "name": "Validar Entrada TG (W1)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        780,
-        600
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const items = $input.all();\nconst rows = (items.length ? items[0].json : []) || [];\nconst ctx = $('Normalizar Telegram (W1)').first().json;\n// nao e coordenador ativo, ou nao veio documento -> ignora silenciosamente\nif (!Array.isArray(rows) || rows.length === 0) return [];\nif (!ctx.temDocumento) return [];\nreturn [{ json: { chatId: ctx.chatId, documentFileId: ctx.documentFileId, coordenador_id: rows[0].id, coordenador_nome: rows[0].nome } }];"
-      }
+        784,
+        608
+      ]
     },
     {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.documentFileId }}",
+        "additionalFields": {}
+      },
       "id": "b20346a0-3be4-4f57-acc0-8f9c4d5071c2",
       "name": "Baixar Doc (TG)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
         1040,
-        600
+        608
       ],
-      "parameters": {
-        "resource": "file",
-        "operation": "get",
-        "fileId": "={{ $json.documentFileId }}",
-        "download": true,
-        "additionalFields": {}
-      },
       "webhookId": "90b722e1-a537-40c6-ad51-f2457395c231"
     },
     {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nconst chatId = $('Normalizar Telegram (W1)').first().json.chatId;\nconst texto = 'Rota de ' + j.data + ' recebida: ' + j.n + ' visitas para ' + j.m + ' responsaveis. ' + j.k + ' lojas sem geolocalizacao.' + (j.aviso || '');\nreturn { json: { identidade: 'tg:' + chatId, tipo: 'texto_livre', variaveis: { texto: texto } } };"
+      },
       "id": "81f3c4ef-effa-4041-9f00-ab5030b61f9b",
       "name": "Montar Confirmacao (W0)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4420,
-        260
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "const j = $json;\nconst chatId = $('Normalizar Telegram (W1)').first().json.chatId;\nconst texto = 'Rota de ' + j.data + ' recebida: ' + j.n + ' visitas para ' + j.m + ' responsaveis. ' + j.k + ' lojas sem geolocalizacao.' + (j.aviso || '');\nreturn { json: { identidade: 'tg:' + chatId, tipo: 'texto_livre', variaveis: { texto: texto } } };"
-      }
+        4432,
+        272
+      ]
     },
     {
-      "id": "f8e8fb96-438e-4d61-bd26-7bf5f0cae91d",
-      "name": "Chamar W0 (Confirmacao)",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        4680,
-        260
-      ],
       "parameters": {
-        "source": "database",
         "workflowId": {
           "__rl": true,
           "mode": "id",
@@ -1137,7 +1107,15 @@
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "id": "f8e8fb96-438e-4d61-bd26-7bf5f0cae91d",
+      "name": "Chamar W0 (Confirmacao)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4688,
+        272
+      ]
     }
   ]
 }

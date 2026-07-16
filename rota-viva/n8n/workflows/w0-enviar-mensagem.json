@@ -7,7 +7,8 @@
   "description": "Roteador de envio (D-10): recebe contrato via Execute Workflow, resolve usuário/canal e envia por Telegram (padrão) ou WhatsApp (dormente). WhatsApp gated por config.whatsapp_habilitado.",
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "connections": {
     "Chamada (Execute Workflow)": {
@@ -111,6 +112,9 @@
   },
   "nodes": [
     {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
       "id": "5bb2b12e-ca60-4e99-8b93-624dec2d68df",
       "name": "Chamada (Execute Workflow)",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
@@ -118,12 +122,12 @@
       "position": [
         0,
         192
-      ],
-      "parameters": {
-        "inputSource": "passthrough"
-      }
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const input = $input.first() ? $input.first().json : {};\nconst usuario_id = input.usuario_id || null;\nconst identidade = input.identidade || null;\nconst tipo = input.tipo || 'texto_livre';\nconst variaveis = input.variaveis || {};\nconst botoes = Array.isArray(input.botoes) ? input.botoes : [];\nconst SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\nconst select = 'select=id,nome,telefone,canal,telegram_chat_id';\nlet urlUsuario;\nif (usuario_id) {\n  urlUsuario = SUPA + '/usuarios?id=eq.' + encodeURIComponent(usuario_id) + '&' + select;\n} else if (identidade) {\n  const idx = identidade.indexOf(':');\n  const prefixo = idx >= 0 ? identidade.slice(0, idx) : '';\n  const resto = idx >= 0 ? identidade.slice(idx + 1) : identidade;\n  if (prefixo === 'tg') urlUsuario = SUPA + '/usuarios?telegram_chat_id=eq.' + encodeURIComponent(resto) + '&' + select;\n  else urlUsuario = SUPA + '/usuarios?telefone=eq.' + encodeURIComponent(resto) + '&' + select;\n} else {\n  urlUsuario = SUPA + '/usuarios?id=eq.00000000-0000-0000-0000-000000000000&' + select;\n}\nreturn [{ json: { usuario_id, identidade, tipo, variaveis, botoes, urlUsuario, urlConfigWpp: SUPA + '/config?chave=eq.whatsapp_habilitado&select=valor' } }];"
+      },
       "id": "7253ee86-bde3-40db-b463-f7abb4bbdd0d",
       "name": "Preparar Contexto",
       "type": "n8n-nodes-base.code",
@@ -131,29 +135,14 @@
       "position": [
         224,
         192
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const input = $input.first() ? $input.first().json : {};\nconst usuario_id = input.usuario_id || null;\nconst identidade = input.identidade || null;\nconst tipo = input.tipo || 'texto_livre';\nconst variaveis = input.variaveis || {};\nconst botoes = Array.isArray(input.botoes) ? input.botoes : [];\nconst SUPA = 'https://zvqwjtndvbqryonjplal.supabase.co/rest/v1';\nconst select = 'select=id,nome,telefone,canal,telegram_chat_id';\nlet urlUsuario;\nif (usuario_id) {\n  urlUsuario = SUPA + '/usuarios?id=eq.' + encodeURIComponent(usuario_id) + '&' + select;\n} else if (identidade) {\n  const idx = identidade.indexOf(':');\n  const prefixo = idx >= 0 ? identidade.slice(0, idx) : '';\n  const resto = idx >= 0 ? identidade.slice(idx + 1) : identidade;\n  if (prefixo === 'tg') urlUsuario = SUPA + '/usuarios?telegram_chat_id=eq.' + encodeURIComponent(resto) + '&' + select;\n  else urlUsuario = SUPA + '/usuarios?telefone=eq.' + encodeURIComponent(resto) + '&' + select;\n} else {\n  urlUsuario = SUPA + '/usuarios?id=eq.00000000-0000-0000-0000-000000000000&' + select;\n}\nreturn [{ json: { usuario_id, identidade, tipo, variaveis, botoes, urlUsuario, urlConfigWpp: SUPA + '/config?chave=eq.whatsapp_habilitado&select=valor' } }];"
-      }
+      ]
     },
     {
-      "id": "b91ddf65-36b3-4afb-80a6-0679620791d8",
-      "name": "Buscar Usuário",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        448,
-        192
-      ],
       "parameters": {
-        "method": "GET",
         "url": "={{ $json.urlUsuario }}",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -162,11 +151,22 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
+      "id": "b91ddf65-36b3-4afb-80a6-0679620791d8",
+      "name": "Buscar Usuário",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        192
+      ],
       "alwaysOutputData": true
     },
     {
+      "parameters": {
+        "jsCode": "const ctx = $('Preparar Contexto').first().json;\nconst users = $input.all().map(i => i.json).filter(u => u && u.id);\nconst tipo = ctx.tipo;\nconst v = ctx.variaveis || {};\nconst botoes = ctx.botoes || [];\nfunction e(s){ return (s === null || s === undefined) ? '' : String(s); }\nif (users.length === 0) {\n  return [{ json: { ok:false, erro:'usuario_nao_encontrado', canal:'nenhum', tipo } }];\n}\nconst u = users[0];\nlet text = '';\nlet wtpl = '';\nlet wparams = [];\nif (tipo === 'rota_diaria') {\n  text = 'Bom dia, ' + e(v.nome || u.nome) + '! Sua rota de ' + e(v.data) + ' tem ' + e(v.qtd_visitas) + ' visita(s):\\n' + e(v.lista_visitas) + '\\nRetornos agendados para hoje: ' + e(v.lista_retornos);\n  wtpl = 'rota_diaria'; wparams = [e(v.nome || u.nome), e(v.data), e(v.qtd_visitas), e(v.lista_visitas), e(v.lista_retornos)];\n} else if (tipo === 'lembrete_retorno') {\n  text = 'Olá, ' + e(v.nome || u.nome) + '! Você tem um retorno agendado hoje na loja ' + e(v.loja) + ' (' + e(v.bairro) + '). Contato: ' + e(v.contato) + '.';\n  wtpl = 'lembrete_retorno'; wparams = [e(v.nome || u.nome), e(v.loja), e(v.bairro), e(v.contato)];\n} else if (tipo === 'relatorio_diario') {\n  text = 'Relatório Rota Viva — ' + e(v.data) + '\\nVisitas: ' + e(v.realizadas) + '/' + e(v.planejadas) + ' planejadas (' + e(v.pct_meta) + '% da meta)\\nAcumulado mês: ' + e(v.acumulado_mes) + '/280\\nCheck-ins suspeitos: ' + e(v.checkins_suspeitos) + '\\nOportunidades novas: ' + e(v.oportunidades_novas) + '\\nContratos parados além do SLA: ' + e(v.contratos_sla);\n  wtpl = 'relatorio_diario_gerente'; wparams = [e(v.data), e(v.realizadas), e(v.planejadas), e(v.pct_meta), e(v.acumulado_mes), e(v.checkins_suspeitos), e(v.oportunidades_novas), e(v.contratos_sla)];\n} else if (tipo === 'alerta_rota_vazia') {\n  text = 'Atenção, ' + e(v.coordenador || u.nome) + ': a rota de ' + e(v.data) + ' está vazia para ' + e(v.usuario_sem_rota) + '. Verifique se a planilha foi enviada corretamente.';\n  wtpl = 'alerta_rota_vazia'; wparams = [e(v.coordenador || u.nome), e(v.data), e(v.usuario_sem_rota)];\n} else if (tipo === 'alerta_checkin_suspeito') {\n  text = 'Alerta: check-in de ' + e(v.usuario) + ' na loja ' + e(v.loja) + ' foi registrado a ' + e(v.distancia) + 'm de distância (acima do limite de ' + e(v.raio) + 'm). Verifique.';\n  wtpl = 'checkin_suspeito'; wparams = [e(v.usuario), e(v.loja), e(v.distancia), e(v.raio)];\n} else {\n  text = e(v.texto);\n  wtpl = ''; wparams = [];\n}\nconst temBotoes = botoes.length > 0;\nlet inlineKeyboard = {};\nif (temBotoes) {\n  inlineKeyboard = { rows: botoes.map(b => ({ row: { buttons: [ { text: e(b.rotulo), additionalFields: { callback_data: e(b.id) } } ] } })) };\n}\nconst wa_params = wparams.map(t => ({ type: 'text', text: t }));\nreturn [{ json: { ok:true, canal: u.canal || 'telegram', chatId: e(u.telegram_chat_id), telefone: e(u.telefone), nome: u.nome, tipo, text, temBotoes, inlineKeyboard, wa_template: wtpl, wa_params } }];"
+      },
       "id": "877096a7-0b8c-4aec-a309-4312637dcd42",
       "name": "Montar Mensagem",
       "type": "n8n-nodes-base.code",
@@ -174,33 +174,19 @@
       "position": [
         672,
         192
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const ctx = $('Preparar Contexto').first().json;\nconst users = $input.all().map(i => i.json).filter(u => u && u.id);\nconst tipo = ctx.tipo;\nconst v = ctx.variaveis || {};\nconst botoes = ctx.botoes || [];\nfunction e(s){ return (s === null || s === undefined) ? '' : String(s); }\nif (users.length === 0) {\n  return [{ json: { ok:false, erro:'usuario_nao_encontrado', canal:'nenhum', tipo } }];\n}\nconst u = users[0];\nlet text = '';\nlet wtpl = '';\nlet wparams = [];\nif (tipo === 'rota_diaria') {\n  text = 'Bom dia, ' + e(v.nome || u.nome) + '! Sua rota de ' + e(v.data) + ' tem ' + e(v.qtd_visitas) + ' visita(s):\\n' + e(v.lista_visitas) + '\\nRetornos agendados para hoje: ' + e(v.lista_retornos);\n  wtpl = 'rota_diaria'; wparams = [e(v.nome || u.nome), e(v.data), e(v.qtd_visitas), e(v.lista_visitas), e(v.lista_retornos)];\n} else if (tipo === 'lembrete_retorno') {\n  text = 'Olá, ' + e(v.nome || u.nome) + '! Você tem um retorno agendado hoje na loja ' + e(v.loja) + ' (' + e(v.bairro) + '). Contato: ' + e(v.contato) + '.';\n  wtpl = 'lembrete_retorno'; wparams = [e(v.nome || u.nome), e(v.loja), e(v.bairro), e(v.contato)];\n} else if (tipo === 'relatorio_diario') {\n  text = 'Relatório Rota Viva — ' + e(v.data) + '\\nVisitas: ' + e(v.realizadas) + '/' + e(v.planejadas) + ' planejadas (' + e(v.pct_meta) + '% da meta)\\nAcumulado mês: ' + e(v.acumulado_mes) + '/280\\nCheck-ins suspeitos: ' + e(v.checkins_suspeitos) + '\\nOportunidades novas: ' + e(v.oportunidades_novas) + '\\nContratos parados além do SLA: ' + e(v.contratos_sla);\n  wtpl = 'relatorio_diario_gerente'; wparams = [e(v.data), e(v.realizadas), e(v.planejadas), e(v.pct_meta), e(v.acumulado_mes), e(v.checkins_suspeitos), e(v.oportunidades_novas), e(v.contratos_sla)];\n} else if (tipo === 'alerta_rota_vazia') {\n  text = 'Atenção, ' + e(v.coordenador || u.nome) + ': a rota de ' + e(v.data) + ' está vazia para ' + e(v.usuario_sem_rota) + '. Verifique se a planilha foi enviada corretamente.';\n  wtpl = 'alerta_rota_vazia'; wparams = [e(v.coordenador || u.nome), e(v.data), e(v.usuario_sem_rota)];\n} else if (tipo === 'alerta_checkin_suspeito') {\n  text = 'Alerta: check-in de ' + e(v.usuario) + ' na loja ' + e(v.loja) + ' foi registrado a ' + e(v.distancia) + 'm de distância (acima do limite de ' + e(v.raio) + 'm). Verifique.';\n  wtpl = 'checkin_suspeito'; wparams = [e(v.usuario), e(v.loja), e(v.distancia), e(v.raio)];\n} else {\n  text = e(v.texto);\n  wtpl = ''; wparams = [];\n}\nconst temBotoes = botoes.length > 0;\nlet inlineKeyboard = {};\nif (temBotoes) {\n  inlineKeyboard = { rows: botoes.map(b => ({ row: { buttons: [ { text: e(b.rotulo), additionalFields: { callback_data: e(b.id) } } ] } })) };\n}\nconst wa_params = wparams.map(t => ({ type: 'text', text: t }));\nreturn [{ json: { ok:true, canal: u.canal || 'telegram', chatId: e(u.telegram_chat_id), telefone: e(u.telefone), nome: u.nome, tipo, text, temBotoes, inlineKeyboard, wa_template: wtpl, wa_params } }];"
-      }
+      ]
     },
     {
-      "id": "594dd72d-5fb6-409a-91f8-7f16f733db05",
-      "name": "Rotear por Canal",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        896,
-        176
-      ],
       "parameters": {
         "rules": {
           "values": [
             {
-              "renameOutput": true,
-              "outputKey": "telegram",
               "conditions": {
                 "options": {
                   "caseSensitive": false,
                   "leftValue": "",
-                  "typeValidation": "loose"
+                  "typeValidation": "loose",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -213,16 +199,17 @@
                   }
                 ],
                 "combinator": "and"
-              }
+              },
+              "renameOutput": true,
+              "outputKey": "telegram"
             },
             {
-              "renameOutput": true,
-              "outputKey": "whatsapp",
               "conditions": {
                 "options": {
                   "caseSensitive": false,
                   "leftValue": "",
-                  "typeValidation": "loose"
+                  "typeValidation": "loose",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -235,7 +222,9 @@
                   }
                 ],
                 "combinator": "and"
-              }
+              },
+              "renameOutput": true,
+              "outputKey": "whatsapp"
             }
           ]
         },
@@ -243,9 +232,28 @@
           "fallbackOutput": "extra",
           "renameFallbackOutput": "Sem Canal / Erro"
         }
-      }
+      },
+      "id": "594dd72d-5fb6-409a-91f8-7f16f733db05",
+      "name": "Rotear por Canal",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        176
+      ]
     },
     {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "replyMarkup": "={{ $json.temBotoes ? 'inlineKeyboard' : 'none' }}",
+        "forceReply": {},
+        "replyKeyboardOptions": {},
+        "replyKeyboardRemove": {},
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
       "id": "61af3ee7-4554-4193-8ee1-56685bde1f12",
       "name": "Enviar Telegram",
       "type": "n8n-nodes-base.telegram",
@@ -254,36 +262,15 @@
         1120,
         0
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
-        "chatId": "={{ $json.chatId }}",
-        "text": "={{ $json.text }}",
-        "replyMarkup": "={{ $json.temBotoes ? 'inlineKeyboard' : 'none' }}",
-        "inlineKeyboard": "={{ $json.inlineKeyboard }}",
-        "additionalFields": {
-          "appendAttribution": false
-        }
-      },
-      "notes": "B-01: unico telegramApi na conta e o da ARMCOM. Trocar para CRED_TELEGRAM_BOT real do Rota Viva antes do go-live.",
-      "webhookId": "f96e0b5e-d277-442c-9c72-152aafb30acc"
+      "webhookId": "f96e0b5e-d277-442c-9c72-152aafb30acc",
+      "notes": "B-01: unico telegramApi na conta e o da ARMCOM. Trocar para CRED_TELEGRAM_BOT real do Rota Viva antes do go-live."
     },
     {
-      "id": "2f9ff127-b7c5-42c7-bb58-a5984b4d2a90",
-      "name": "Buscar Flag WhatsApp",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1120,
-        192
-      ],
       "parameters": {
-        "method": "GET",
         "url": "={{ $('Preparar Contexto').first().json.urlConfigWpp }}",
-        "authentication": "predefinedCredentialType",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpCustomAuth",
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
         "headerParameters": {
           "parameters": [
             {
@@ -292,25 +279,26 @@
             }
           ]
         },
-        "nodeCredentialType": "supabaseApi"
+        "options": {}
       },
+      "id": "2f9ff127-b7c5-42c7-bb58-a5984b4d2a90",
+      "name": "Buscar Flag WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        192
+      ],
       "alwaysOutputData": true
     },
     {
-      "id": "f75f8d4a-761e-4652-9e1f-495a31fa113c",
-      "name": "WhatsApp Habilitado?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        1344,
-        192
-      ],
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "loose",
+            "version": 1
           },
           "conditions": [
             {
@@ -323,10 +311,84 @@
             }
           ],
           "combinator": "and"
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "f75f8d4a-761e-4652-9e1f-495a31fa113c",
+      "name": "WhatsApp Habilitado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        192
+      ]
     },
     {
+      "parameters": {
+        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do número de telefone do WhatsApp Business (Meta Cloud API)__>",
+        "recipientPhoneNumber": "={{ $('Montar Mensagem').first().json.telefone }}",
+        "template": "={{ $('Montar Mensagem').first().json.wa_template }}",
+        "components": {
+          "component": [
+            {
+              "bodyParameters": {
+                "parameter": [
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {},
+                  {}
+                ]
+              }
+            }
+          ]
+        }
+      },
       "id": "99c3225b-1088-4739-b32d-2a81c0c4b739",
       "name": "Enviar WhatsApp (dormente)",
       "type": "n8n-nodes-base.whatsApp",
@@ -335,27 +397,15 @@
         1568,
         96
       ],
-      "parameters": {
-        "resource": "message",
-        "operation": "sendTemplate",
-        "phoneNumberId": "<__PLACEHOLDER_VALUE__ID do número de telefone do WhatsApp Business (Meta Cloud API)__>",
-        "recipientPhoneNumber": "={{ $('Montar Mensagem').first().json.telefone }}",
-        "template": "={{ $('Montar Mensagem').first().json.wa_template }}",
-        "components": {
-          "component": [
-            {
-              "type": "body",
-              "bodyParameters": {
-                "parameter": "={{ $('Montar Mensagem').first().json.wa_params }}"
-              }
-            }
-          ]
-        }
-      },
-      "notes": "Canal WhatsApp DORMENTE (D-10). So executa se config.whatsapp_habilitado=true. B-01: trocar credencial para a CRED_META_CLOUD real do Rota Viva antes de qualquer ativacao.",
-      "webhookId": "b1092456-ac32-4cb4-922b-7aa5bdb4c410"
+      "webhookId": "b1092456-ac32-4cb4-922b-7aa5bdb4c410",
+      "notes": "Canal WhatsApp DORMENTE (D-10). So executa se config.whatsapp_habilitado=true. B-01: trocar credencial para a CRED_META_CLOUD real do Rota Viva antes de qualquer ativacao."
     },
     {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ { \"ok\": true, \"canal\": \"whatsapp\", \"enviado\": false, \"motivo\": \"whatsapp_habilitado=false\" } }}",
+        "options": {}
+      },
       "id": "973458c7-28c3-4743-afa4-0476cdb5d485",
       "name": "WhatsApp Desabilitado",
       "type": "n8n-nodes-base.set",
@@ -363,13 +413,14 @@
       "position": [
         1568,
         288
-      ],
-      "parameters": {
-        "mode": "raw",
-        "jsonOutput": "={{ { \"ok\": true, \"canal\": \"whatsapp\", \"enviado\": false, \"motivo\": \"whatsapp_habilitado=false\" } }}"
-      }
+      ]
     },
     {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ { \"ok\": false, \"erro\": ($json.erro || \"canal_desconhecido\"), \"canal\": $json.canal } }}",
+        "options": {}
+      },
       "id": "6fb97b2c-bc00-4639-8cb6-d262b1d67167",
       "name": "Registrar Sem Canal / Erro",
       "type": "n8n-nodes-base.set",
@@ -377,11 +428,7 @@
       "position": [
         1120,
         384
-      ],
-      "parameters": {
-        "mode": "raw",
-        "jsonOutput": "={{ { \"ok\": false, \"erro\": ($json.erro || \"canal_desconhecido\"), \"canal\": $json.canal } }}"
-      }
+      ]
     }
   ]
 }
