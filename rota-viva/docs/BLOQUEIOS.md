@@ -402,3 +402,107 @@ expired, or the account password or permissions changed.
 **Ação humana necessária:** abrir a credencial `ROTA-VIVA - Google Sheets` (e `- Google Drive`) no
 n8n e concluir o fluxo OAuth ("Connect my account"). Depois: re-executar o Motor Sheets API (aba
 Agenda + colunas da Config), testar W5/W7 e fazer o G2.
+
+### ⚠️ Adendo (23 Jul 2026) — B-10 CONTINUA ABERTO após tentativa de reconexão
+
+O PROMPT 1.1 partiu da premissa "B-10 RESOLVIDO: OAuth reconectado". **Não se confirmou no servidor.**
+Três tentativas independentes, todas com o mesmo erro
+`The credential "ROTA-VIVA - Google Sheets" needs to be reconnected`:
+
+| Tentativa | Como | Execução | Resultado |
+|---|---|---|---|
+| 1 | HTTP `predefinedCredentialType` (Motor Sheets API) | `4827` (22/07) | falhou |
+| 2 | idem, após "reconexão" | `4866` | falhou |
+| 3 | **node nativo Google Sheets** (`Ler Aba Config`, W7) | `4867` | falhou |
+
+A tentativa 3 é decisiva: o erro **não** é do node HTTP — o node nativo falha igual, logo o token da
+credencial é que está inválido. Também foi descartada a hipótese de credencial nova: `list_credentials`
+mostra apenas `ROTA-VIVA - Google Sheets` (`V8yK9tJ9nbUTis15`) e `ROTA-VIVA - Google Drive`
+(`xaChmTzpezR036yv`) — nenhuma credencial Google criada depois.
+
+**Continuam bloqueados (inalterados):** aba **Agenda** (o Motor já está com o `batchUpdate` pronto —
+addSheet `sheetId:771122` + cabeçalho — basta re-executar), colunas `status_sync`/`observacao_sync` na
+aba ⚙ Config, teste do W5 (sync de agenda), teste do W7 e o **G2** (linha de teste da aba Visitas +
+célula órfã de e-mails da Config).
+
+**Ao reconectar, confirmar de fato:** executar o `[RotaViva] Motor Sheets API (manual)` e verificar que
+a execução termina `success` (não basta a UI dizer "connected"). O Motor foi tornado genérico nesta
+sessão: o Code node monta `{ body: {...} }` e o HTTP envia `={{ $json.body }}`, então ele aceita
+qualquer payload do `spreadsheets:batchUpdate` (inclusive `includeSpreadsheetInResponse` /
+`responseIncludeGridData` para ler metadata e grid).
+
+---
+
+## B-11 — Convergência dupla por node desabilitado (mesma classe do 3040) — 23 Jul 2026
+
+**✅ RESOLVIDO.** Node desabilitado no n8n é **pass-through**: repassa o item adiante. Quando um node
+dormente e seu equivalente Telegram ativo apontam para o **mesmo destino**, o destino executa **duas
+vezes**. Foi a causa-raiz do 3040 (`Criar Visita`) e reapareceu no ramo de alerta:
+
+`Mapear Destinatarios Alerta` → `Enviar Alerta Checkin (TG)` (ativo) **e** `Enviar Template Checkin
+Suspeito` (DESABILITADO) → ambos → `Consolidar Alerta Destinatarios`.
+
+**Efeito:** em todo check-in fora do raio, `Consolidar Alerta Destinatarios` rodava 2x e o promotor
+recebia **duas** mensagens "envie a foto da fachada".
+
+**Correção:** removida a conexão de saída do node dormente (`Enviar Template Checkin Suspeito` →
+`Consolidar`). O node permanece no canvas, desabilitado, com a conexão de **entrada** preservada (não
+vira órfão, então a ferramenta de update parcial continua salvando).
+
+**Auditoria completa do W2 (23/07):** mapeados **todos os 8 pontos de convergência** (nodes que recebem
+`main` de 2+ origens). Após a correção, **todos verdes** — nenhum ponto mistura origem desabilitada com
+origem ativa. Verificado também que nenhum outro node desabilitado tem aresta de saída (todos os pares
+"(TG) ativo + WhatsApp dormente" terminam em nodes-folha).
+
+**Verificação:** execução `4864` — check-in a 990 m (raio 200 m) → `flagSuspeito=true`,
+`Consolidar Alerta Destinatarios` com **1 execução**, `Pedir Foto Fachada (TG)` com **1 execução /
+1 item**.
+
+**Regra que fica:** ao desabilitar um node, conferir se ele tem aresta de **saída** que reconverge com
+um caminho ativo. Se tiver, remover a aresta de saída (não basta desabilitar).
+
+---
+
+## B-09 — Adendo (23 Jul 2026): mais duas ocorrências corrigidas; comando maquininha resolvido
+
+**`Mapear Destinatarios Alerta`** tinha o mesmo padrão quebrado
+(`const rows = items[0].json; ... rows.filter(...)`), o que fazia `rows.filter is not a function` e
+**matava todo o ramo de alerta de check-in suspeito**. Corrigido para `$input.all().map(i => i.json)`.
+Descoberto ao testar a correção B-11 (execução `4863` falhou com esse erro).
+
+**Comando `maquininha <codcl> ativada` — ✅ RESOLVIDO** (era o item explicitamente pendente do B-09).
+O caminho não tinha **nenhuma busca HTTP** antes dos code nodes — eles liam um array que nunca chegava.
+Construída a cadeia espelhando o caminho irmão "contrato assinado":
+
+```
+Rotear Comando (saída 1) → Buscar Loja por Codcl (Maquininha) → Extrair Loja Maquininha
+  → Buscar Contrato Atual (Maquininha) → Extrair Contrato Maquininha → Atualizar Contrato Ativo
+```
+
+Os dois code nodes também tiveram o padrão `Array.isArray` corrigido.
+
+**Verificação (execução `4865`, end-to-end real contra o Supabase):** `maquininha TESTE001 ativada` →
+contrato de teste passou de `assinatura_diretoria` para `etapa='ativo'`, com
+`data_ativacao=2026-07-23` e `vigencia_inicio=2026-08-01` (regra de `top_service` = 1º dia do mês
+seguinte, D-03). Dado de teste purgado depois.
+
+**Bug latente encontrado no caminho irmão:** `Buscar Contrato Atual (Assinatura)` ordenava por
+`order=criado_em.desc`, mas `rotaviva.contratos` **não tem** a coluna `criado_em` (só `atualizado_em`
+e `etapa_desde`) — o PostgREST devolveria **400** e o comando `contrato <codcl> assinado` estaria
+quebrado. Corrigido para `order=atualizado_em.desc`.
+
+---
+
+## B-12 — `Transcrever Audio` desabilitado entre dois nodes ativos (observação por áudio degradada)
+
+**ABERTO — precisa de decisão.** No W2: `Baixar Audio (Telegram)` (ativo) → `Transcrever Audio`
+(**desabilitado**) → `Estruturar Observacao` (ativo). Como node desabilitado é pass-through, o **binário
+do áudio chega ao LLM sem transcrição** — a observação por áudio não é transcrita de verdade.
+
+Não é convergência (por isso não entrou no B-11), mas é a mesma família: comportamento silenciosamente
+errado por causa de um node desabilitado no meio de um caminho ativo.
+
+**Decisão pendente:** (a) reativar `Transcrever Audio` (node OpenAI — exige credencial OpenAI, que não
+existe hoje na conta); (b) trocar por transcrição via outro provedor; ou (c) assumir que a observação
+por áudio fica sem transcrição no piloto e ajustar o texto ao usuário. Não alterado nesta sessão por
+depender dessa escolha.
