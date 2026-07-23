@@ -151,3 +151,96 @@ custo — **decisão consciente do cliente, aceitável no piloto**. Reavaliaçã
 adiada caso o projeto vire produto multi-tenant. B-04 fica **resolvido por mudança de arquitetura**
 (não foi preciso liberar `exceljs` no servidor). Proibido, daqui em diante, node Microsoft Excel/OneDrive
 e Code node com libs externas de planilha em qualquer ponto do projeto.
+
+## D-14 — Foto do check-in não é mais armazenada; é encaminhada ao coordenador em tempo real
+
+**Contexto:** o desenho original (W2) baixava a foto da fachada enviada no check-in e subia pro
+Supabase Storage (`rotaviva-fotos/{agenda_id}.jpg`), gravando o caminho em `visitas.foto_url` —
+pensado como evidência auditável depois. No teste piloto (17 Jul 2026), o Guilherme pediu pra trocar
+isso por um encaminhamento direto da foto pro coordenador via Telegram, sem salvar em lugar nenhum.
+
+**Decisão:**
+
+1. O node `Buscar Coordenador Notificacao` busca o primeiro usuário `papel=coordenador`, `ativo=true`
+   e com `telegram_chat_id` preenchido; `Montar Legenda Foto` monta a legenda ("Chegada registrada:
+   `<nome>` · Loja: `<nome da loja>` · localização conferida/não conferida", sem coordenadas); `Enviar
+   Foto Coordenador` reenvia a foto **por `file_id` do Telegram** (não baixa nem re-hospeda o binário
+   — o Telegram permite reenviar um arquivo já recebido por outro chat direto pelo id).
+2. `visitas.foto_url` deixa de ser preenchido (fica `null`). O registro de `visitas` continua sendo
+   criado normalmente (check-in, distância, `flag_suspeito`, etc.) — só a foto em si não é mais
+   persistida em nenhum storage do projeto.
+3. Os nodes antigos (`Baixar Foto (Telegram)`, `Upload Foto Storage`, `Preparar Contexto Apos Upload`)
+   foram **desativados, não apagados** — ficam no canvas como registro de como funcionava antes,
+   mesmo padrão usado para os nodes WhatsApp dormentes (D-10).
+4. Destinatário no piloto: só o(s) usuário(s) com `papel=coordenador` — sem escalonamento pro gerente
+   (diferente da regra do check-in suspeito, D-06). Hoje isso aponta pro registro de teste `Guilherme
+   Almada (teste)`, já que nem Anderson (coordenador real) nem Jansen (gerente) têm `telegram_chat_id`
+   vinculado ainda.
+
+**Consequência — risco aceito conscientemente:** a foto deixa de ser uma evidência **consultável
+depois**. Sem storage, não existe mais como abrir a visita de uma data passada e ver a foto de novo —
+ela só existe no histórico do chat do Telegram de quem recebeu, sujeita a limpeza de conversa, saída
+do bot do grupo, ou simplesmente ninguém rolar pra trás. Se no futuro precisar de auditoria
+retroativa (disputa com loja, conferência de visita antiga), essa decisão precisa ser revisitada —
+reintroduzir o storage é reversível (os nodes desativados continuam no canvas, só reconectar e
+reativar).
+
+## D-15 — Mapa de promotores da rota via planilha, com validação
+
+**Contexto:** o W1 importa a rota a partir da planilha enviada pelo coordenador; a coluna PROMO traz nomes livres.
+**Decisão:** o casamento nome→usuário é feito por `rotaviva.resolver_usuario_por_nome()` (case-insensitive, sem acento). Nome não reconhecido **não descarta a linha** — a visita é importada pendente e sem responsável, e os nomes não reconhecidos são listados na confirmação ao coordenador.
+**Consequência:** `agenda_visitas.usuario_id` pode ser legitimamente nulo. Implementação detalhada no Prompt 2 (reforma do W1).
+
+## D-17 — Calendário operacional é segunda a sexta
+
+**Contexto:** a operação de campo não roda aos sábados no piloto.
+**Decisão:** todos os crons de W3 (rota diária), W4 (relatório) e W6 (lembrete de retorno) usam `1-5` (seg–sex).
+**Consequência (aplicado neste prompt):** W3 `0 30 7 * * 1-6`→`0 30 7 * * 1-5`; W4 `0 0 18 * * 1-6`→`0 0 18 * * 1-5`; W6 `0 0 8 * * *`→`0 0 8 * * 1-5`.
+
+## D-18 — Importar apenas datas ≥ hoje; reimportação substitui a janela por promotor+período
+
+**Contexto:** o coordenador reenvia a planilha de rota; não se deve duplicar nem sobrescrever histórico passado.
+**Decisão:** o W1 importa somente linhas com data ≥ hoje; uma reimportação substitui a janela (promotor + período) em vez de acumular.
+**Consequência:** implementação no Prompt 2 (reforma do W1). Registrado agora como enunciado vinculante.
+
+## D-19 — Estado de conversa expira em 4 horas
+
+**Contexto:** um estado de conversa preso (ex.: `aguardando_foto` de horas atrás) roteava mensagens novas para o ramo errado.
+**Decisão:** estado com `atualizado_em` anterior a agora−4h é descartado (tratado como `ocioso`) e a linha em `estado_conversa` é apagada; o fluxo recomeça limpo.
+**Consequência (aplicado neste prompt):** no W2, entre `Buscar Estado Conversa` e `Normalizar Estado`, um IF `Estado Expirado?` roteia estados expirados para um DELETE (`Expirar Estado Conversa`) antes de normalizar como ocioso. Validado na execução de teste 4826.
+
+## D-20 — Interatividade por botões nos campos fechados
+
+**Decisão:** onde a resposta do campo é de domínio fechado (produto, fechou/analisar, motivo, contraproposta, data de retorno), o bot usa botões/listas do Telegram em vez de texto livre.
+**Consequência:** já refletido no Motor de Checkout do W2. Registrado como enunciado.
+
+## D-21 — W5 permanece manual durante a homologação
+
+**Decisão:** o W5 (Sync to Sheets) não é ativado na homologação; roda por execução manual. O push imediato a partir do W2 fica desabilitado (ver A6 abaixo), com o cron de resgate cobrindo o sync via outbox quando o W5 for ativado.
+**Consequência:** o `Chamar W5 (push sync)` do W2 foi **desabilitado** neste prompt; `config.sync_push_habilitado=true` fica registrado para reativação no go-live. Isso também resolveu a dependência de publish (n8n exige sub-workflow referenciado publicado — ver BLOQUEIOS).
+
+## D-22 — Foto do check-in não vai para storage; prova por encaminhamento + código
+
+**Contexto:** evolução de D-14. A foto não é persistida em storage.
+**Decisão:** a prova da visita é o **encaminhamento da foto ao coordenador** somado a `visitas.foto_file_id` (file_id do Telegram) e `visitas.foto_codigo` (código curto `V-####` sequencial, único, gerado por default de sequência no banco). Auditoria futura localiza a foto no chat do coordenador pelo código.
+**Consequência (aplicado):** colunas `foto_file_id`, `foto_codigo`, `motivo_suspeita` criadas em `visitas`; W2 grava `foto_file_id` e deixa o banco gerar `foto_codigo`; a legenda ao coordenador traz nome da loja, codcl e código.
+
+## D-23 — Foto encaminhada no Telegram marca a visita como suspeita
+
+**Decisão:** se a foto de check-in tiver `forward_origin`/`forward_date` (encaminhada), a visita recebe `flag_suspeito=true` e `motivo_suspeita='foto_encaminhada'`, e a legenda ao coordenador sinaliza `⚠ foto_encaminhada`.
+**Consequência (aplicado):** `Normalizar Telegram` extrai `forwardOrigin`; `Gerar Codigo da Foto` decide o motivo. A suspeita por distância grava `motivo_suspeita='fora_do_raio'`. Validado na execução de teste 4825.
+
+## D-24 — Geocodificação via Nominatim/OSM
+
+**Decisão:** geocodificação de endereços de loja usa Nominatim/OpenStreetMap (gratuito, ~1 req/s), sem provedores pagos por ora.
+**Consequência:** implementação no Prompt 2 (reforma do W1). Registrado agora como enunciado.
+
+## D-25 — Modelo de dois eixos: `resultado` (operacional) × `resultado_comercial` (comercial)
+
+**Contexto:** o enunciado do prompt supunha que `visitas.resultado` e `visitas.status_1` tivessem semânticas sobrepostas e pedia unificação. A auditoria do Motor de Checkout (W2) mostrou o contrário.
+**Decisão:** os dois campos são **ortogonais** e ambos permanecem:
+- `resultado` — **eixo operacional**: como a visita transcorreu (`normal`/`loja_fechada`/`contato_ausente`), gravado na etapa `decisor`.
+- `resultado_comercial` (ex-`status_1`) — **eixo comercial**: desfecho de venda (`fechou`/`analisar`/`sem_interesse`), gravado nas etapas `fechou_ou_analisar`/`data_retorno`/`contraproposta`.
+
+Como o banco estava vazio (custo de rename = zero), a coluna `status_1` foi **renomeada** para `resultado_comercial` para eliminar a ambiguidade de nome. Os três pontos de uso foram atualizados: Motor de Checkout (W2), query de perdas do W4 (`resultado_comercial=eq.sem_interesse`) e o transform da aba Visitas do W5.
+**Consequência:** dropar `status_1` teria quebrado a query de perdas do W4; manter os dois eixos preserva a semântica. Migration `renomear_status_1_para_resultado_comercial_d25`.

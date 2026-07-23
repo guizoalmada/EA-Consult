@@ -113,6 +113,12 @@ Auditar `autoAssignedCredentials` após cada criação/edição de workflow com 
 (auto-associados à `ARMCOM - WhatsApp Cloud API`) — só relevantes se/quando o WhatsApp for reativado
 (produção futura); trocar para `CRED_META_CLOUD` real antes de qualquer ativação do ramo WhatsApp.
 
+**✅ RESOLVIDO (Anthropic) — 17 Jul 2026:** o Guilherme criou a credencial real `ROTA-VIVA -
+Anthropic` (tipo `anthropicApi`) e vai trocar manualmente na UI do n8n o node **Modelo Anthropic
+Claude Haiku** do W2 (`n8n/workflows/w2-conversa-campo.json`), hoje apontando para
+`KRPStNscv88T1xYa` — ARMCOM - Anthropic. Confirmar depois de trocar que nenhum node do W2 referencia
+credencial cujo nome comece por "ARMCOM - ".
+
 ---
 
 ## B-02 — "Planilha Mestre" com aba Config e o W7 de sincronização não existem
@@ -244,3 +250,155 @@ como "HTTP Custom Auth" com headers `apikey: <service_role>` e `Authorization: B
 Enquanto não: criar a planilha (Bloco G) e testar W5/W7/W8 fica bloqueado. O workflow
 `[RotaViva] Setup - Planilha Master` (`XJPy0wMAW6vB4H8z`) está pronto para re-executar assim que o
 OAuth do Google for concluído.
+
+---
+
+## B-07 — `Validar Usuario Ativo` (W2) descartava todo usuário vinculado — 17 Jul 2026
+
+**✅ RESOLVIDO no mesmo dia.** O code node `Validar Usuario Ativo` assumia que a resposta HTTP do
+Supabase chegava em `items[0].json` como um **array** de linhas (`rows[0]`). Na prática, o node
+`Buscar Usuario Ativo` (HTTP Request) já entrega o array JSON **desagregado em itens** pelo n8n —
+`items[0].json` é o objeto do usuário direto, não um array. `Array.isArray(rows)` dava sempre
+`false` para qualquer usuário encontrado, e o node retornava `[]`, matando a conversa em silêncio.
+
+**Consequência:** desde a criação do W2, **nenhum usuário com `telegram_chat_id` vinculado recebia
+resposta a nenhuma mensagem** (texto, localização, foto, etc.) — só o fluxo de `/start`/vincular
+contato funcionava, porque é um code path separado (`Casar Telefone`) que não tem esse bug.
+Descoberto ao testar o check-in de localização da Juliana (execução `2991`, `Validar Usuario Ativo`
+com `itemsInput: 1` e `itemsOutput: 0`).
+
+**Correção aplicada:** trocado para `const usuario = items[0].json;` direto, sem esperar array.
+Workflow salvo via `n8n_update_full_workflow` (a atualização parcial recusou salvar por causa dos
+nodes WhatsApp dormentes órfãos — ver nota abaixo). Confirmado em produção com `n8n_get_workflow`.
+
+**Efeito colateral do processo de correção:** a ferramenta de atualização parcial (`n8n_update_partial_workflow`)
+bloqueia qualquer salvamento se existir node sem nenhuma conexão de entrada/saída — e o W2 tinha 13
+nodes WhatsApp dormentes (D-10) desconectados do grafo (órfãos desde o rebuild multicanal, não
+apagados mas também não religados aos pontos onde o Telegram os substituiu). Para conseguir salvar a
+correção, esses 13 nodes foram reconectados aos mesmos pontos dos seus equivalentes Telegram
+(continuam `disabled: true`, nenhum efeito em runtime) via `n8n_update_full_workflow`. Se precisar
+editar o W2 de novo com a ferramenta parcial, esse pré-requisito de "todo node conectado" continua
+valendo.
+
+---
+
+## B-08 — `estado_conversa` no W2 ainda gravava por `telefone`, coluna que não existe mais — 17 Jul 2026
+
+**✅ RESOLVIDO no mesmo dia.** A migração para D-10 trocou a chave de `estado_conversa` de
+`telefone` para `identidade` (`tg:<chat_id>` | `wa:<telefone>`), mas **4 nodes do W2 não foram
+atualizados** e continuavam lendo/gravando por `telefone`:
+
+- `Buscar Estado Conversa` — `GET .../estado_conversa?telefone=eq....`
+- `Upsert Estado Aguardando Foto`, `Upsert Estado Checkout`, `Upsert Estado Final Checkout` —
+  `POST .../estado_conversa?on_conflict=telefone`, corpo com `"telefone": ...`
+
+**Efeito:** erro Postgres `42703 column estado_conversa.telefone does not exist` em qualquer
+mensagem de um usuário Telegram que dependesse de estado — ou seja, **todo o fluxo depois do
+check-in de localização** (pedir foto, checkout, decisor, produto, fechamento, observação) estava
+quebrado. Descoberto no teste da Juliana (execução `3005`).
+
+**Correção aplicada:** os 4 nodes passaram a usar `identidade` (query e `on_conflict`); o node
+`Motor de Checkout` passou a propagar `identidade` no objeto de retorno para o upsert final
+conseguir referenciar o registro certo.
+
+---
+
+## B-09 — Padrão `Array.isArray(items[0].json)` quebrado em vários code nodes (mesma causa-raiz de B-07) — 17 Jul 2026
+
+**Causa-raiz comum:** o node HTTP Request do n8n, quando a resposta do PostgREST é um array JSON,
+**desagrega cada linha em um item próprio** — `items[0].json` já é o objeto da primeira linha, nunca
+um array. Um padrão de código copiado em vários code nodes deste workflow assume o contrário
+(`const rows = (items.length ? items[0].json : []) || []; if (!Array.isArray(rows) ...)`), o que faz
+`Array.isArray()` ser **sempre falso**, mesmo quando a busca encontrou resultado. B-07 já tinha
+corrigido essa causa-raiz em `Validar Usuario Ativo`; B-09 é o mesmo bug recorrendo em outros nodes.
+
+**✅ RESOLVIDO (parcial) no mesmo dia — `Calcular Loja Mais Proxima`:** `Buscar Agenda Pendente Hoje`
+achava a visita pendente da Juliana corretamente, mas `Calcular Loja Mais Proxima` caía sempre no
+fallback "nenhuma visita pendente" por causa desse bug — mesmo com agenda encontrada. Descoberto no
+teste da Juliana (execução `3009`: usuário tinha 1 visita pendente, mas
+`nenhumaVisitaPendente: 'true'`). Corrigido para ler `$input.all().map(i => i.json)` direto, em vez
+de esperar um array dentro de `items[0].json`.
+
+**✅ RESOLVIDO (mais 3 ocorrências) no mesmo dia:**
+
+- `Normalizar Estado` — a mais grave: `Buscar Estado Conversa` achava certinho o estado salvo
+  (`aguardando_foto`, contexto com `loja_id`/`agenda_id`/distância), mas `Normalizar Estado` jogava
+  tudo fora e resetava para `ocioso`/`{}`, fazendo o roteador (`Rotear Estado`) mandar qualquer
+  mensagem seguinte (inclusive a foto da fachada) pro ramo errado. Bloqueava **todo o fluxo depois
+  do check-in de localização**. Descoberto na execução `3012` (Juliana mandou a foto, nada
+  aconteceu).
+- `Avaliar Suspeita` — variante silenciosa (`rows.length` em vez de `Array.isArray`): como
+  `items[0].json` de uma config encontrada é um objeto (sem `.length`), a expressão sempre caía no
+  fallback `200` **mesmo quando `config.raio_checkin_m` estava configurado**. Não travava porque o
+  valor real da config (200) coincidia com o fallback — mas mudar a config não teria efeito nenhum
+  em produção sem essa correção.
+- `Extrair Loja Contrato Assinado`, `Extrair Contrato Atual Assinatura` — mesmo padrão, caminho de
+  comando de texto (`contrato <codcl> assinado`), corrigido por tabela mesmo sem teste direto ainda.
+
+**⚠️ MESMO BUG AINDA PRESENTE (não corrigido, escopo maior — problema arquitetural, não só o
+padrão):** `Extrair Contrato Maquininha` (lê de `Extrair Loja Maquininha`, que está pendurado direto
+do switch `Rotear Comando` **sem nenhuma busca HTTP de loja por `codcl` antes dele** — não é só
+trocar o padrão de leitura, falta o node de busca inteiro). Comando `maquininha <codcl> ativada`
+provavelmente não funciona hoje. Corrigir antes de incluir esse comando no checklist de teste
+ponta-a-ponta.
+
+---
+
+## B-01 — Adendo (auditoria de 22 Jul 2026, PROMPT 1)
+
+Auditoria node-a-node dos 12 workflows via `mcp__n8n__n8n_get_workflow` (retorna o objeto `credentials`
+real por node):
+
+- **Telegram:** todos os nodes Telegram (W0, W1, W2) usam `ROTA-VITA - Telegram - Morgana`
+  (`9B3nW4btlkMwlbYj`) — correto. O W0 `Enviar Telegram` **já estava correto** (a premissa do Bloco B,
+  de que apontava para a ARMCOM, já havia sido resolvida em 15/07); só a nota do node foi atualizada.
+- **Supabase (httpCustomAuth):** todos apontam para `CRED_SUPABASE_ROTAVIVA` (`ueScB1frQvcIityq`).
+- **Anthropic (W2):** `ROTA-VIVA - Anthropic`. **Gmail (W4):** `ROTA-VIVIA - Gmail` (`AtQCjRk5DlQ7mcmL`).
+  **Google Sheets/Drive:** credenciais Rota Viva. Nenhuma credencial DreamMaker/Copilot/JobTread.
+- **WhatsApp ARMCOM ainda presente (dormente, PENDENTE go-live):** `ARMCOM - WhatsApp Cloud API`
+  (`qxbrAen7zi4DhywY`) em 6 nodes — W0 (Enviar WhatsApp), W1 (Obter URL do Media, Responder
+  Coordenador), W3 (Enviar Rota Diária, Enviar Alerta Rota Vazia), W4 (Enviar WhatsApp Gerente),
+  W6 (Enviar Lembrete Retorno); e `ARMCOM - WhatsApp Trigger` (`oWOgKLFpUr5DdRWd`) no W1. **Todos
+  `disabled`** e gated por `whatsapp_habilitado=false`. Trocar para `CRED_META_CLOUD` real (junto com
+  `phoneNumberId`, também placeholder) antes de qualquer ativação do ramo WhatsApp. Não bloqueia o
+  piloto (Telegram é o canal vivo).
+
+Efeito colateral recorrente da ferramenta de edição parcial: ela recusa salvar se qualquer node ficar
+sem conexão. Os nodes WhatsApp dormentes órfãos de W3/W4/W6 foram **reconectados** (permanecem
+`disabled`) para permitir salvar as mudanças de cron — mesmo padrão do B-07.
+
+---
+
+## B-10 — OAuth do Google Sheets/Drive expirado de novo (bloqueia W5/W7/planilha) — 22 Jul 2026
+
+**Onde ocorre:** a credencial `ROTA-VIVA - Google Sheets` (`V8yK9tJ9nbUTis15`) perdeu o token. Ao
+executar o `[RotaViva] Motor Sheets API` para criar a aba **Agenda** (execução `4827`), o node
+`Aplicar (Sheets API)` falhou com:
+
+```
+NodeApiError: The credential "ROTA-VIVA - Google Sheets" needs to be reconnected.
+Access could not be refreshed because the connected account has revoked access, the refresh token
+expired, or the account password or permissions changed.
+```
+
+É o mesmo B-06 recorrendo (refresh token OAuth expirado). Provavelmente vale também para
+`ROTA-VIVA - Google Drive` (`xaChmTzpezR036yv`, W8).
+
+**Impacto (o que ficou pronto mas NÃO testado / pendente de reconexão):**
+
+- **Bloco E (W5):** o ramo de sync da Agenda (`Buscar Agenda nao sync` → `Transformar Agenda` →
+  `Upsert Aba Agenda` → `Marcar Agenda sync`) foi **construído e validado estruturalmente** (W5 segue
+  inativo). Falta: (a) criar a aba **Agenda** (cabeçalho `id,data,usuario,loja,codcl,origem,status`) —
+  o Code node `Montar Requests` do Motor Sheets API já está pronto com o `batchUpdate` (addSheet
+  `sheetId:771122` + updateCells do cabeçalho), só re-executar; (b) teste de sync com uma
+  `agenda_visitas` de teste (verificação 5).
+- **Bloco F (W7):** `Aplicar Config` passou a **emitir aviso** para chave protegida (não ignora mais em
+  silêncio) e um node `Escrever Aviso Config` grava o motivo na aba **⚙ Config** (colunas
+  `status_sync`/`observacao_sync`, casando por `row_number`). **Não-testado** (Sheets fora). Falta:
+  criar as colunas `status_sync`/`observacao_sync` na aba ⚙ Config (via Motor Sheets API) e testar.
+- **Bloco G2 (limpeza da planilha):** remover a linha de visita de teste na aba Visitas e a célula
+  órfã de e-mails abaixo da tabela da ⚙ Config — **bloqueado** (precisa de escrita no Sheets).
+
+**Ação humana necessária:** abrir a credencial `ROTA-VIVA - Google Sheets` (e `- Google Drive`) no
+n8n e concluir o fluxo OAuth ("Connect my account"). Depois: re-executar o Motor Sheets API (aba
+Agenda + colunas da Config), testar W5/W7 e fazer o G2.
