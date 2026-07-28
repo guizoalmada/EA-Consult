@@ -244,3 +244,29 @@ reativar).
 
 Como o banco estava vazio (custo de rename = zero), a coluna `status_1` foi **renomeada** para `resultado_comercial` para eliminar a ambiguidade de nome. Os três pontos de uso foram atualizados: Motor de Checkout (W2), query de perdas do W4 (`resultado_comercial=eq.sem_interesse`) e o transform da aba Visitas do W5.
 **Consequência:** dropar `status_1` teria quebrado a query de perdas do W4; manter os dois eixos preserva a semântica. Migration `renomear_status_1_para_resultado_comercial_d25`.
+
+## D-26 — Canal de entrada restrito a texto e imagem; sem IA no fluxo principal
+
+**Contexto:** a observação de campo podia ser enviada por áudio, que era baixado, transcrito e depois estruturado por LLM (Haiku). A cadeia nunca funcionou de verdade: o node `Transcrever Audio` estava desabilitado no meio de um caminho ativo e, como node desabilitado é pass-through, o binário do áudio chegava ao LLM sem transcrição (B-12).
+
+**Decisão:** o bot aceita apenas **texto, comandos, localização e foto**. Áudio, vídeo, nota de voz, sticker e documento **não são suportados** — o bot responde orientando o envio por escrito.
+
+**Motivo:** remove a dependência de um provedor de transcrição (custo, credencial adicional numa conta n8n compartilhada — risco B-01 — e ponto de falha sem SLA no piloto).
+
+**Emenda o D-01**, que previa IA na transcrição de áudio. E vai além do enunciado original do prompt, que mandava manter o Haiku estruturando texto livre: a estruturação por IA **também foi removida**. Os campos que ela extrairia (`motivo_nao_fechamento`, `contraproposta`, `data_retorno`) já são capturados **por botão**, de forma determinística, nas etapas anteriores do checkout (D-20). Religar o LLM criaria redundância com risco de contradição (o botão diz "taxas", o texto diz "já possui" — qual vence?), custo e latência em campo, sem ganho. **Resultado: não há mais nenhuma chamada de IA no W2.** A credencial `ROTA-VIVA - Anthropic` deixa de ser usada pelo projeto.
+
+**Consequência (aplicado):**
+- Deletados (não desabilitados) 9 nodes do W2: `Observacao Por Audio?`, `Buscar URL Midia Audio`, `Baixar Audio`, `Transcrever Audio`, `Baixar Audio (Telegram)`, `Estruturar Observacao`, `Preparar Resultado Audio`, `Modelo Anthropic Claude Haiku`, `Parser Estruturado Observacao`. O estado `checkout` passa a ir direto de `Rotear Estado` para `Preparar Resultado Texto`.
+- `Normalizar Telegram` classifica `voice`/`audio`/`video_note`/`video`/`document`/`sticker`/`animation` como `nao_suportado`. Um IF `Midia Nao Suportada?` intercepta **antes** de qualquer leitura ou escrita de `estado_conversa` e responde *"Consigo ler apenas texto e foto 📝📷 / Me escreve a observação, por favor."*, encerrando o turno **sem alterar o estado** — o promotor manda o texto em seguida e continua de onde parou.
+- Copy do `Motor de Checkout` corrigida: `"(texto, audio, ou responda nao)"` → `"(escreva o texto, ou responda nao)"`.
+- **Coluna `visitas.obs_audio_transcrito` dropada** (migration `dropar_obs_audio_transcrito_d26`). Tabela vazia no momento do drop (0 linhas), custo zero — mesmo critério aplicado ao rename `status_1` → `resultado_comercial` (D-25); depois viraria migração com histórico. A observação passa a viver exclusivamente em `visitas.obs_texto`. O W5 (`Buscar Visitas nao sync` e `Transformar Visitas`) foi ajustado junto, senão o PostgREST devolveria 400.
+- **Pendência de produto:** o `RotaViva_Fluxos_Aprovacao.pdf` pode mencionar observação por áudio — divergência a comunicar ao Jansen (ação do Guilherme).
+- **Pendência técnica:** o ramo WhatsApp (`Normalizar Mensagem`) **não** recebeu a classificação `nao_suportado`. É dormente (D-10); tratar antes de qualquer ativação do WhatsApp.
+
+## D-27 — Sub-workflow chamado por Execute Workflow precisa estar publicado
+
+**Contexto:** a regra "salvar tudo inativo até o go-live" foi aplicada indistintamente, inclusive aos sub-workflows. Ao testar o W3, o `Chamar W0 (Alerta Vazio)` não conseguia executar o W0 porque ele estava despublicado.
+
+**Decisão:** a regra "salvar inativo" vale para os workflows **com trigger próprio** (W3, W4, W6, W7, W8) — são eles que disparam sozinhos e por isso precisam ficar desligados. **Sub-workflows chamados por `Execute Workflow` (W0, W5, Motor Sheets API) precisam estar publicados em produção**: sem versão publicada, a chamada falha. Publicar um sub-workflow não o faz disparar nada por conta própria — ele só roda quando alguém o chama.
+
+**Consequência:** o W0 foi publicado temporariamente para o teste do W3 e devolvido ao estado inativo ao fim da sessão. **Isso é um pré-requisito de go-live:** ao ativar W3/W4/W6, o W0 precisa estar publicado, senão nenhum envio ocorre. Mesma coisa para o W5 quando o push sync do W2 for reabilitado (A6). Registrado no checklist do `GO-LIVE.md`.
