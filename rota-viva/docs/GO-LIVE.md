@@ -184,20 +184,46 @@ própria planilha via Google Drive (`files.export`), para quem preferir Excel lo
 
 ## 8. Ativar os workflows na ordem
 
-Garanta que o sub-workflow **`[RotaViva] W0 - Enviar Mensagem`** exista (é chamado por todos; não tem
-trigger para ativar). Depois ative (toggle "Active") nesta ordem:
+> **⚠ Ordem corrigida em 17 Jul 2026.** A ordem original abaixo (W2 primeiro) **não publica**: o n8n
+> recusa publicar um workflow que chama, via node `Execute Workflow` por ID, um sub-workflow ainda
+> não publicado — e o W2 chama o W5 (node "Chamar W5 (push sync)"). Erro visto: *"Cannot publish
+> workflow: Node 'Chamar W5 (push sync)' references workflow ... which is not published."* A mesma
+> regra vale, em tese, para W1/W3/W4/W6 → W0 — se o n8n reclamar de W0 "não publicado" ao ativar
+> qualquer um desses, publique W0 primeiro (mesmo sem trigger).
+>
+> **✅ Confirmado empiricamente em 27 Jul 2026 (D-27).** O "em tese" acima foi **verificado em
+> execução**: com o W0 despublicado, o `Chamar W0` do W3 não executa. **Sub-workflow chamado por
+> `Execute Workflow` precisa estar PUBLICADO** — a regra "salvar inativo até o go-live" vale só para
+> os workflows **com trigger próprio** (W3, W4, W6, W7, W8), que disparam sozinhos. Publicar um
+> sub-workflow **não** o faz disparar nada: ele só roda quando alguém o chama.
+>
+> **Pré-requisito de ativação, portanto:**
+> - **W0 publicado** antes de ativar W1/W3/W4/W6 — senão *nenhum envio ocorre*.
+> - **W5 publicado** antes de reabilitar o `Chamar W5 (push sync)` do W2 (hoje desabilitado, guard do
+>   A6 / D-21) — senão o push imediato falha e o Sheets só atualiza pelo cron de resgate de 5 min.
+>
+> Ao fim da sessão de 27/07 o W0 foi devolvido ao estado **inativo** (era assim que estava antes do
+> teste). **Publicá-lo é passo obrigatório do go-live.**
 
-1. `[RotaViva] W2 - Conversa Campo`
-2. `[RotaViva] W1 - Ingestão Rota`
-3. `[RotaViva] W3 - Rota Diária`
-4. `[RotaViva] W6 - Lembrete Retorno`
-5. `[RotaViva] W4 - Relatório Diário`
-6. `[RotaViva] W5 - Sync to Sheets`
-7. `[RotaViva] W7 - Sync de Entradas`
-8. `[RotaViva] W8 - Export XLSX`
+Garanta que o sub-workflow **`[RotaViva] W0 - Enviar Mensagem`** exista e esteja salvo (é chamado por
+todos; não tem trigger para ativar, então pode não ter toggle "Active" — só precisa existir/estar
+publicado). Depois ative (toggle "Active") nesta ordem, respeitando as dependências reais entre
+workflows (mapeadas via `Execute Workflow`: W1/W3/W4/W6 → W0; W2 → W5):
 
-(W2 primeiro porque recebe as mensagens do bot; os agendados por último para revisar os interativos
-em produção antes de ligar os cron jobs.)
+1. `[RotaViva] W0 - Enviar Mensagem` (sem trigger — confirmar que está salvo/publicado)
+2. `[RotaViva] W5 - Sync to Sheets` (precisa de `CRED_SUPABASE_ROTAVIVA` e do OAuth do Google Sheets
+   já conectado — ver B-06 em `BLOQUEIOS.md`; se falhar ao publicar por credencial, resolver antes de
+   seguir)
+3. `[RotaViva] W2 - Conversa Campo`
+4. `[RotaViva] W1 - Ingestão Rota`
+5. `[RotaViva] W3 - Rota Diária`
+6. `[RotaViva] W6 - Lembrete Retorno`
+7. `[RotaViva] W4 - Relatório Diário`
+8. `[RotaViva] W7 - Sync de Entradas`
+9. `[RotaViva] W8 - Export XLSX`
+
+(W2 antes dos demais interativos porque recebe as mensagens do bot; os agendados por último para
+revisar os interativos em produção antes de ligar os cron jobs.)
 
 ## 9. Teste ponta-a-ponta
 

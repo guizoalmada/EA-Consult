@@ -106,7 +106,7 @@ Mitigação aplicada: `notes` em ambos os nodes. Ação humana antes do go-live:
 Auditar `autoAssignedCredentials` após cada criação/edição de workflow com node Telegram/WhatsApp.
 
 **✅ RESOLVIDO (Telegram) — 15 Jul 2026:** o Guilherme criou a credencial real
-`ROTA-VITA - Telegram - Morgana` (id `9B3nW4btlkMwlbYj`, tipo `telegramApi`). Ela foi vinculada via
+`ROTA-VIVA - Telegram - Morgana` (id `9B3nW4btlkMwlbYj`, tipo `telegramApi`). Ela foi vinculada via
 `setNodeCredential` a **todos os nós Telegram**: W0 (`Enviar Telegram`) e W2 (`Telegram Trigger`,
 `Pedir Contato (/start)`, `Confirmar Vinculacao`, `Orientar Nao Cadastrado`). Confirmado
 `autoAssignedCredentials: []` na aplicação. **Pendente ainda:** os nós **WhatsApp** dormentes
@@ -349,11 +349,11 @@ ponta-a-ponta.
 Auditoria node-a-node dos 12 workflows via `mcp__n8n__n8n_get_workflow` (retorna o objeto `credentials`
 real por node):
 
-- **Telegram:** todos os nodes Telegram (W0, W1, W2) usam `ROTA-VITA - Telegram - Morgana`
+- **Telegram:** todos os nodes Telegram (W0, W1, W2) usam `ROTA-VIVA - Telegram - Morgana`
   (`9B3nW4btlkMwlbYj`) — correto. O W0 `Enviar Telegram` **já estava correto** (a premissa do Bloco B,
   de que apontava para a ARMCOM, já havia sido resolvida em 15/07); só a nota do node foi atualizada.
 - **Supabase (httpCustomAuth):** todos apontam para `CRED_SUPABASE_ROTAVIVA` (`ueScB1frQvcIityq`).
-- **Anthropic (W2):** `ROTA-VIVA - Anthropic`. **Gmail (W4):** `ROTA-VIVIA - Gmail` (`AtQCjRk5DlQ7mcmL`).
+- **Anthropic (W2):** `ROTA-VIVA - Anthropic`. **Gmail (W4):** `ROTA-VIVA - Gmail` (`AtQCjRk5DlQ7mcmL`).
   **Google Sheets/Drive:** credenciais Rota Viva. Nenhuma credencial DreamMaker/Copilot/JobTread.
 - **WhatsApp ARMCOM ainda presente (dormente, PENDENTE go-live):** `ARMCOM - WhatsApp Cloud API`
   (`qxbrAen7zi4DhywY`) em 6 nodes — W0 (Enviar WhatsApp), W1 (Obter URL do Media, Responder
@@ -431,6 +431,41 @@ sessão: o Code node monta `{ body: {...} }` e o HTTP envia `={{ $json.body }}`,
 qualquer payload do `spreadsheets:batchUpdate` (inclusive `includeSpreadsheetInResponse` /
 `responseIncludeGridData` para ler metadata e grid).
 
+### ✅ B-10 RESOLVIDO — 27 Jul 2026 (causa-raiz identificada e corrigida na origem)
+
+**Causa-raiz:** não era reconexão mal feita. O app OAuth do Google Cloud (client
+*"Cliente Web 1n8n Google Drive"*) estava em modo **Testing**, no qual o Google **expira o refresh
+token a cada 7 dias** — criado 15/07 → expirou 22/07 → reconectado 23/07 → expiraria de novo ~30/07.
+As três tentativas do adendo de 23/07 falharam porque o token voltava a morrer, não porque a
+reconexão estivesse errada.
+
+**Correção definitiva (ação do Guilherme):** o app foi **publicado** (*Google Auth Platform →
+Público-alvo → Publicar app*), saindo de **Testing → In production**. Com isso o refresh token deixa
+de expirar em 7 dias. **A recorrência está resolvida na raiz, não contornada.**
+
+**Confirmado por execução, não pela UI** (como o próprio adendo de 23/07 exigia):
+
+| Execução | O que rodou | Resultado |
+|---|---|---|
+| `5163` | Motor Sheets API (addSheet Agenda) | `400 Sheet with id 771122 already exists` — **erro semântico do Google, não de auth**: a chamada autenticou |
+| `5165` | Motor Sheets API (leitura) | **`success`** |
+| `5167` | W5 — sync da agenda | **`success`** |
+| `5171` | W7 — sync de config | **`success`** |
+
+O erro deixou de ser `The credential "ROTA-VIVA - Google Sheets" needs to be reconnected`.
+
+**Tudo o que estava bloqueado foi desbloqueado e concluído nesta sessão:** aba **Agenda** (já existia,
+com o cabeçalho `id,data,usuario,loja,codcl,origem,status` correto), colunas
+**`status_sync`/`observacao_sync`** na aba ⚙ Config (criadas, execução `5166`), teste do **W5**, teste
+do **W7** (chave editável e chave protegida) e o **G2**.
+
+**⚠️ Correção de um erro de leitura cometido nesta sessão:** ao inspecionar a planilha com
+`responseRanges`, o array `sheets` da resposta vem **filtrado pelos ranges pedidos** — o que levou à
+conclusão errada de que a planilha só tinha 3 abas. Uma leitura **sem** `responseRanges` (execução
+`5169`) mostrou as **8 abas** reais: `📊 Dashboard`, `Visitas`, `Oportunidades`, `Contratos`,
+`Ranking`, `⚙ Config`, `➕ Agenda Manual`, `Agenda`. **Para inventariar abas, nunca usar
+`responseRanges`.**
+
 ---
 
 ## B-11 — Convergência dupla por node desabilitado (mesma classe do 3040) — 23 Jul 2026
@@ -495,14 +530,131 @@ quebrado. Corrigido para `order=atualizado_em.desc`.
 
 ## B-12 — `Transcrever Audio` desabilitado entre dois nodes ativos (observação por áudio degradada)
 
-**ABERTO — precisa de decisão.** No W2: `Baixar Audio (Telegram)` (ativo) → `Transcrever Audio`
-(**desabilitado**) → `Estruturar Observacao` (ativo). Como node desabilitado é pass-through, o **binário
-do áudio chega ao LLM sem transcrição** — a observação por áudio não é transcrita de verdade.
+**✅ FECHADO POR DECISÃO (D-26) — 27 Jul 2026.** No W2: `Baixar Audio (Telegram)` (ativo) →
+`Transcrever Audio` (**desabilitado**) → `Estruturar Observacao` (ativo). Como node desabilitado é
+pass-through, o **binário do áudio chegava ao LLM sem transcrição**.
 
-Não é convergência (por isso não entrou no B-11), mas é a mesma família: comportamento silenciosamente
-errado por causa de um node desabilitado no meio de um caminho ativo.
+Não era convergência (por isso não entrou no B-11), mas é a mesma família: comportamento
+silenciosamente errado por causa de um node desabilitado no meio de um caminho ativo.
 
-**Decisão pendente:** (a) reativar `Transcrever Audio` (node OpenAI — exige credencial OpenAI, que não
-existe hoje na conta); (b) trocar por transcrição via outro provedor; ou (c) assumir que a observação
-por áudio fica sem transcrição no piloto e ajustar o texto ao usuário. Não alterado nesta sessão por
-depender dessa escolha.
+**Não houve correção técnica — a funcionalidade saiu do escopo.** Das três opções em aberto
+(reativar com credencial OpenAI, trocar de provedor, ou assumir sem transcrição), o Guilherme
+escolheu uma quarta: **remover o áudio**. Ver **D-26**. Os nodes foram **deletados**, não
+desabilitados — e junto com eles a estruturação por IA, que só existia para dar sentido à fala
+corrida do áudio. O W2 não tem mais nenhuma chamada de LLM.
+
+---
+
+## B-13 — Alerta de rota vazia do W3 nunca funcionou (dependência de ordem de execução) — 27 Jul 2026
+
+**✅ RESOLVIDO no mesmo dia.** Descoberto ao rodar a verificação 3b do PROMPT 1.2. O
+`Trigger Diário` disparava **dois ramos em paralelo**: `Buscar Usuários que Fazem Visitas` e
+`Buscar Coordenadores Ativos`. Na ordem de execução v1 do n8n, o ramo dos usuários rodava
+**inteiro** — incluindo o loop e o ramo de alerta — antes de o ramo dos coordenadores começar.
+Como `Montar Alertas de Rota Vazia` faz `$('Buscar Coordenadores Ativos').all()`, a execução
+morria com:
+
+```
+Node 'Buscar Coordenadores Ativos' hasn't been executed
+```
+
+**Efeito:** desde a criação do W3, **nenhum alerta de rota vazia jamais foi enviado**. O bug
+estava mascarado porque o W3 nunca havia sido executado de verdade com um usuário sem rota
+(execução `5151`).
+
+**Correção:** os dois ramos foram **serializados** —
+`Trigger` → `Buscar Coordenadores Ativos` → `Buscar Usuários que Fazem Visitas` → `Loop Usuários`.
+O `Buscar Usuários que Fazem Visitas` recebeu `executeOnce: true`, senão rodaria uma vez por
+coordenador retornado (2 itens = 2 execuções = tudo duplicado).
+
+**Regra que fica:** `$('Node').all()` só é seguro se o node citado **comprovadamente já executou**
+naquele caminho. Ramos paralelos saindo de um mesmo trigger **não** têm ordem garantida entre si —
+se um ramo lê dados do outro, encadeie-os explicitamente em vez de confiar na ordem.
+
+---
+
+## B-14 — W0 falhava aberto com `chat_id` vazio e derrubava o workflow chamador — 27 Jul 2026
+
+**✅ RESOLVIDO no mesmo dia.** Com o B-13 corrigido, o W3 passou a gerar os alertas — e aí apareceu
+o defeito seguinte. O coordenador **Anderson Lemos** está ativo mas **não tem `telegram_chat_id`**
+(nunca deu `/start` no bot). O W0 montava a mensagem assim mesmo, com `chatId: ''`, e o node
+`Enviar Telegram` estourava:
+
+```
+400 - {"ok":false,"error_code":400,"description":"Bad Request: chat_id is empty"}
+```
+
+**Efeito:** o erro subia do sub-workflow para o chamador e **abortava a execução inteira do W3** —
+um único usuário sem canal vinculado impedia os alertas de **todos** os outros (execução `5152`).
+
+**Correção (duas camadas):**
+1. **W0, `Montar Mensagem`** — falha fechado: usuário de canal `telegram` sem `telegram_chat_id`
+   retorna `{ ok:false, erro:'sem_telegram_chat_id', canal:'nenhum' }` e cai no ramo
+   `Registrar Sem Canal / Erro`, sem chamar a API do Telegram.
+2. **W3, `Chamar W0 (Rota)` e `Chamar W0 (Alerta Vazio)`** — `onError: continueRegularOutput`, para
+   que a falha de um destinatário não derrube os demais.
+
+**Verificação (execução `5154`, `success`):** 4 alertas entregues ao coordenador com chat vinculado
+e o coordenador sem chat retornando `{"ok":false,"erro":"sem_telegram_chat_id"}` — sem abortar nada.
+
+**⚠️ PENDÊNCIA DE DADO (go-live):** `Anderson Lemos`, `Jansen Araújo`, `Danton`, `Guilherme` e
+`Leonardo Rosa` estão **ativos e sem `telegram_chat_id`**. Enquanto não derem `/start` no bot e
+enviarem o contato, **não recebem nenhuma mensagem** — rota diária, alerta, lembrete ou relatório.
+Hoje só `Juliana Elisei` e `Guilherme Almada (teste)` estão vinculados. O sistema agora avisa em vez
+de quebrar, mas o vínculo é pré-requisito operacional do go-live.
+
+---
+
+## Pendências de go-live registradas em 27 Jul 2026 (PROMPT 1.2)
+
+Nenhuma delas bloqueia a homologação; todas precisam ser tratadas **antes** de ligar a operação.
+
+### 1. `Chamar W5 (push sync)` do W2 está DESABILITADO
+
+Guard do A6 (D-21), para permitir publicar o W2 com o W5 despublicado. **Reabilitar quando o W5
+entrar em produção** — senão o push imediato nunca ocorre e o Sheets só é atualizado pelo cron de
+resgate de 5 min. Junto com isso, ver **D-27**: o W5 precisa estar **publicado** para o
+`Execute Workflow` funcionar.
+
+### 2. Nomes de credenciais — divergências RESOLVIDAS na origem
+
+Auditoria via `list_credentials` em 27/07 mostra que os dois typos registrados em prompts anteriores
+**já não existem no servidor**. A documentação é que estava defasada (corrigida nesta passagem):
+
+| Nome antigo na doc | Nome real hoje | ID |
+|---|---|---|
+| `ROTA-VIVIA - Gmail` | **`ROTA-VIVA - Gmail`** | `AtQCjRk5DlQ7mcmL` |
+| `ROTA-VITA - Telegram - Morgana` | **`ROTA-VIVA - Telegram - Morgana`** | `9B3nW4btlkMwlbYj` |
+
+**Não há renomeação pendente.** Os IDs nunca mudaram, então nenhum node foi afetado.
+
+### 3. Auditoria B-01 desta sessão
+
+Todas as 8 chamadas de `update_workflow` (W2, W3, W0, W5, W4, W6, Motor Sheets API) retornaram
+**`autoAssignedCredentials: []`** — nenhuma credencial de outro cliente foi auto-associada. O único
+node novo criado (`Avisar Midia Nao Suportada (TG)`, no W2) teve a credencial fixada **explicitamente**
+via `setNodeCredential` para `ROTA-VIVA - Telegram - Morgana` (`9B3nW4btlkMwlbYj`), justamente para não
+cair na heurística do B-01. Os dados de execução confirmam por node: `CRED_SUPABASE_ROTAVIVA`
+(`ueScB1frQvcIityq`) nos nodes Supabase, `ROTA-VIVA - Telegram - Morgana` no `Enviar Telegram` do W0 e
+`ROTA-VIVA - Google Sheets` (`V8yK9tJ9nbUTis15`) no Motor Sheets API.
+
+**Ressalva de método:** o MCP `claude.ai n8n` **não** devolve o objeto `credentials` em
+`get_workflow_details`, e o segundo servidor (`mcp__n8n__`) esteve `NO_RESPONSE` a sessão inteira.
+A auditoria node-a-node completa dos 11 workflows **não pôde ser refeita** — o que está confirmado é
+(a) nenhuma auto-associação nas edições desta sessão e (b) as credenciais visíveis nos dados de
+execução. O quadro do adendo de 22/07 (WhatsApp ARMCOM dormente em 6 nodes) permanece válido e
+**pendente**.
+
+### 4. JSONs em `n8n/workflows/` estão DEFASADOS em relação à instância
+
+Dívida preexistente, agravada nesta sessão. Os arquivos exportados no repo ainda trazem `status_1`
+(renomeado para `resultado_comercial` em 22/07, D-25) e toda a cadeia de áudio deletada hoje
+(`w2-conversa-campo.json` linhas ~2182, ~2196, ~2759; `w5-sync-to-sheets.json` linha ~306). **A fonte
+de verdade é a instância `n8n.guizoalmada.com.br`, não o repo.** Reexportar os JSONs é tarefa própria
+— não foi feita aqui para não misturar um diff mecânico gigante com as mudanças de comportamento
+desta sessão.
+
+### 5. Áudio no ramo WhatsApp
+
+O `Normalizar Mensagem` (ramo WhatsApp dormente) **não** classifica mídia como `nao_suportado` — só o
+`Normalizar Telegram` foi tratado. Ver **D-26**. Aplicar antes de qualquer ativação do WhatsApp.
