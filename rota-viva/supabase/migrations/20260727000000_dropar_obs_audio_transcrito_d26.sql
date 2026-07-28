@@ -1,0 +1,11 @@
+-- D-26: o canal de entrada do bot passa a aceitar apenas TEXTO e IMAGEM.
+-- A cadeia de transcricao de audio foi removida do W2 (nodes deletados, nao desabilitados),
+-- entao a coluna nunca mais recebe valor. Tabela vazia no momento do drop (0 linhas), custo
+-- zero -- mesmo criterio aplicado ao rename status_1 -> resultado_comercial (D-25).
+-- A observacao de campo passa a viver exclusivamente em visitas.obs_texto.
+--
+-- Consumidor ajustado junto: W5 (`Buscar Visitas nao sync` e `Transformar Visitas`), que
+-- selecionava a coluna -- sem isso o PostgREST devolveria 400.
+--
+-- Aplicada na instancia em 27 Jul 2026 via apply_migration `dropar_obs_audio_transcrito_d26`.
+alter table rotaviva.visitas drop column if exists obs_audio_transcrito;
